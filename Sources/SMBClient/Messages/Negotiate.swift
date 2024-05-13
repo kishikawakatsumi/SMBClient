@@ -1,0 +1,132 @@
+import Foundation
+
+public enum Negotiate {
+  public struct Request {
+    public let header: Header
+    public let structureSize: UInt16
+    public let dialectCount: UInt16
+    public let securityMode: SecurityMode
+    public let reserved: UInt16
+    public let capabilities: Capabilities
+    public let clientGuid: UUID
+    public let clientStartTime: UInt64
+    public let dialects: [Dialects]
+    public let padding: Data
+    public let negotiateContextList: Data
+
+    public init(messageId: UInt64, securityMode: SecurityMode, dialects: [Dialects]) {
+      header = Header(
+        command: .negotiate,
+        flags: [],
+        nextCommand: 0,
+        messageId: messageId,
+        sessionId: 0
+      )
+      structureSize  = 36
+      dialectCount = UInt16(dialects.count)
+      self.securityMode = securityMode
+      reserved = 0
+      capabilities = []
+      clientGuid = UUID()
+      clientStartTime = 0
+      self.dialects = dialects
+      padding = Data(count: (dialects.count * 2) % 8)
+      negotiateContextList = Data()
+    }
+
+    public func encoded() -> Data {
+      var data = Data()
+      data += header.encoded()
+      data += structureSize
+      data += dialectCount
+      data += securityMode.rawValue
+      data += reserved
+      data += capabilities.rawValue
+      data += clientGuid.data
+      data += clientStartTime
+      for dialect in dialects {
+        data += dialect.rawValue
+      }
+      data += padding
+      data += negotiateContextList
+      return data
+    }
+  }
+
+  public struct Response {
+    public let header: Header
+    public let structureSize: UInt16
+    public let securityMode: SecurityMode
+    public let dialectRevision: UInt16
+    public let negotiateContextCount: UInt16
+    public let serverGuid: UUID
+    public let capabilities: Capabilities
+    public let maxTransactSize: UInt32
+    public let maxReadSize: UInt32
+    public let maxWriteSize: UInt32
+    public let systemTime: UInt64
+    public let serverStartTime: UInt64
+    public let securityBufferOffset: UInt16
+    public let securityBufferLength: UInt16
+    public let negotiateContextOffset: UInt32
+    public let securityBuffer: Data
+
+    public init(data: Data) {
+      let reader = ByteReader(data)
+
+      header = reader.read()
+
+      structureSize = reader.read()
+      securityMode = SecurityMode(rawValue: reader.read())
+      dialectRevision = reader.read()
+      negotiateContextCount = reader.read()
+      serverGuid = reader.read()
+      capabilities = Capabilities(rawValue: reader.read())
+      maxTransactSize = reader.read()
+      maxReadSize = reader.read()
+      maxWriteSize = reader.read()
+      systemTime = reader.read()
+      serverStartTime = reader.read()
+      securityBufferOffset = reader.read()
+      securityBufferLength = reader.read()
+      negotiateContextOffset = reader.read()
+      securityBuffer = reader.read(from: Int(securityBufferOffset), count: Int(securityBufferLength))
+    }
+  }
+
+  public struct SecurityMode: OptionSet {
+    public let rawValue: UInt16
+
+    public init(rawValue: UInt16) {
+      self.rawValue = rawValue
+    }
+
+    public static let signingEnabled = SecurityMode(rawValue: 0x0001)
+    public static let signingRequired = SecurityMode(rawValue: 0x0002)
+  }
+
+  public struct Capabilities: OptionSet {
+    public let rawValue: UInt32
+
+    public init(rawValue: UInt32) {
+      self.rawValue = rawValue
+    }
+
+    public static let dfs = Capabilities(rawValue: 0x00000001)
+    public static let leasing = Capabilities(rawValue: 0x00000002)
+    public static let largeMtu = Capabilities(rawValue: 0x00000004)
+    public static let multiChannel = Capabilities(rawValue: 0x00000008)
+    public static let persistentHandles = Capabilities(rawValue: 0x00000010)
+    public static let directoryLeasing = Capabilities(rawValue: 0x00000020)
+    public static let encryption = Capabilities(rawValue: 0x00000040)
+    public static let notifications = Capabilities(rawValue: 0x00000080)
+  }
+
+  public enum Dialects: UInt16 {
+    case smb202 = 0x0202
+    case smb210 = 0x0210
+    case smb300 = 0x0300
+    case smb302 = 0x0302
+    case smb311 = 0x0311
+  }
+}
