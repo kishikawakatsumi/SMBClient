@@ -6,13 +6,13 @@ public class SMBClient {
   public let port: Int
   public var share: String? { session.connectedTree }
 
+  public let session: Session
+
   public var onDisconnected: (Error) -> Void {
     didSet {
       session.onDisconnected = onDisconnected
     }
   }
-
-  private let session: Session
 
   public init(host: String) {
     self.host = host
@@ -86,7 +86,20 @@ public class SMBClient {
     try await session.deleteFile(path: path)
   }
 
-  public func download(content: Data, path: String) async throws -> Data {
+  public func fileStat(path: String) async throws -> FileStat {
+    let response = try await session.fileStat(path: path)
+    return FileStat(response)
+  }
+
+  public func existFile(path: String) async throws -> Bool {
+    try await session.existFile(path: path)
+  }
+
+  public func existDirectory(path: String) async throws -> Bool {
+    try await session.existDirectory(path: path)
+  }
+
+  public func download(path: String) async throws -> Data {
     let fileReader = fileReader(path: path)
 
     let data = try await fileReader.download()

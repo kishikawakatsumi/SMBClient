@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  samba:
+    build: .
+    image: ghcr.io/servercontainers/samba
+    container_name: samba
+    ports:
+      - "139:139"
+      - "4445:445"
+    environment:
+      AVAHI_DISABLE: 1
+
+      GROUP_staff: 20
+
+      ACCOUNT_alice: alipass
+      UID_alice: 1000
+      GROUPS_alice: staff
+
+      ACCOUNT_bob: bobpass
+      UID_bob: 1001
+      GROUPS_bob: staff
+
+      SAMBA_GLOBAL_CONFIG_access_SPACE_based_SPACE_share_SPACE_enum: yes
+      SAMBA_CONF_MAP_TO_GUEST: Never
+
+      SAMBA_VOLUME_CONFIG_alice: |
+        [Alice Share]
+         path = /shares/alice
+         valid users = alice
+         guest ok = no
+         read only = no
+         browseable = yes
+      SAMBA_VOLUME_CONFIG_bob: |
+        [Bob Share]
+         path = /shares/bob
+         valid users = bob
+         guest ok = no
+         read only = no
+         browseable = yes
+      SAMBA_VOLUME_CONFIG_public: |
+        [Public]
+         path = /shares/public
+         valid users = alice, bob
+         guest ok = no
+         read only = no
+         browseable = yes
+         force group = staff

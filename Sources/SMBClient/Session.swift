@@ -359,11 +359,107 @@ public class Session {
     return files
   }
 
+  public func fileStat(path: String) async throws -> Create.Response {
+    let createRequest = Create.Request(
+      messageId: messageId.next(),
+      treeId: treeId,
+      sessionId: sessionId,
+      desiredAccess: [.readData, .readAttributes, .synchronize],
+      fileAttributes: [],
+      shareAccess: [.read, .write, .delete],
+      createDisposition: .open,
+      createOptions: [],
+      name: path
+    )
+    let closeRequest = Close.Request(
+      flags: [.relatedOperations],
+      messageId: messageId.next(),
+      treeId: treeId,
+      sessionId: sessionId,
+      fileId: temporaryUUID
+    )
+
+    let data = try await send(
+      createRequest.encoded(),
+      closeRequest.encoded()
+    )
+
+    let createResponse = Create.Response(data: data)
+    return createResponse
+  }
+
+  public func existFile(path: String) async throws -> Bool {
+    do {
+      _ = try await fileStat(path: path)
+      return true
+    } catch let error as ErrorResponse {
+      if error.header.status == ErrorCodes.objectNameNotFound {
+        return false
+      }
+      throw error
+    } catch {
+      throw error
+    }
+  }
+
+  public func existDirectory(path: String) async throws -> Bool {
+    do {
+      let stat = try await fileStat(path: path)
+      return stat.fileAttributes.contains(.directory)
+    } catch let error as ErrorResponse {
+      if error.header.status == ErrorCodes.objectNameNotFound {
+        return false
+      }
+      throw error
+    } catch {
+      throw error
+    }
+  }
+
+  public func queryInfo(path: String) async throws -> QueryInfo.Response {
+    let createRequest = Create.Request(
+      messageId: messageId.next(),
+      treeId: treeId,
+      sessionId: sessionId,
+      desiredAccess: [.readAttributes],
+      fileAttributes: [],
+      shareAccess: [.read],
+      createDisposition: .open,
+      createOptions: [],
+      name: path
+    )
+    let createResponse = Create.Response(data: try await send(createRequest.encoded()))
+
+    let queryInfoRequest = QueryInfo.Request(
+      headerFlags: [.relatedOperations],
+      messageId: messageId.next(),
+      treeId: treeId,
+      sessionId: sessionId,
+      infoType: .file,
+      fileInfoClass: .fileAllInformation,
+      fileId: createResponse.fileId
+    )
+    let data = try await send(queryInfoRequest.encoded())
+    let queryInfoResponse = QueryInfo.Response(data: data)
+
+//    let data = try await send(
+//      createRequest.encoded(),
+//      queryInfoRequest.encoded()
+//    )
+//
+//    let createResponse = Create.Response(data: data)
+//    let queryInfoResponse = QueryInfo.Response(data: Data(data[createResponse.header.nextCommand...]))
+
+    try await close(fileId: createResponse.fileId)
+
+    return queryInfoResponse
+  }
+
   @discardableResult
   public func createDirectory(path: String) async throws -> Create.Response {
     let response = try await create(
       desiredAccess: [.readData, .readAttributes],
-      fileAttributes: [.directory],
+      fileAttributes: [],
       shareAccess: [.read, .write, .delete],
       createDisposition: .create,
       createOptions: [.directoryFile],
@@ -442,6 +538,7 @@ public class Session {
       name: path
     )
     let setInfoRequest = SetInfo.Request(
+      flags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
@@ -450,6 +547,7 @@ public class Session {
       fileInformation: FileDispositionInformation(deletePending: true)
     )
     let closeRequest = Close.Request(
+      flags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
@@ -512,6 +610,7 @@ public class Session {
       name: from
     )
     let setInfoRequest = SetInfo.Request(
+      flags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
@@ -520,6 +619,7 @@ public class Session {
       fileInformation: FileRenameInformation(fileName: to)
     )
     let closeRequest = Close.Request(
+      flags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
