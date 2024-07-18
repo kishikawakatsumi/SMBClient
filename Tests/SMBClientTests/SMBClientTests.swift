@@ -1,7 +1,7 @@
 import XCTest
 @testable import SMBClient
 
-final class ClientTests: XCTestCase {
+final class SMBClientTests: XCTestCase {
   let alice = ServerConfig(username: "Alice", password: "alipass", share: "Alice Share", sharePath: "shares/alice")
   let bob = ServerConfig(username: "Bob", password: "bobpass", share: "Bob Share", sharePath: "shares/bob")
 
