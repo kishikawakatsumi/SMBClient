@@ -3,7 +3,7 @@ import Foundation
 public struct FileModeInformation {
   public let mode: Mode
 
-  public struct Mode: OptionSet {
+  public struct Mode: OptionSet, Sendable {
     public let rawValue: UInt32
 
     public init(rawValue: UInt32) {

@@ -3,7 +3,7 @@ import Foundation
 public struct FileAlignmentInformation {
   public let alignmentRequirement: AlignmentRequirement
 
-  public struct AlignmentRequirement: OptionSet {
+  public struct AlignmentRequirement: OptionSet, Sendable {
     public let rawValue: UInt32
 
     public init(rawValue: UInt32) {
