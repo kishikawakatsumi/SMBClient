@@ -74,9 +74,9 @@ enum SetInfo {
     public let structureSize: UInt16
 
     public init(data: Data) {
-      let byteReader = ByteReader(data)
-      header = Header(data: data)
-      structureSize = byteReader.read()
+      let reader = ByteReader(data)
+      header = reader.read()
+      structureSize = reader.read()
     }
   }
 }

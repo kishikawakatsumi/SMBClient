@@ -539,6 +539,45 @@ final class SMBClientTests: XCTestCase {
     try await client.deleteDirectory(path: directoryName)
     try await assertDirectoryDoesNotExist(at: directoryName, client: client)
   }
+
+  func testFileStat() async throws {
+    let user = alice
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password)
+    try await client.treeConnect(path: user.share)
+
+    let filePath = "test_data/dir1/file1.txt"
+
+    let file = try await client.fileStat(path: filePath)
+    XCTAssertFalse(file.isDirectory)
+    XCTAssertFalse(file.isReadOnly)
+
+    let directoryPath = "test_data/dir1/subdir1"
+
+    let directory = try await client.fileStat(path: directoryPath)
+    XCTAssertTrue(directory.isDirectory)
+    XCTAssertFalse(directory.isReadOnly)
+  }
+
+  func testFileInfo() async throws {
+    let user = alice
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password)
+    try await client.treeConnect(path: user.share)
+
+    let filePath = "test_data/dir2/file1.txt"
+
+    let file = try await client.fileInfo(path: filePath)
+
+    XCTAssertFalse(file.standardInformation.directory)
+    XCTAssertEqual(file.nameInformation.fileName, "\\test_data\\dir2\\file1.txt")
+
+    let directoryPath = "test_data/dir2/subdir2"
+
+    let directory = try await client.fileInfo(path: directoryPath)
+    XCTAssertTrue(directory.standardInformation.directory)
+    XCTAssertEqual(directory.nameInformation.fileName, "\\test_data\\dir2\\subdir2")
+  }
 }
 
 func assertFileExists(
