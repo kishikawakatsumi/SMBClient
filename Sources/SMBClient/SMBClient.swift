@@ -124,6 +124,17 @@ public class SMBClient {
     try await fileWriter.close()
   }
 
+  public func upload(fileHandle: FileHandle, path: String) async throws {
+    try await upload(fileHandle: fileHandle, path: path, progressHandler: { _ in })
+  }
+
+  public func upload(fileHandle: FileHandle, path: String, progressHandler: (_ progress: Double) -> Void) async throws {
+    let fileWriter = fileWriter(path: path)
+
+    try await fileWriter.upload(fileHandle: fileHandle, progressHandler: progressHandler)
+    try await fileWriter.close()
+  }
+
   public func upload(localPath: URL, remotePath path: String) async throws {
     try await upload(localPath: localPath, remotePath: path, progressHandler: { _, _, _ in })
   }

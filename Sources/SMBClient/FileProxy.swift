@@ -1,6 +1,6 @@
 import Foundation
 
-struct FileHandle {
+struct FileProxy {
   let id: Data
   let size: UInt64
 }
