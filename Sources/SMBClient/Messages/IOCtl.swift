@@ -94,7 +94,7 @@ public enum IOCtl {
     public let reserved: UInt16
     public let ctlCode: UInt32
     public let fileId: Data
-    let inputOffset: UInt32
+    public let inputOffset: UInt32
     public let inputCount: UInt32
     public let outputOffset: UInt32
     public let outputCount: UInt32
@@ -128,7 +128,7 @@ public enum IOCtl {
       self.rawValue = rawValue
     }
 
-    public static let isIoctl = Flags(rawValue: 0x00000000)
+    public static let isIoctl = Flags([]) // 0x00000000
     public static let isFsctl = Flags(rawValue: 0x00000001)
   }
 }

@@ -7,7 +7,8 @@ public struct FileNameInformation {
   public init(data: Data) {
     let byteReader = ByteReader(data)
     fileNameLength = byteReader.read()
-    fileName = String(data: byteReader.read(count: Int(fileNameLength)), encoding: .utf16LittleEndian)!
+    let fileNameData = byteReader.read(count: Int(fileNameLength))
+    fileName = String(data: fileNameData, encoding: .utf16LittleEndian) ?? fileNameData.hex
   }
 
   fileprivate init(fileNameLength: UInt32, fileName: String) {
@@ -19,7 +20,8 @@ public struct FileNameInformation {
 extension ByteReader {
   func read() -> FileNameInformation {
     let fileNameLength: UInt32 = read()
-    let fileName = String(data: read(count: Int(fileNameLength)), encoding: .utf16LittleEndian)!
+    let fileNameData = read(count: Int(fileNameLength))
+    let fileName = String(data: fileNameData, encoding: .utf16LittleEndian) ?? fileNameData.hex
     return FileNameInformation(fileNameLength: fileNameLength, fileName: fileName)
   }
 }

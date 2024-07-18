@@ -463,7 +463,8 @@ enum DCERPC {
       } else {
         terminator = 0
       }
-      value = String(data: Data(valueData)[0..<valueData.count - 2], encoding: .utf16LittleEndian)!
+      let valueData = Data(valueData)[0..<valueData.count - 2]
+      value = String(data: valueData, encoding: .utf16LittleEndian) ?? valueData.hex
     }
 
     func encoded() -> Data {

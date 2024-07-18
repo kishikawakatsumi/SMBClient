@@ -10,7 +10,7 @@ public struct FileAlignmentInformation {
       self.rawValue = rawValue
     }
 
-    public static let byte = AlignmentRequirement(rawValue: 0x00000000)
+    public static let byte = AlignmentRequirement([]) // 0x00000000
     public static let word = AlignmentRequirement(rawValue: 0x00000001)
     public static let long = AlignmentRequirement(rawValue: 0x00000003)
     public static let quad = AlignmentRequirement(rawValue: 0x00000007)
@@ -20,7 +20,7 @@ public struct FileAlignmentInformation {
     public static let oneTwentyEight = AlignmentRequirement(rawValue: 0x0000007F)
     public static let twoFiftySix = AlignmentRequirement(rawValue: 0x000000FF)
     public static let fiveTwelve = AlignmentRequirement(rawValue: 0x000001FF)
-  } 
+  }
 
   public init(data: Data) {
     let byteReader = ByteReader(data)

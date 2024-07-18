@@ -87,7 +87,7 @@ public enum TreeConnect {
         self.rawValue = rawValue
       }
 
-      public static let manualCaching = ShareFlags(rawValue: 0x00000000)
+      public static let manualCaching = ShareFlags([]) // 0x00000000
       public static let autoCaching = ShareFlags(rawValue: 0x00000010)
       public static let vdoCaching = ShareFlags(rawValue: 0x00000020)
       public static let noCaching = ShareFlags(rawValue: 0x00000030)
