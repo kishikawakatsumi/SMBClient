@@ -6,7 +6,7 @@ public struct AccessMask: OptionSet {
   public init(rawValue: UInt32) {
     self.rawValue = rawValue
   }
-  
+
   public static let readEa = DirectoryAccessMask(rawValue: 0x00000008)
   public static let writeEa = DirectoryAccessMask(rawValue: 0x00000010)
 
@@ -28,7 +28,7 @@ public struct AccessMask: OptionSet {
   public static let addFile = DirectoryAccessMask(rawValue: 0x00000002)
   public static let addSubdirectory = DirectoryAccessMask(rawValue: 0x00000004)
   public static let traverse = DirectoryAccessMask(rawValue: 0x00000020)
-  
+
   public static let readData = FilePipePrinterAccessMask(rawValue: 0x00000001)
   public static let writeData = FilePipePrinterAccessMask(rawValue: 0x00000002)
   public static let appendData = FilePipePrinterAccessMask(rawValue: 0x00000004)
