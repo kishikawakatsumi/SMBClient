@@ -13,40 +13,6 @@ enum SetInfo {
     public let fileId: Data
     public let buffer: Data
 
-    public enum InfoType: UInt8 {
-      case file = 0x01
-      case fileSystem = 0x02
-      case security = 0x03
-      case quota = 0x04
-    }
-
-    public enum FileSystemInfoClass: UInt8 {
-      case fileFsVolumeInformation = 0x01
-      case fileFsLabelInformation = 0x02
-      case fileFsSizeInformation = 0x03
-      case fileFsDeviceInformation = 0x04
-      case fileFsAttributeInformation = 0x05
-      case fileFsControlInformation = 0x06
-      case fileFsFullSizeInformation = 0x07
-      case fileFsObjectIdInformation = 0x08
-      case fileFsDriverPathInformation = 0x09
-      case fileFsVolumeFlagsInformation = 0x0A
-      case fileFsSectorSizeInformation = 0x0B
-    }
-
-    public struct SecurityDescriptor: OptionSet {
-      public let rawValue: UInt8
-
-      public static let owner = SecurityDescriptor(rawValue: 0x00000001)
-      public static let group = SecurityDescriptor(rawValue: 0x00000002)
-      public static let dacl = SecurityDescriptor(rawValue: 0x00000004)
-      public static let sacl = SecurityDescriptor(rawValue: 0x00000008)
-      public static let label = SecurityDescriptor(rawValue: 0x00000010)
-      public static let attribute = SecurityDescriptor(rawValue: 0x00000020)
-      public static let scope = SecurityDescriptor(rawValue: 0x00000040)
-      public static let backup = SecurityDescriptor(rawValue: 0x00000080)
-    }
-
     public struct Flags: OptionSet {
       public let rawValue: UInt32
 

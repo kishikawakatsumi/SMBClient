@@ -14,6 +14,7 @@ public enum ErrorCodes {
   public static let noMoreFiles: UInt32 = 0x80000006
   public static let stoppedOnSymlink: UInt32 = 0x8000002D
   public static let notImplemented: UInt32 = 0xC0000002
+  public static let invalidInfoClass: UInt32 = 0xC0000003
   public static let invalidParameter: UInt32 = 0xC000000D
   public static let noSuchDevice: UInt32 = 0xC000000E
   public static let noSuchFile: UInt32 = 0xC000000F
@@ -34,8 +35,11 @@ public enum ErrorCodes {
   public static let fileIsADirectory: UInt32 = 0xC00000BA
   public static let notSupported: UInt32 = 0xC00000BB
   public static let networkNameDeleted: UInt32 = 0xC00000C9
+  public static let badNetworkName: UInt32 = 0xC00000CC
+  public static let notADirectory: UInt32 = 0xC0000103
   public static let fileClosed: UInt32 = 0xC0000128
   public static let userSessionDeleted: UInt32 = 0xC0000203
+  public static let connectionRefused: UInt32 = 0xC0000236
   public static let networkSessionExpired: UInt32 = 0xC000035C
   public static let smbTooManyUIDs: UInt32 = 0xC000205A
 
@@ -63,6 +67,8 @@ public enum ErrorCodes {
       return "The create operation stopped after reaching a symbolic link."
     case ErrorCodes.notImplemented:
       return "The requested operation is not implemented."
+    case ErrorCodes.invalidInfoClass:
+      return "The specified information class is not a valid information class for the specified object."
     case ErrorCodes.invalidParameter:
       return "The parameter specified in the request is not valid."
     case ErrorCodes.noSuchFile:
@@ -103,10 +109,16 @@ public enum ErrorCodes {
       return "The client request is not supported."
     case ErrorCodes.networkNameDeleted:
       return "The network name specified by the client has been deleted on the server. This error is returned if the client specifies an incorrect TID or the share on the server represented by the TID was deleted."
+    case ErrorCodes.badNetworkName:
+      return "The specified share name cannot be found on the remote server."
+    case ErrorCodes.notADirectory:
+      return "A requested opened file is not a directory."
     case ErrorCodes.fileClosed:
       return "An I/O request other than close and several other special case operations was attempted using a file object that had already been closed."
     case ErrorCodes.userSessionDeleted:
       return "The user session specified by the client has been deleted on the server. This error is returned by the server if the client sends an incorrect UID."
+    case ErrorCodes.connectionRefused:
+      return "The transport-connection attempt was refused by the remote system."
     case ErrorCodes.networkSessionExpired:
       return "The client's session has expired; therefore, the client MUST re-authenticate to continue accessing remote resources."
     case ErrorCodes.smbTooManyUIDs:

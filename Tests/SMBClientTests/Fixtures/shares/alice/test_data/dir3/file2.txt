@@ -1,0 +1,1 @@
+This is another test file in dir3/file2.txt

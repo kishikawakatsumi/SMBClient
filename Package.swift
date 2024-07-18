@@ -20,7 +20,8 @@ let package = Package(
     ),
     .testTarget(
       name: "SMBClientTests",
-      dependencies: ["SMBClient"]
+      dependencies: ["SMBClient"],
+      resources: [.copy("Fixtures")]
     ),
   ]
 )

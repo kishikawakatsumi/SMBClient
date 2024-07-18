@@ -1,0 +1,25 @@
+name: Test
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: |
+          set -ex
+                
+          brew install docker docker-compose colima
+          colima start --runtime docker
+
+          docker compose up --detach
+
+          prefix="./Tests/SMBClientTests/Fixtures"
+          chmod -R 777 ${prefix}/shares
+          docker cp ${prefix}/shares samba:/
+
+          swift test
