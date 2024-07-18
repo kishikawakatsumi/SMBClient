@@ -370,11 +370,18 @@ struct AVPair {
     self.avValue = avValue
   }
 
-  var data: Data {
+  init(data: Data) {
+    let reader = ByteReader(data)
+    avId = AVId(rawValue: reader.read())!
+    avLen = reader.read()
+    avValue = reader.read(count: Int(avLen))
+  }
+  
+  func encoded() -> Data {
     var data = Data()
-//    data += avId.bigEndian
-//    data += avLen.bigEndian
-//    data += avValue
+    data += avId.rawValue
+    data += avLen
+    data += avValue
     return data
   }
 }
