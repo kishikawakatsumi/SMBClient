@@ -38,14 +38,11 @@ public class FileWriter {
   }
 
   public func upload(fileHandle: FileHandle, progressHandler: (_ progress: Double) -> Void) async throws {
+    let fileSize = try fileHandle.fileSize()
     let fileProxy = try await fileProxy()
 
-    let currentOffset = fileHandle.offsetInFile
-    let fileSize = fileHandle.seekToEndOfFile()
-    try fileHandle.seek(toFileOffset: currentOffset)
-
     while true {
-      let offset = UInt64(fileHandle.offsetInFile)
+      let offset = UInt64(try fileHandle.offsetInFile())
       let data = fileHandle.readData(ofLength: Int(session.maxWriteSize))
       if data.isEmpty { break }
 
@@ -97,10 +94,9 @@ public class FileWriter {
         let fileWriter = FileWriter(session: session, path: destination)
         try await fileWriter.upload(fileHandle: fileHandle)
         try await fileWriter.close()
-        
+
         completedFiles += 1
-        
-        progressHandler(completedFiles, current, Int64(fileHandle.offsetInFile))
+        progressHandler(completedFiles, current, Int64(try fileHandle.offsetInFile()))
       }
     }
   }
@@ -132,7 +128,34 @@ public class FileWriter {
       createResponse = response
       return FileProxy(id: response.fileId, size: response.endOfFile)
     }
-    
+
     return FileProxy(id: createResponse.fileId, size: createResponse.endOfFile)
+  }
+}
+
+extension FileHandle {
+  func offsetInFile() throws -> UInt64 {
+    if #available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *) {
+      return try offset()
+    } else {
+      return offsetInFile
+    }
+  }
+
+  func fileSize() throws -> UInt64 {
+    let currentOffset: UInt64
+    let fileSize: UInt64
+
+    if #available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *) {
+      currentOffset = try offset()
+      fileSize = try seekToEnd()
+    } else {
+      currentOffset = offsetInFile
+      fileSize = seekToEndOfFile()
+    }
+
+    seek(toFileOffset: currentOffset)
+
+    return fileSize
   }
 }
