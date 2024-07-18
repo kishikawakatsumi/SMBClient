@@ -1,6 +1,6 @@
 import Foundation
 
-public struct FileAttributes: OptionSet {
+public struct FileAttributes: OptionSet, Sendable {
   public let rawValue: UInt32
 
   public init(rawValue: UInt32) {

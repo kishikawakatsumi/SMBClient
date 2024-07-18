@@ -1,6 +1,6 @@
 import Foundation
 
-public struct FilePipePrinterAccessMask: OptionSet {
+public struct FilePipePrinterAccessMask: OptionSet, Sendable {
   public let rawValue: UInt32
 
   public init(rawValue: UInt32) {

@@ -243,7 +243,7 @@ public enum NTLM {
     }
   }
 
-  public struct NegotiateFlags: OptionSet {
+  public struct NegotiateFlags: OptionSet, Sendable {
     public let rawValue: UInt32
 
     public init(rawValue: UInt32) {

@@ -94,7 +94,7 @@ public enum Negotiate {
     }
   }
 
-  public struct SecurityMode: OptionSet {
+  public struct SecurityMode: OptionSet, Sendable {
     public let rawValue: UInt16
 
     public init(rawValue: UInt16) {
@@ -105,7 +105,7 @@ public enum Negotiate {
     public static let signingRequired = SecurityMode(rawValue: 0x0002)
   }
 
-  public struct Capabilities: OptionSet {
+  public struct Capabilities: OptionSet, Sendable {
     public let rawValue: UInt32
 
     public init(rawValue: UInt32) {

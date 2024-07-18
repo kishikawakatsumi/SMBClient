@@ -24,7 +24,7 @@ public enum QueryDirectory {
       case fileInfomationClass_Reserved = 0x64
     }
 
-    public struct Flags: OptionSet {
+    public struct Flags: OptionSet, Sendable {
       public let rawValue: UInt8
 
       public init(rawValue: UInt8) {

@@ -123,7 +123,7 @@ public struct Header {
     case serverToClientNotification = 0x0013
   }
 
-  public struct Flags: OptionSet {
+  public struct Flags: OptionSet, Sendable {
     public let rawValue: UInt32
 
     public init(rawValue: UInt32) {

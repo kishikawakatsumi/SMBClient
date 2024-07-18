@@ -13,7 +13,7 @@ public enum SessionSetup {
     public let previousSessionId: UInt64
     public let securityBuffer: Data
 
-    public struct Flags: OptionSet {
+    public struct Flags: OptionSet, Sendable {
       public let rawValue: UInt8
 
       public init(rawValue: UInt8) {
@@ -23,7 +23,7 @@ public enum SessionSetup {
       public static let binding = Flags(rawValue: 0x0001)
     }
 
-    public struct SecurityMode: OptionSet {
+    public struct SecurityMode: OptionSet, Sendable {
       public let rawValue: UInt8
 
       public init(rawValue: UInt8) {
@@ -34,7 +34,7 @@ public enum SessionSetup {
       public static let signingRequired = SecurityMode(rawValue: 0x0002)
     }
 
-    public struct Capabilities: OptionSet {
+    public struct Capabilities: OptionSet, Sendable {
       public let rawValue: UInt32
 
       public init(rawValue: UInt32) {
@@ -101,7 +101,7 @@ public enum SessionSetup {
     public let securityBufferLength: UInt16
     public let buffer: Data
 
-    public struct SessionFlags: OptionSet {
+    public struct SessionFlags: OptionSet, Sendable {
       public let rawValue: UInt16
 
       public init(rawValue: UInt16) {
