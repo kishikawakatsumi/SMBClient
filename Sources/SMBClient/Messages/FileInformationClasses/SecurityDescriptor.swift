@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SecurityDescriptor: OptionSet {
+public struct SecurityDescriptor: OptionSet, Sendable {
   public let rawValue: UInt8
 
   public init(rawValue: UInt8) {

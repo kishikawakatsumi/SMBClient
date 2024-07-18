@@ -24,7 +24,7 @@ public enum QueryDirectory {
       case fileInfomationClass_Reserved = 0x64
     }
 
-    public struct Flags: OptionSet {
+    public struct Flags: OptionSet, Sendable {
       public let rawValue: UInt8
 
       public init(rawValue: UInt8) {
@@ -152,10 +152,12 @@ public enum QueryDirectory {
         eaSize = byteStream.read()
         shortNameLength = byteStream.read()
         reserved = byteStream.read()
-        shortName = String(data: byteStream.read(count: 24), encoding: .utf16LittleEndian)!
+        let shortNameData = byteStream.read(count: 24)
+        shortName = String(data: shortNameData, encoding: .utf16LittleEndian) ?? shortNameData.hex
         reserved2 = byteStream.read()
         fileId = byteStream.read(count: 8)
-        fileName = String(data: byteStream.read(count: Int(fileNameLength)), encoding: .utf16LittleEndian)!
+        let fileNameData = byteStream.read(count: Int(fileNameLength))
+        fileName = String(data: fileNameData, encoding: .utf16LittleEndian) ?? fileNameData.hex
       }
     }
   }

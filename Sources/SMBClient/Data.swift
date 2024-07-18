@@ -16,6 +16,12 @@ extension BinaryConvertible {
   }
 }
 
+extension BinaryConvertible {
+  func hexString() -> String {
+    (Data() + self).hex
+  }
+}
+
 extension UInt8: BinaryConvertible {}
 extension UInt16: BinaryConvertible {}
 extension UInt32: BinaryConvertible {}

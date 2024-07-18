@@ -64,7 +64,7 @@ public enum Write {
       return data
     }
 
-    public struct Flags: OptionSet {
+    public struct Flags: OptionSet, Sendable {
       public let rawValue: UInt32
 
       public init(rawValue: UInt32) {

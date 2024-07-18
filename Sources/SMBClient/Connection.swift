@@ -38,13 +38,11 @@ public class Connection {
     return try await withCheckedThrowingContinuation { (continuation) in
       connection.stateUpdateHandler = { (state) in
         switch state {
-        case .setup:
+        case .setup, .preparing:
           break
         case .waiting(let error):
           continuation.resume(throwing: error)
           self.connection.stateUpdateHandler = nil
-        case .preparing:
-          break
         case .ready:
           continuation.resume()
           self.connection.stateUpdateHandler = stateUpdateHandler
@@ -62,10 +60,13 @@ public class Connection {
       connection.start(queue: .global(qos: .userInitiated))
     }
 
+    @Sendable
     func stateUpdateHandler(_ state: NWConnection.State) {
       switch state {
       case .waiting(let error), .failed(let error):
         onDisconnected(error)
+      case .setup, .preparing, .ready, .cancelled:
+        break
       @unknown default:
         break
       }
@@ -86,7 +87,7 @@ public class Connection {
     case .waiting(let error), .failed(let error):
       onDisconnected(error)
       throw error
-    case .ready:
+    case .preparing, .ready:
       break
     case .cancelled:
       throw ConnectionError.cancelled

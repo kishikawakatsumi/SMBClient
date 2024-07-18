@@ -9,7 +9,7 @@ public enum TreeConnect {
     public let pathLength: UInt16
     public let buffer: Data
 
-    public struct Flags: OptionSet {
+    public struct Flags: OptionSet, Sendable {
       public let rawValue: UInt16
 
       public init(rawValue: UInt16) {
@@ -80,14 +80,14 @@ public enum TreeConnect {
       maximalAccess = reader.read()
     }
 
-    public struct ShareFlags: OptionSet {
+    public struct ShareFlags: OptionSet, Sendable {
       public let rawValue: UInt32
 
       public init(rawValue: UInt32) {
         self.rawValue = rawValue
       }
 
-      public static let manualCaching = ShareFlags(rawValue: 0x00000000)
+      public static let manualCaching = ShareFlags([]) // 0x00000000
       public static let autoCaching = ShareFlags(rawValue: 0x00000010)
       public static let vdoCaching = ShareFlags(rawValue: 0x00000020)
       public static let noCaching = ShareFlags(rawValue: 0x00000030)
@@ -106,7 +106,7 @@ public enum TreeConnect {
       public static let isolatedTransport = ShareFlags(rawValue: 0x00200000)
     }
 
-    public struct Capabilities: OptionSet {
+    public struct Capabilities: OptionSet, Sendable {
       public let rawValue: UInt32
 
       public init(rawValue: UInt32) {

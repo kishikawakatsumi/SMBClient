@@ -97,7 +97,7 @@ public enum Create {
       case delegation = 0x00000003
     }
 
-    public struct ShareAccess: OptionSet {
+    public struct ShareAccess: OptionSet, Sendable {
       public let rawValue: UInt32
 
       public init(rawValue: UInt32) {
@@ -118,7 +118,7 @@ public enum Create {
       case overwriteIf = 0x00000005
     }
 
-    public struct CreateOptions: OptionSet {
+    public struct CreateOptions: OptionSet, Sendable {
       public let rawValue: UInt32
 
       public init(rawValue: UInt32) {
@@ -176,7 +176,7 @@ public enum Create {
       case lease = 0xFF
     }
 
-    public struct Flags: OptionSet {
+    public struct Flags: OptionSet, Sendable {
       public let rawValue: UInt8
 
       public init(rawValue: UInt8) {
