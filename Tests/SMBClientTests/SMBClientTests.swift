@@ -245,33 +245,6 @@ final class SMBClientTests: XCTestCase {
     try await client.logoff()
   }
 
-  func testUpload() async throws {
-    let user = alice
-    let client = SMBClient(host: "localhost", port: 4445)
-    try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
-
-    let length = 1024
-    var data = Data(count: length)
-    for i in 0..<length {
-      data[i] = UInt8(arc4random_uniform(256))
-    }
-
-    let filename = #function
-    try await client.upload(content: data, path: filename)
-
-    try await assertFileExists(at: filename, client: client)
-
-    let downloadData = try await client.download(path: filename)
-    XCTAssertEqual(downloadData, data)
-
-    try await client.deleteFile(path: filename)
-    try await assertFileDoesNotExist(at: filename, client: client)
-
-    try await client.treeDisconnect()
-    try await client.logoff()
-  }
-
   func testDownload() async throws {
     let user = bob
     let client = SMBClient(host: "localhost", port: 4445)
@@ -357,6 +330,33 @@ final class SMBClientTests: XCTestCase {
     }
   }
 
+  func testUpload() async throws {
+    let user = alice
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password)
+    try await client.treeConnect(path: user.share)
+
+    let length = 1024
+    var data = Data(count: length)
+    for i in 0..<length {
+      data[i] = UInt8(arc4random_uniform(256))
+    }
+
+    let filename = #function
+    try await client.upload(content: data, path: filename)
+
+    try await assertFileExists(at: filename, client: client)
+
+    let downloadData = try await client.download(path: filename)
+    XCTAssertEqual(downloadData, data)
+
+    try await client.deleteFile(path: filename)
+    try await assertFileDoesNotExist(at: filename, client: client)
+
+    try await client.treeDisconnect()
+    try await client.logoff()
+  }
+
   func testUploadFile() async throws {
     let user = alice
 
@@ -375,12 +375,34 @@ final class SMBClientTests: XCTestCase {
 
     try await assertFileExists(at: "\(directoryName)/uploaded.zip", client: client)
 
+    let expected = try Data(contentsOf: fixtureURL.appending(component: "shares/bob/\(path)"))
     let downloadData = try await client.download(path: "\(directoryName)/uploaded.zip")
+    XCTAssertEqual(expected, downloadData)
 
-    XCTAssertEqual(
-      downloadData,
-      try Data(contentsOf: fixtureURL.appending(component: "shares/bob/\(path)"))
-    )
+    try await client.deleteDirectory(path: directoryName)
+    try await assertDirectoryDoesNotExist(at: directoryName, client: client)
+  }
+
+  func testUploadFileHandle() async throws {
+    let user = alice
+
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password)
+    try await client.treeConnect(path: user.share)
+
+    let path = "test_files/zip_10MB.zip"
+
+    let directoryName: String = #function
+    try await client.createDirectory(path: directoryName)
+
+    let fileHandle = try FileHandle(forReadingFrom: fixtureURL.appending(component: "shares/bob/\(path)"))
+    try await client.upload(fileHandle: fileHandle, path: "\(directoryName)/uploaded.zip")
+
+    try await assertFileExists(at: "\(directoryName)/uploaded.zip", client: client)
+
+    let expected = try Data(contentsOf: fixtureURL.appending(component: "shares/bob/\(path)"))
+    let downloadData = try await client.download(path: "\(directoryName)/uploaded.zip")
+    XCTAssertEqual(expected, downloadData)
 
     try await client.deleteDirectory(path: directoryName)
     try await assertDirectoryDoesNotExist(at: directoryName, client: client)

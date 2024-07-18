@@ -8,8 +8,8 @@ public class FileReader {
 
   public var fileSize: UInt64 {
     get async throws {
-      let fileHandle = try await fileHandle()
-      return fileHandle.size
+      let fileProxy = try await fileProxy()
+      return fileProxy.size
     }
   }
 
@@ -24,26 +24,26 @@ public class FileReader {
 
   public func read(offset: UInt64, length: UInt32) async throws -> Data {
     let readSize = min(length, session.maxReadSize)
-    let fileHandle = try await fileHandle()
+    let fileProxy = try await fileProxy()
 
     var buffer = Data()
 
     var response: Read.Response
     repeat {
       response = try await session.read(
-        fileId: fileHandle.id,
+        fileId: fileProxy.id,
         offset: offset + UInt64(buffer.count),
         length: min(readSize, length - UInt32(truncatingIfNeeded: buffer.count))
       )
 
       buffer.append(response.buffer)
-    } while response.header.status != NTStatus.endOfFile && buffer.count < length && offset + UInt64(buffer.count) < fileHandle.size
+    } while response.header.status != NTStatus.endOfFile && buffer.count < length && offset + UInt64(buffer.count) < fileProxy.size
 
     return buffer
   }
 
   public func download() async throws -> Data {
-    let fileHandle = try await fileHandle()
+    let fileProxy = try await fileProxy()
 
     var offset: UInt64 = 0
     var buffer = Data()
@@ -51,13 +51,13 @@ public class FileReader {
     var response: Read.Response
     repeat {
       response = try await session.read(
-        fileId: fileHandle.id,
+        fileId: fileProxy.id,
         offset: offset
       )
 
       buffer.append(response.buffer)
       offset = UInt64(buffer.count)
-    } while response.header.status != NTStatus.endOfFile && buffer.count < fileHandle.size
+    } while response.header.status != NTStatus.endOfFile && buffer.count < fileProxy.size
 
     return buffer
   }
@@ -69,7 +69,7 @@ public class FileReader {
     createResponse = nil
   }
 
-  private func fileHandle() async throws -> FileHandle {
+  private func fileProxy() async throws -> FileProxy {
     guard let createResponse else {
       let response = try await session.create(
         desiredAccess: [.genericRead],
@@ -80,8 +80,9 @@ public class FileReader {
         name: path
       )
       createResponse = response
-      return FileHandle(id: response.fileId, size: response.endOfFile)
+      return FileProxy(id: response.fileId, size: response.endOfFile)
     }
-    return FileHandle(id: createResponse.fileId, size: createResponse.endOfFile)
+
+    return FileProxy(id: createResponse.fileId, size: createResponse.endOfFile)
   }
 }

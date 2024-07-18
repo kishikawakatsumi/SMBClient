@@ -16,7 +16,7 @@ public class FileWriter {
   }
 
   public func upload(data: Data, progressHandler: (_ progress: Double) -> Void) async throws {
-    let fileHandle = try await fileHandle()
+    let fileProxy = try await fileProxy()
 
     var offset: UInt64 = 0
     while offset < data.count {
@@ -24,12 +24,38 @@ public class FileWriter {
 
       _ = try await session.write(
         data: buffer,
-        fileId: fileHandle.id,
+        fileId: fileProxy.id,
         offset: offset
       )
 
       offset += UInt64(buffer.count)
       progressHandler(Double(offset) / Double(data.count))
+    }
+  }
+
+  public func upload(fileHandle: FileHandle) async throws {
+    try await upload(fileHandle: fileHandle, progressHandler: { _ in })
+  }
+
+  public func upload(fileHandle: FileHandle, progressHandler: (_ progress: Double) -> Void) async throws {
+    let fileProxy = try await fileProxy()
+
+    let currentOffset = fileHandle.offsetInFile
+    let fileSize = fileHandle.seekToEndOfFile()
+    try fileHandle.seek(toFileOffset: currentOffset)
+
+    while true {
+      let offset = UInt64(fileHandle.offsetInFile)
+      let data = fileHandle.readData(ofLength: Int(session.maxWriteSize))
+      if data.isEmpty { break }
+
+      _ = try await session.write(
+        data: data,
+        fileId: fileProxy.id,
+        offset: offset
+      )
+
+      progressHandler(Double(offset) / Double(fileSize))
     }
   }
 
@@ -66,16 +92,15 @@ public class FileWriter {
       } else {
         progressHandler(completedFiles, current, bytesSent)
 
-        let data = try Data(contentsOf: current)
-        
-        let fileWriter = FileWriter(session: session, path: destination)
-        try await fileWriter.upload(data: data)
-        try await fileWriter.close()
+        let fileHandle = try FileHandle(forReadingFrom: current)
 
-        completedFiles += 1
-        bytesSent += Int64(data.count)
+        let fileWriter = FileWriter(session: session, path: destination)
+        try await fileWriter.upload(fileHandle: fileHandle)
+        try await fileWriter.close()
         
-        progressHandler(completedFiles, current, bytesSent)
+        completedFiles += 1
+        
+        progressHandler(completedFiles, current, Int64(fileHandle.offsetInFile))
       }
     }
   }
@@ -87,7 +112,7 @@ public class FileWriter {
     createResponse = nil
   }
 
-  private func fileHandle() async throws -> FileHandle {
+  private func fileProxy() async throws -> FileProxy {
     guard let createResponse else {
       let response = try await session.create(
         desiredAccess: [
@@ -105,8 +130,9 @@ public class FileWriter {
         name: path
       )
       createResponse = response
-      return FileHandle(id: response.fileId, size: response.endOfFile)
+      return FileProxy(id: response.fileId, size: response.endOfFile)
     }
-    return FileHandle(id: createResponse.fileId, size: createResponse.endOfFile)
+    
+    return FileProxy(id: createResponse.fileId, size: createResponse.endOfFile)
   }
 }
