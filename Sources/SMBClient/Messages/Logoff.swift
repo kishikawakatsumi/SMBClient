@@ -43,7 +43,7 @@ public enum Logoff {
 
     public init(data: Data) {
       let reader = ByteReader(data)
-      header = Header(data: data)
+      header = reader.read()
       structureSize = reader.read()
       reserved = reader.read()
     }

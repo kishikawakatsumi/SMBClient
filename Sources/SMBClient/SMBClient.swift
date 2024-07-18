@@ -99,6 +99,11 @@ public class SMBClient {
     try await session.existDirectory(path: path)
   }
 
+  public func fileInfo(path: String) async throws -> FileAllInformation {
+    let response = try await session.queryInfo(path: path)
+    return FileAllInformation(data: response.buffer)
+  }
+
   public func download(path: String) async throws -> Data {
     let fileReader = fileReader(path: path)
 

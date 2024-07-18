@@ -88,7 +88,7 @@ public enum QueryInfo {
 
     public init(data: Data) {
       let byteReader = ByteReader(data)
-      header = Header(data: data)
+      header = byteReader.read()
       structureSize = byteReader.read()
       outputBufferOffset = byteReader.read()
       outputBufferLength = byteReader.read()

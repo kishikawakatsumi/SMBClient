@@ -416,7 +416,7 @@ public class Session {
     }
   }
 
-  public func queryInfo(path: String) async throws -> QueryInfo.Response {
+  public func queryInfo(path: String, fileInfoClass: FileInfoClass = .fileAllInformation) async throws -> QueryInfo.Response {
     let createRequest = Create.Request(
       messageId: messageId.next(),
       treeId: treeId,
@@ -428,30 +428,31 @@ public class Session {
       createOptions: [],
       name: path
     )
-    let createResponse = Create.Response(data: try await send(createRequest.encoded()))
-
     let queryInfoRequest = QueryInfo.Request(
       headerFlags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
       infoType: .file,
-      fileInfoClass: .fileAllInformation,
-      fileId: createResponse.fileId
+      fileInfoClass: fileInfoClass,
+      fileId: temporaryUUID
     )
-    let data = try await send(queryInfoRequest.encoded())
-    let queryInfoResponse = QueryInfo.Response(data: data)
+    let closeRequest = Close.Request(
+      flags: [.relatedOperations],
+      messageId: messageId.next(),
+      treeId: treeId,
+      sessionId: sessionId,
+      fileId: temporaryUUID
+    )
 
-//    let data = try await send(
-//      createRequest.encoded(),
-//      queryInfoRequest.encoded()
-//    )
-//
-//    let createResponse = Create.Response(data: data)
-//    let queryInfoResponse = QueryInfo.Response(data: Data(data[createResponse.header.nextCommand...]))
+    let data = try await send(
+      createRequest.encoded(),
+      queryInfoRequest.encoded(),
+      closeRequest.encoded()
+    )
 
-    try await close(fileId: createResponse.fileId)
-
+    let createResponse = Create.Response(data: data)
+    let queryInfoResponse = QueryInfo.Response(data: Data(data[createResponse.header.nextCommand...]))
     return queryInfoResponse
   }
 

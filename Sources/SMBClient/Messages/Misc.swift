@@ -11,10 +11,3 @@ extension UUID {
     self = data.withUnsafeBytes { $0.load(as: UUID.self) }
   }
 }
-
-extension ByteReader {
-  func read() -> Header {
-    let data = read(count: 64)
-    return Header(data: Data(data))
-  }
-}

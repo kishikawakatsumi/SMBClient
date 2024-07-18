@@ -44,6 +44,11 @@ class ByteReader {
 }
 
 extension ByteReader {
+  func read() -> Bool {
+    let value: UInt8 = read()
+    return value == 1
+  }
+
   func read() -> UUID {
     UUID(data: read(count: 16))
   }

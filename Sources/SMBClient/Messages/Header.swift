@@ -139,3 +139,10 @@ public struct Header {
     public static let replayOperation = Flags(rawValue: 0x20000000)
   }
 }
+
+extension ByteReader {
+  func read() -> Header {
+    let data = read(count: 64)
+    return Header(data: Data(data))
+  }
+}
