@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="z5E-vX-Qcz">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.AVKitIBPlugin" version="22689"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22689"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Window Controller-->
+        <scene sceneID="UeV-6C-cNp">
+            <objects>
+                <windowController storyboardIdentifier="VideoPlayerWindowController" id="z5E-vX-Qcz" customClass="VideoPlayerWindowController" customModule="FileBrowser" customModuleProvider="target" sceneMemberID="viewController">
+                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="g1f-Kd-iou">
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" fullSizeContentView="YES"/>
+                        <rect key="contentRect" x="255" y="323" width="854" height="480"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="1728" height="1079"/>
+                        <view key="contentView" id="YQU-vG-1N2">
+                            <rect key="frame" x="0.0" y="0.0" width="854" height="480"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </view>
+                        <connections>
+                            <outlet property="delegate" destination="z5E-vX-Qcz" id="Z3r-dr-kgg"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="A6n-vB-Wwx" kind="relationship" relationship="window.shadowedContentViewController" id="1Fd-Qh-BLl"/>
+                    </connections>
+                </windowController>
+                <customObject id="0Mj-XI-776" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-54" y="119"/>
+        </scene>
+        <!--Video Player View Controller-->
+        <scene sceneID="IyJ-GH-W8P">
+            <objects>
+                <viewController id="A6n-vB-Wwx" customClass="VideoPlayerViewController" customModule="FileBrowser" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="bjr-hr-T5e">
+                        <rect key="frame" x="0.0" y="0.0" width="854" height="480"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <avPlayerView controlsStyle="inline" translatesAutoresizingMaskIntoConstraints="NO" id="Dd6-PL-1ck">
+                                <rect key="frame" x="0.0" y="0.0" width="854" height="480"/>
+                            </avPlayerView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="Dd6-PL-1ck" secondAttribute="bottom" id="MOS-97-994"/>
+                            <constraint firstAttribute="trailing" secondItem="Dd6-PL-1ck" secondAttribute="trailing" id="R2H-vY-m7C"/>
+                            <constraint firstItem="Dd6-PL-1ck" firstAttribute="leading" secondItem="bjr-hr-T5e" secondAttribute="leading" id="azW-3K-mo9"/>
+                            <constraint firstItem="Dd6-PL-1ck" firstAttribute="top" secondItem="bjr-hr-T5e" secondAttribute="top" id="cwk-tO-3Kl"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="playerView" destination="Dd6-PL-1ck" id="0EY-Cz-eum"/>
+                    </connections>
+                </viewController>
+                <customObject id="oMR-rD-5Ic" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="915" y="119"/>
+        </scene>
+    </scenes>
+</document>

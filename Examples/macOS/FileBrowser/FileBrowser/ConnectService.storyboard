@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="OCJ-n2-a3N">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22689"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Window Controller-->
+        <scene sceneID="Rp3-l6-QIz">
+            <objects>
+                <windowController id="OCJ-n2-a3N" customClass="ConnectServiceWindowController" customModule="FileBrowser" customModuleProvider="target" sceneMemberID="viewController">
+                    <window key="window" title="Connect to Server" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="lLk-h2-8c3">
+                        <windowStyleMask key="styleMask" titled="YES"/>
+                        <rect key="contentRect" x="255" y="323" width="480" height="270"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="1728" height="1079"/>
+                        <view key="contentView" id="uJ1-Tx-bzG">
+                            <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </view>
+                        <connections>
+                            <outlet property="delegate" destination="OCJ-n2-a3N" id="Bdo-VB-IPT"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="bU7-R8-ocO" kind="relationship" relationship="window.shadowedContentViewController" id="KTQ-zH-7CT"/>
+                    </connections>
+                </windowController>
+                <customObject id="71G-TX-wPM" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-208" y="-58"/>
+        </scene>
+        <!--Connect Service View Controller-->
+        <scene sceneID="PEd-7d-5j0">
+            <objects>
+                <viewController id="bU7-R8-ocO" customClass="ConnectServiceViewController" customModule="FileBrowser" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="tOy-S4-hL0">
+                        <rect key="frame" x="0.0" y="0.0" width="442" height="192"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Rmp-H6-PWr">
+                                <rect key="frame" x="18" y="118" width="70" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Username:" id="UHL-gf-BK9">
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField verticalHuggingPriority="750" contentType="username" translatesAutoresizingMaskIntoConstraints="NO" id="iXV-7B-1Uu">
+                                <rect key="frame" x="94" y="115" width="328" height="21"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="hkJ-ex-6M0">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="d4V-73-yR9">
+                                <rect key="frame" x="18" y="87" width="70" height="16"/>
+                                <textFieldCell key="cell" lineBreakMode="clipping" alignment="right" title="Password:" id="O6A-VY-UKt">
+                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <secureTextField verticalHuggingPriority="750" contentType="password" translatesAutoresizingMaskIntoConstraints="NO" id="NL8-Qy-0CS">
+                                <rect key="frame" x="94" y="84" width="328" height="21"/>
+                                <secureTextFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" usesSingleLineMode="YES" id="rQx-0z-zK7">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <allowedInputSourceLocales>
+                                        <string>NSAllRomanInputSourcesLocaleIdentifier</string>
+                                    </allowedInputSourceLocales>
+                                </secureTextFieldCell>
+                            </secureTextField>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fKy-S3-gF6">
+                                <rect key="frame" x="92" y="59" width="154" height="18"/>
+                                <buttonCell key="cell" type="check" title="Remember password" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="taU-ww-a9h">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="wns-j0-ouG">
+                                <rect key="frame" x="259" y="13" width="86" height="32"/>
+                                <buttonCell key="cell" type="push" title="Cancel" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bdD-73-fOJ">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                    <string key="keyEquivalent" base64-UTF8="YES">
+Gw
+</string>
+                                </buttonCell>
+                            </button>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="FJn-wX-P1o">
+                                <rect key="frame" x="343" y="13" width="86" height="32"/>
+                                <buttonCell key="cell" type="push" title="Connect" bezelStyle="rounded" alignment="center" enabled="NO" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="xbR-AD-VLe">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                    <string key="keyEquivalent" base64-UTF8="YES">
+DQ
+</string>
+                                </buttonCell>
+                            </button>
+                            <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="Hva-BF-so3">
+                                <rect key="frame" x="18" y="156" width="406" height="16"/>
+                                <textFieldCell key="cell" selectable="YES" title="Enter your name and password for the server “%@”." id="lff-Tx-dls">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="Hva-BF-so3" firstAttribute="top" secondItem="tOy-S4-hL0" secondAttribute="top" constant="20" symbolic="YES" id="2Ug-mM-Vvj"/>
+                            <constraint firstItem="Hva-BF-so3" firstAttribute="leading" secondItem="tOy-S4-hL0" secondAttribute="leading" constant="20" symbolic="YES" id="7Xs-MO-5rI"/>
+                            <constraint firstItem="FJn-wX-P1o" firstAttribute="centerY" secondItem="wns-j0-ouG" secondAttribute="centerY" id="7tZ-46-ZVx"/>
+                            <constraint firstAttribute="trailing" secondItem="NL8-Qy-0CS" secondAttribute="trailing" constant="20" symbolic="YES" id="9a8-vr-JWK"/>
+                            <constraint firstAttribute="trailing" secondItem="iXV-7B-1Uu" secondAttribute="trailing" constant="20" symbolic="YES" id="BJL-vw-uiv"/>
+                            <constraint firstItem="wns-j0-ouG" firstAttribute="top" secondItem="fKy-S3-gF6" secondAttribute="bottom" constant="20" symbolic="YES" id="HaP-ul-OUO"/>
+                            <constraint firstItem="Rmp-H6-PWr" firstAttribute="leading" secondItem="tOy-S4-hL0" secondAttribute="leading" constant="20" symbolic="YES" id="Ifs-DM-cj5"/>
+                            <constraint firstItem="NL8-Qy-0CS" firstAttribute="width" secondItem="iXV-7B-1Uu" secondAttribute="width" id="IoE-yn-qmV"/>
+                            <constraint firstItem="FJn-wX-P1o" firstAttribute="leading" secondItem="wns-j0-ouG" secondAttribute="trailing" constant="12" symbolic="YES" id="JoK-r7-4OM"/>
+                            <constraint firstItem="d4V-73-yR9" firstAttribute="width" secondItem="Rmp-H6-PWr" secondAttribute="width" id="MZA-LA-Qp2"/>
+                            <constraint firstItem="NL8-Qy-0CS" firstAttribute="top" secondItem="iXV-7B-1Uu" secondAttribute="bottom" constant="10" symbolic="YES" id="N1S-dp-UJT"/>
+                            <constraint firstAttribute="trailing" secondItem="Hva-BF-so3" secondAttribute="trailing" constant="20" symbolic="YES" id="RMQ-r8-y8b"/>
+                            <constraint firstItem="FJn-wX-P1o" firstAttribute="width" secondItem="wns-j0-ouG" secondAttribute="width" id="UhW-Ww-lbS"/>
+                            <constraint firstAttribute="bottom" secondItem="FJn-wX-P1o" secondAttribute="bottom" constant="20" symbolic="YES" id="eLf-CR-hv3"/>
+                            <constraint firstItem="iXV-7B-1Uu" firstAttribute="top" secondItem="Hva-BF-so3" secondAttribute="bottom" constant="20" id="ffK-at-st7"/>
+                            <constraint firstItem="iXV-7B-1Uu" firstAttribute="leading" secondItem="Rmp-H6-PWr" secondAttribute="trailing" constant="8" symbolic="YES" id="iV3-N3-agt"/>
+                            <constraint firstItem="NL8-Qy-0CS" firstAttribute="leading" secondItem="d4V-73-yR9" secondAttribute="trailing" constant="8" symbolic="YES" id="ilX-0y-wf9"/>
+                            <constraint firstAttribute="trailing" secondItem="FJn-wX-P1o" secondAttribute="trailing" constant="20" symbolic="YES" id="mOD-SS-ug1"/>
+                            <constraint firstItem="fKy-S3-gF6" firstAttribute="top" secondItem="NL8-Qy-0CS" secondAttribute="bottom" constant="8" symbolic="YES" id="mY2-7Q-qBa"/>
+                            <constraint firstItem="NL8-Qy-0CS" firstAttribute="centerY" secondItem="d4V-73-yR9" secondAttribute="centerY" id="qHE-2C-DwG"/>
+                            <constraint firstItem="fKy-S3-gF6" firstAttribute="leading" secondItem="NL8-Qy-0CS" secondAttribute="leading" id="rf4-ec-orm"/>
+                            <constraint firstItem="iXV-7B-1Uu" firstAttribute="centerY" secondItem="Rmp-H6-PWr" secondAttribute="centerY" id="ybu-4I-9zy"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="cancelButton" destination="wns-j0-ouG" id="Xni-tT-dVC"/>
+                        <outlet property="connectButton" destination="FJn-wX-P1o" id="vS3-c9-zFq"/>
+                        <outlet property="messageLabel" destination="Hva-BF-so3" id="iwP-HG-WtE"/>
+                        <outlet property="passwordField" destination="NL8-Qy-0CS" id="1W7-3g-PX9"/>
+                        <outlet property="usernameField" destination="iXV-7B-1Uu" id="Gw9-FZ-hpa"/>
+                    </connections>
+                </viewController>
+                <customObject id="9uD-mB-xHs" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="379" y="-58"/>
+        </scene>
+    </scenes>
+</document>
