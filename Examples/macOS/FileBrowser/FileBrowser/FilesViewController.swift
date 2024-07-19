@@ -265,8 +265,9 @@ class FilesViewController: NSViewController {
 
   @IBAction
   private func deleteFileContextMenuAction(_ sender: Any) {
+    let targetRows = outlineView.targetRows()
+
     Task {
-      let targetRows = outlineView.targetRows()
       await deleteFileNodes(rows: targetRows)
     }
   }
