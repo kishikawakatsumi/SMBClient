@@ -37,6 +37,10 @@ class VideoPlayerWindowController: NSWindowController, NSWindowDelegate {
     super.windowDidLoad()
 
     guard let window else { return }
+
+    window.appearance = NSAppearance(named: .darkAqua)
+    window.title = URL(fileURLWithPath: path).lastPathComponent
+
     window.delegate = self
 
     guard let videoPlayerViewController = contentViewController as? VideoPlayerViewController else { return }
