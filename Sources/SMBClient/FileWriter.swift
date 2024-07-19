@@ -96,7 +96,8 @@ public class FileWriter {
         try await fileWriter.close()
 
         completedFiles += 1
-        progressHandler(completedFiles, current, Int64(try fileHandle.offsetInFile()))
+        bytesSent += Int64(try fileHandle.offsetInFile())
+        progressHandler(completedFiles, current, bytesSent)
       }
     }
   }
