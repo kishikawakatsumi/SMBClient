@@ -11,8 +11,8 @@
         <scene sceneID="NDd-dw-SQr">
             <objects>
                 <windowController storyboardIdentifier="DocumentWindowController" id="GWR-qk-rkb" customClass="DocumentWindowController" customModule="FileBrowser" customModuleProvider="target" sceneMemberID="viewController">
-                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" tabbingMode="disallowed" titleVisibility="hidden" id="MFh-KI-oMb">
-                        <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" tabbingMode="disallowed" titlebarAppearsTransparent="YES" titleVisibility="hidden" id="MFh-KI-oMb">
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" fullSizeContentView="YES"/>
                         <rect key="contentRect" x="255" y="323" width="854" height="480"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1728" height="1079"/>
                         <view key="contentView" id="C46-mD-4Fs">
@@ -39,30 +39,30 @@
                         <rect key="frame" x="0.0" y="0.0" width="854" height="480"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <wkWebView wantsLayer="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Hu6-BX-Pip">
+                            <progressIndicator hidden="YES" maxValue="1" controlSize="small" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="tFy-vQ-dEC">
+                                <rect key="frame" x="0.0" y="472" width="854" height="12"/>
+                            </progressIndicator>
+                            <wkWebView wantsLayer="YES" translatesAutoresizingMaskIntoConstraints="NO" id="GJ8-WJ-8Ng">
                                 <rect key="frame" x="0.0" y="0.0" width="854" height="480"/>
                                 <wkWebViewConfiguration key="configuration">
                                     <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
                                     <wkPreferences key="preferences"/>
                                 </wkWebViewConfiguration>
                             </wkWebView>
-                            <progressIndicator hidden="YES" maxValue="1" controlSize="small" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="tFy-vQ-dEC">
-                                <rect key="frame" x="0.0" y="472" width="854" height="12"/>
-                            </progressIndicator>
                         </subviews>
                         <constraints>
+                            <constraint firstItem="GJ8-WJ-8Ng" firstAttribute="top" secondItem="2qY-dd-yhD" secondAttribute="top" id="13i-Tx-LbE"/>
                             <constraint firstItem="tFy-vQ-dEC" firstAttribute="leading" secondItem="2qY-dd-yhD" secondAttribute="leading" id="Enz-xg-8p6"/>
-                            <constraint firstItem="Hu6-BX-Pip" firstAttribute="leading" secondItem="2qY-dd-yhD" secondAttribute="leading" id="GZO-wX-D7R"/>
                             <constraint firstItem="tFy-vQ-dEC" firstAttribute="top" secondItem="2qY-dd-yhD" secondAttribute="top" constant="-4" id="Qad-E0-CpD"/>
                             <constraint firstAttribute="trailing" secondItem="tFy-vQ-dEC" secondAttribute="trailing" id="c4t-JE-b9x"/>
-                            <constraint firstAttribute="bottom" secondItem="Hu6-BX-Pip" secondAttribute="bottom" id="clI-tM-gjF"/>
-                            <constraint firstItem="Hu6-BX-Pip" firstAttribute="top" secondItem="2qY-dd-yhD" secondAttribute="top" id="iLD-5W-Qni"/>
-                            <constraint firstAttribute="trailing" secondItem="Hu6-BX-Pip" secondAttribute="trailing" id="nal-wV-KZd"/>
+                            <constraint firstItem="GJ8-WJ-8Ng" firstAttribute="leading" secondItem="2qY-dd-yhD" secondAttribute="leading" id="gFP-3i-Xzw"/>
+                            <constraint firstAttribute="trailing" secondItem="GJ8-WJ-8Ng" secondAttribute="trailing" id="jod-ju-ggC"/>
+                            <constraint firstAttribute="bottom" secondItem="GJ8-WJ-8Ng" secondAttribute="bottom" id="pCu-QS-Eby"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="progressIndicator" destination="tFy-vQ-dEC" id="W5T-kT-jqK"/>
-                        <outlet property="webView" destination="Hu6-BX-Pip" id="rkj-8q-y5E"/>
+                        <outlet property="webView" destination="GJ8-WJ-8Ng" id="9No-E6-J8e"/>
                     </connections>
                 </viewController>
                 <customObject id="qU2-zM-LZL" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
