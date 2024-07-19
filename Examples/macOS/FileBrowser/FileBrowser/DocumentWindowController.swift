@@ -42,7 +42,6 @@ class DocumentWindowController: NSWindowController, NSWindowDelegate {
   override func windowDidLoad() {
     super.windowDidLoad()
 
-    window?.appearance = NSAppearance(named: .darkAqua)
     window?.delegate = self
 
     let semaphore = self.semaphore
