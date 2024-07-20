@@ -40,9 +40,6 @@ class SharesViewController: NSViewController {
 
     title = serverNode.name
 
-    outlineView.enclosingScrollView?.automaticallyAdjustsContentInsets = true
-    outlineView.enclosingScrollView?.contentInsets = NSEdgeInsets(top: 0, left: 0, bottom: 28 + 28, right: 0)
-
     outlineView.dataSource = self
     outlineView.delegate = self
 
