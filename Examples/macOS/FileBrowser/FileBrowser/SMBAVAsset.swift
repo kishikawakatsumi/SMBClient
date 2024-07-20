@@ -2,7 +2,7 @@ import Foundation
 import AVFoundation
 import SMBClient
 
-class AVSMBAsset: AVURLAsset {
+class SMBAVAsset: AVURLAsset {
   private let resourceLoaderDelegate: AssetResourceLoaderDelegate
 
   init(client: SMBClient, path: String) {
@@ -90,17 +90,25 @@ private class AssetResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelega
 private func chunkSize(_ fileSize: UInt64, _ requestedLength: Int) -> UInt64 {
   let length: UInt64
   let requested = UInt64(requestedLength)
-  if fileSize < 512 * 1024 * 1024 {
-    length = 4 * 1024 * 1024
+  
+  if fileSize < 64 * 1024 * 1024 {
+    length = 512 * 1024
+  } else if fileSize < 128 * 1024 * 1024 {
+    length = 1 * 1024 * 1024
+  } else if fileSize < 512 * 1024 * 1024 {
+    length = 2 * 1024 * 1024
   } else if fileSize < 1 * 1024 * 1024 * 1024 {
-    length = 8 * 1024 * 1024
+    length = 3 * 1024 * 1024
+  } else if fileSize < 2 * 1024 * 1024 * 1024 {
+    length = 4 * 1024 * 1024
   } else if fileSize < 4 * 1024 * 1024 * 1024 {
-    length = 10 * 1024 * 1024
-  } else if fileSize < 10 * 1024 * 1024 * 1024 {
+    length = 8 * 1024 * 1024
+  } else if fileSize < 8 * 1024 * 1024 * 1024 {
     length = 12 * 1024 * 1024
   } else {
     length = 16 * 1024 * 1024
   }
+
   return min(length, requested)
 }
 

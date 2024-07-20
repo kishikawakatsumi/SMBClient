@@ -45,7 +45,7 @@ class VideoPlayerWindowController: NSWindowController, NSWindowDelegate {
 
     guard let videoPlayerViewController = contentViewController as? VideoPlayerViewController else { return }
 
-    let asset = AVSMBAsset(client: client, path: path)
+    let asset = SMBAVAsset(client: client, path: path)
     let playerItem = AVPlayerItem(asset: asset)
 
     let player = AVPlayer(playerItem: playerItem)
