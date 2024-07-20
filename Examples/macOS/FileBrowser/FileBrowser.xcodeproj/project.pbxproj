@@ -33,7 +33,7 @@
 		145299AC2C3612C6003B035C /* CredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299AB2C3612C6003B035C /* CredentialStore.swift */; };
 		145299B02C3A5C0B003B035C /* VideoPlayerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299AF2C3A5C0B003B035C /* VideoPlayerWindowController.swift */; };
 		145299B22C3A5C42003B035C /* VideoPlayerWindowController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 145299B12C3A5C42003B035C /* VideoPlayerWindowController.storyboard */; };
-		145299B42C3A5DAD003B035C /* AVSMBAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299B32C3A5DAD003B035C /* AVSMBAsset.swift */; };
+		145299B42C3A5DAD003B035C /* SMBAVAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299B32C3A5DAD003B035C /* SMBAVAsset.swift */; };
 		145299E72C3AC3DD003B035C /* DocumentWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299E62C3AC3DD003B035C /* DocumentWindowController.swift */; };
 		145299E92C3AC3EF003B035C /* DocumentWindowController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 145299E82C3AC3EF003B035C /* DocumentWindowController.storyboard */; };
 		145299EC2C3AC745003B035C /* FlyingFox in Frameworks */ = {isa = PBXBuildFile; productRef = 145299EB2C3AC745003B035C /* FlyingFox */; };
@@ -86,7 +86,7 @@
 		145299AB2C3612C6003B035C /* CredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialStore.swift; sourceTree = "<group>"; };
 		145299AF2C3A5C0B003B035C /* VideoPlayerWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerWindowController.swift; sourceTree = "<group>"; };
 		145299B12C3A5C42003B035C /* VideoPlayerWindowController.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = VideoPlayerWindowController.storyboard; sourceTree = "<group>"; };
-		145299B32C3A5DAD003B035C /* AVSMBAsset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVSMBAsset.swift; sourceTree = "<group>"; };
+		145299B32C3A5DAD003B035C /* SMBAVAsset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMBAVAsset.swift; sourceTree = "<group>"; };
 		145299E62C3AC3DD003B035C /* DocumentWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentWindowController.swift; sourceTree = "<group>"; };
 		145299E82C3AC3EF003B035C /* DocumentWindowController.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = DocumentWindowController.storyboard; sourceTree = "<group>"; };
 		14529A192C3D201B003B035C /* ConnectServerWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectServerWindowController.swift; sourceTree = "<group>"; };
@@ -159,7 +159,7 @@
 				14C15E972C49827600F2F9A9 /* DirectoryStructure.swift */,
 				145299E62C3AC3DD003B035C /* DocumentWindowController.swift */,
 				145299AF2C3A5C0B003B035C /* VideoPlayerWindowController.swift */,
-				145299B32C3A5DAD003B035C /* AVSMBAsset.swift */,
+				145299B32C3A5DAD003B035C /* SMBAVAsset.swift */,
 				14529A3F2C3EB153003B035C /* AuthManager.swift */,
 				14529A3D2C3E8B5D003B035C /* SessionManager.swift */,
 				145299922C34D523003B035C /* SidebarManager.swift */,
@@ -300,7 +300,7 @@
 				1446802A2C347FA40029A1AB /* WindowController.swift in Sources */,
 				14529A1A2C3D201B003B035C /* ConnectServerWindowController.swift in Sources */,
 				14529A3C2C3E7724003B035C /* SidebarCellView.swift in Sources */,
-				145299B42C3A5DAD003B035C /* AVSMBAsset.swift in Sources */,
+				145299B42C3A5DAD003B035C /* SMBAVAsset.swift in Sources */,
 				144680322C3488770029A1AB /* ServiceDiscovery.swift in Sources */,
 				144680302C3482620029A1AB /* NavigationController.swift in Sources */,
 				1452999A2C34F896003B035C /* ConnectServiceWindowController.swift in Sources */,
