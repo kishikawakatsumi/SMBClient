@@ -155,7 +155,10 @@ class FilesViewController: NSViewController {
     guard let searchText = userInfo[WindowControllerUserInfoKey.searchText] as? String else {
       return
     }
-    guard navigationController()?.topViewController == self else {
+    guard  let window = view.window, window == window.tabGroup?.selectedWindow else {
+      return
+    }
+    guard self == navigationController()?.topViewController else {
       return
     }
 

@@ -7,7 +7,9 @@ class WindowController: NSWindowController {
 
   private let activitiesViewController = ActivitiesViewController.instantiate()
   private let popover = NSPopover()
-  
+
+  private var searchField: NSSearchField?
+
   override func windowDidLoad() {
     super.windowDidLoad()
 
@@ -109,6 +111,11 @@ class WindowController: NSWindowController {
 
     activitiesAction(toolbarItem)
   }
+
+  @IBAction
+  private func findAction(_ sender: Any) {
+    window?.makeFirstResponder(searchField)
+  }
 }
 
 extension WindowController: NSToolbarDelegate {
@@ -180,6 +187,7 @@ extension WindowController: NSToolbarDelegate {
     case .searchToolbarItemIdentifer:
       let toolbarItem = NSSearchToolbarItem(itemIdentifier: itemIdentifier)
       toolbarItem.searchField.delegate = self
+      searchField = toolbarItem.searchField
       return toolbarItem
     default:
       return nil
