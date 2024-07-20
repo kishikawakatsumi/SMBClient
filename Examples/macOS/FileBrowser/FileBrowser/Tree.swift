@@ -19,13 +19,6 @@ struct Tree {
   func parent(of node: Node) -> Node? {
     return nodes.first { $0.id == node.parent }
   }
-
-  func subtree(from node: Node) -> Tree {
-    var subtree = Tree()
-    let children = children(of: node)
-    subtree.nodes = children.map { $0.detach() }
-    return subtree
-  }
 }
 
 class Node {
