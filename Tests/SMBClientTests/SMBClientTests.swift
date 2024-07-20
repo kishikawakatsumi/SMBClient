@@ -80,7 +80,7 @@ final class SMBClientTests: XCTestCase {
 
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let files = try await client.listDirectory(path: "")
       .filter { $0.name != "." && $0.name != ".." }
@@ -111,7 +111,7 @@ final class SMBClientTests: XCTestCase {
 
     let share = user.share
     let shareDirectory = user.sharePath
-    try await client.treeConnect(path: share)
+    try await client.connectShare(share)
 
     func listDirectory(share: String, shareDirectory: String, path: String) async throws {
       let files = try await client.listDirectory(path: path)
@@ -153,7 +153,7 @@ final class SMBClientTests: XCTestCase {
 
     let share = user.share
     let shareDirectory = user.sharePath
-    try await client.treeConnect(path: share)
+    try await client.connectShare(share)
 
     func listDirectory(share: String, shareDirectory: String, path: String) async throws {
       let files = try await client.listDirectory(path: path)
@@ -196,7 +196,7 @@ final class SMBClientTests: XCTestCase {
       try await client.login(username: user.username, password: user.password)
 
       do {
-        try await client.treeConnect(path: "Nonexistent Share")
+        try await client.connectShare("Nonexistent Share")
         XCTFail("Tree connect should fail")
       } catch let error as ErrorResponse {
         XCTAssertEqual(error.header.status, ErrorCodes.badNetworkName)
@@ -211,7 +211,7 @@ final class SMBClientTests: XCTestCase {
   func testListDirectory05() async throws {
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: alice.username, password: alice.password)
-    try await client.treeConnect(path: alice.share)
+    try await client.connectShare(alice.share)
 
     do {
       _ = try await client.listDirectory(path: "Nonexistent Directory")
@@ -230,7 +230,7 @@ final class SMBClientTests: XCTestCase {
     let user = alice
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let directoryName = #function
     try await client.createDirectory(path: directoryName)
@@ -249,7 +249,7 @@ final class SMBClientTests: XCTestCase {
     let user = bob
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let path = "test_files/file_example_JPG_1MB.jpg"
 
@@ -261,7 +261,7 @@ final class SMBClientTests: XCTestCase {
     let user = bob
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let path = "test_files/file_example_TIFF_10MB.tiff"
 
@@ -290,7 +290,7 @@ final class SMBClientTests: XCTestCase {
     let user = bob
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let path = "test_files/file_example_TIFF_10MB.tiff"
 
@@ -311,7 +311,7 @@ final class SMBClientTests: XCTestCase {
     let user = bob
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let path = "test_files/file_example_MP4_1920_18MG.mp4"
 
@@ -334,7 +334,7 @@ final class SMBClientTests: XCTestCase {
     let user = alice
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let length = 1024
     var data = Data(count: length)
@@ -362,7 +362,7 @@ final class SMBClientTests: XCTestCase {
 
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let path = "test_files/zip_10MB.zip"
 
@@ -388,7 +388,7 @@ final class SMBClientTests: XCTestCase {
 
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let path = "test_files/zip_10MB.zip"
 
@@ -412,7 +412,7 @@ final class SMBClientTests: XCTestCase {
     let user = bob
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let directoryName = #function
     try await client.upload(
@@ -432,7 +432,7 @@ final class SMBClientTests: XCTestCase {
     let user = bob
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let directoryName = #function
     try await client.createDirectory(path: "test_files/\(directoryName)")
@@ -460,7 +460,7 @@ final class SMBClientTests: XCTestCase {
 
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let path = "test_files/file_example_PPT_1MB.ppt"
 
@@ -491,7 +491,7 @@ final class SMBClientTests: XCTestCase {
 
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let path = "test_files/file_example_ODS_5000.ods"
     let expedtedData = try Data(contentsOf: fixtureURL.appending(component: "shares/bob/\(path)"))
@@ -528,7 +528,7 @@ final class SMBClientTests: XCTestCase {
 
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let path = "test_files/file_example_PNG_2500kB.jpg"
     let expedtedData = try Data(contentsOf: fixtureURL.appending(component: "shares/bob/\(path)"))
@@ -566,7 +566,7 @@ final class SMBClientTests: XCTestCase {
     let user = alice
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let filePath = "test_data/dir1/file1.txt"
 
@@ -585,7 +585,7 @@ final class SMBClientTests: XCTestCase {
     let user = alice
     let client = SMBClient(host: "localhost", port: 4445)
     try await client.login(username: user.username, password: user.password)
-    try await client.treeConnect(path: user.share)
+    try await client.connectShare(user.share)
 
     let filePath = "test_data/dir2/file1.txt"
 
