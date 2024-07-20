@@ -41,6 +41,8 @@ try await session.logoff()
 
 ## Example Applications
 
+### Network File Browser for macOS
+
 <img width="1200" src="https://github.com/user-attachments/assets/5573ab34-645a-404e-b28f-182935b0badd" alt="macOS File Browser App">
 
 ## Installation
