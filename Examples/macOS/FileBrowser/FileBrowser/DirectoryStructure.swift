@@ -227,7 +227,6 @@ class DirectoryStructure {
 
   private func mergeNodes(oldNodes: [Node], newNodes: [Node]) -> [Node] {
     var mergedNodes = [Node]()
-    let oldSet = Set(oldNodes)
     let oldDict = Dictionary(uniqueKeysWithValues: oldNodes.map { ($0, $0) })
 
     for newNode in newNodes {
