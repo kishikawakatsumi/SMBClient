@@ -59,8 +59,8 @@ class DirectoryStructure {
 
       let newNodes = mergeNodes(oldNodes: rootNodes, newNodes: nodes)
 
-      tree.nodes.removeAll { rootNodes.contains($0) }
-      tree.nodes.append(contentsOf: newNodes)
+      let set = Set(rootNodes)
+      tree.nodes = tree.nodes.filter { !set.contains($0) } + newNodes
 
       viewTree = viewTree(tree)
 
@@ -68,25 +68,56 @@ class DirectoryStructure {
     }
   }
 
-  func update(_ outlineView: NSOutlineView) {
-    if let nodes = DataRepository.shared.nodes(join(server, path)) {
-      tree.nodes = nodes
-    }
+  func expand(_ fileNode: FileNode, _ outlineView: NSOutlineView) async {
+    let path = resolvePath(fileNode)
 
+    let nodes = await listDirectory(path: path, parent: fileNode)
+    let childlen = children(of: fileNode)
+
+    let (deleted, inserted) = nodeDelta(oldNodes: childlen, newNodes: nodes)
+    let newNodes = mergeNodes(oldNodes: childlen, newNodes: nodes)
+
+    let set = Set(childlen)
+    tree.nodes = tree.nodes.filter { !set.contains($0) } + newNodes
+
+    viewTree = viewTree(tree)
+
+    outlineView.beginUpdates()
+    outlineView.removeItems(at: IndexSet(deleted), inParent: fileNode)
+    outlineView.insertItems(at: IndexSet(inserted), inParent: fileNode, withAnimation: childlen.isEmpty ? .slideDown : [])
+    outlineView.endUpdates()
+  }
+
+  func update(_ outlineView: NSOutlineView) {
+    guard let newRootNodes = DataRepository.shared.nodes(join(server, path)) else {
+      return
+    }
     let expandedNodes = tree.nodes
-      .filter {
-        guard let fileNode = $0 as? FileNode else { return false }
-        return fileNode.isDirectory && outlineView.isItemExpanded(fileNode)
-      }
       .compactMap {
         $0 as? FileNode
       }
-    for node in expandedNodes {
-      if let nodes = DataRepository.shared.nodes(join(server, node.path)) {
-        tree.nodes.removeAll { nodes.contains($0) }
-        tree.nodes.append(contentsOf: nodes)
+      .filter {
+        return $0.isDirectory && outlineView.isItemExpanded($0)
+      }
+    var newChildNodes = [Node]()
+    for expandedNode in expandedNodes {
+      if let nodes = DataRepository.shared.nodes(join(server, expandedNode.path)) {
+        for case let node as FileNode in nodes {
+          newChildNodes.append(FileNode(path: node.path, file: node.file, parent: ID(expandedNode.path)))
+        }
       }
     }
+
+    let oldNodes = Set(tree.nodes)
+    let newNodes = Set(newRootNodes + newChildNodes)
+
+    let common = oldNodes.intersection(newNodes)
+    let added = newNodes.subtracting(oldNodes)
+
+    var merged = Array(common)
+    merged.append(contentsOf: added)
+
+    tree.nodes = merged
 
     viewTree = viewTree(tree)
     outlineView.reloadData()
@@ -100,24 +131,6 @@ class DirectoryStructure {
   func sort(_ descriptor: NSSortDescriptor) {
     sortDescriptor = descriptor
     viewTree = viewTree(tree)
-  }
-
-  func expand(_ fileNode: FileNode, _ outlineView: NSOutlineView) async {
-    let path = resolvePath(fileNode)
-
-    let nodes = await listDirectory(path: path, parent: fileNode)
-    let childlen = children(of: fileNode)
-
-    let (deleted, inserted) = nodeDelta(oldNodes: childlen, newNodes: nodes)
-    let newNodes = mergeNodes(oldNodes: childlen, newNodes: nodes)
-
-    tree.nodes.removeAll { childlen.contains($0) }
-    tree.nodes.append(contentsOf: newNodes)
-
-    viewTree = viewTree(tree)
-
-    outlineView.removeItems(at: IndexSet(deleted), inParent: fileNode)
-    outlineView.insertItems(at: IndexSet(inserted), inParent: fileNode, withAnimation: childlen.isEmpty ? .slideDown : [])
   }
 
   func resolvePath(_ node: Node) -> String {
@@ -198,19 +211,15 @@ class DirectoryStructure {
   }
 
   private func nodeDelta(oldNodes: [Node], newNodes: [Node]) -> (deleted: [Int], inserted: [Int]) {
+    let oldSet = Set(oldNodes)
+    let newSet = Set(newNodes)
+
     let deleted: [Int] = oldNodes.enumerated().compactMap { (index, node) in
-      if let _ = newNodes.firstIndex(of: node) {
-        return nil
-      } else {
-        return index
-      }
+      return newSet.contains(node) ? nil : index
     }
+
     let inserted: [Int] = newNodes.enumerated().compactMap { (index, node) in
-      if let _ = oldNodes.firstIndex(of: node) {
-        return nil
-      } else {
-        return index
-      }
+      return oldSet.contains(node) ? nil : index
     }
 
     return (deleted, inserted)
@@ -218,20 +227,16 @@ class DirectoryStructure {
 
   private func mergeNodes(oldNodes: [Node], newNodes: [Node]) -> [Node] {
     var mergedNodes = [Node]()
+    let oldSet = Set(oldNodes)
+    let oldDict = Dictionary(uniqueKeysWithValues: oldNodes.map { ($0, $0) })
+
     for newNode in newNodes {
-      if let index = oldNodes.firstIndex(of: newNode) {
-        mergedNodes.append(oldNodes[index])
+      if let oldNode = oldDict[newNode] {
+        mergedNodes.append(oldNode)
       } else {
         mergedNodes.append(newNode)
       }
     }
-
-    mergedNodes = mergedNodes
-      .compactMap {
-        guard let node = $0 as? FileNode else { return nil }
-        return node
-      }
-      .sorted(sortDescriptor)
 
     return mergedNodes
   }
