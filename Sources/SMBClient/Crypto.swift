@@ -17,6 +17,15 @@ enum Crypto {
     return Data(hmac)
   }
 
+  public static func hmacSHA256(key: Data, data: Data) -> Data {
+    let context = UnsafeMutablePointer<CCHmacContext>.allocate(capacity: 1)
+    CCHmacInit(context, CCHmacAlgorithm(kCCHmacAlgSHA256), (key as NSData).bytes, size_t(key.count))
+    CCHmacUpdate(context, (data as NSData).bytes, size_t(data.count))
+    var hmac = Array<UInt8>(repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
+    CCHmacFinal(context, &hmac)
+    return Data(hmac)
+  }
+
   public static func rc4(key: Data, data: Data) -> Data {
     let cryptData = NSMutableData(length: Int((data.count)))!
     var numBytesEncrypted :size_t = 0

@@ -13,7 +13,7 @@ public struct Header {
   public let reserved: UInt32
   public let treeId: UInt32
   public let sessionId: UInt64
-  public let signature: Data
+  public internal(set) var signature: Data
 
   public init(
     creditCharge: UInt16 = 0,
