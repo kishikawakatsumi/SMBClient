@@ -5,6 +5,8 @@ public class Session {
   private var sessionId: UInt64 = 0
   private var treeId: UInt32 = 0
 
+  private var signingKey: Data?
+
   public private(set) var maxTransactSize: UInt32 = 0
   public private(set) var maxReadSize: UInt32 = 0
   public private(set) var maxWriteSize: UInt32 = 0
@@ -157,11 +159,13 @@ public class Session {
         data: response.buffer
       )
 
+      let signingKey = Crypto.randomBytes(count: 16)
       let authenticateMessage = challengeMessage.authenticateMessage(
         username: username,
         password: password,
         domain: domain,
-        negotiateMessage: securityBuffer
+        negotiateMessage: securityBuffer,
+        signingKey: signingKey
       )
 
       let request = SessionSetup.Request(
@@ -174,6 +178,7 @@ public class Session {
       )
 
       let data = try await send(request.encoded())
+      self.signingKey = signingKey
       return SessionSetup.Response(data: data)
     } else {
       return response
@@ -690,23 +695,35 @@ public class Session {
   }
 
   private func send(_ payload: Data) async throws -> Data {
-    return try await connection.send(payload)
+    try await connection.send(sign(payload))
   }
 
   private func send(_ payloads: Data...) async throws -> Data {
-    return try await send(
+    return try await connection.send(
       payloads.enumerated().reduce(into: Data()) {
         let alignment = Data(repeating: 0, count: 8 - $1.element.count % 8)
         if $1.offset < payloads.count - 1 {
-          var header = Header(data: $1.element[...64])
           let payload = $1.element + alignment
+          var header = Header(data: payload[..<64])
           header.nextCommand = UInt32(payload.count)
-          $0 += header.encoded() + $1.element[64...] + alignment
+
+          $0 += sign(header.encoded() + $1.element[64...] + alignment)
         } else {
-          $0 += $1.element + alignment
+          $0 += sign($1.element + alignment)
         }
       }
     )
+  }
+
+  private func sign(_ payload: Data) -> Data {
+    if let signingKey {
+      let signature = Crypto.hmacSHA256(key: signingKey, data: payload)[..<16]
+      var header = Header(data: payload[..<64])
+      header.signature = signature
+      return header.encoded() + payload[64...]
+    } else {
+      return payload
+    }
   }
 }
 

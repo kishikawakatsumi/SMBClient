@@ -114,7 +114,8 @@ public enum NTLM {
       username: String? = nil,
       password: String? = nil,
       domain: String? = nil,
-      negotiateMessage: Data
+      negotiateMessage: Data,
+      signingKey: Data
     ) -> AuthenticateMessage {
       let responseKeyNT = ntowfv2(
         username: username ?? "",
@@ -134,8 +135,7 @@ public enum NTLM {
       let ntProofStr = Crypto.hmacMD5(key: responseKeyNT, data: Data() + serverChallenge + temp)
       let sessionBaseKey = Crypto.hmacMD5(key: responseKeyNT, data: ntProofStr)
 
-      let randomData = Crypto.randomBytes(count: 16)
-      let encryptedRandomSessionKey = Crypto.rc4(key: sessionBaseKey, data: randomData)
+      let encryptedRandomSessionKey = Crypto.rc4(key: sessionBaseKey, data: signingKey)
 
       let ntChallengeResponse = ntProofStr + temp
 
@@ -145,7 +145,7 @@ public enum NTLM {
         encryptedRandomSessionKey: Data(encryptedRandomSessionKey)
       )
       let mic = Crypto.hmacMD5(
-        key: randomData,
+        key: signingKey,
         data: negotiateMessage + buffer + authenticateMessage.encoded()
       )
 
