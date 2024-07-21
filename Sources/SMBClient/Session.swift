@@ -107,6 +107,7 @@ public class Session {
     }
   }
 
+  @discardableResult
   public func negotiate(
     securityMode: Negotiate.SecurityMode = [.signingEnabled],
     dialects: [Negotiate.Dialects] = [.smb202, .smb210]
@@ -132,19 +133,20 @@ public class Session {
     domain: String? = nil,
     workstation: String? = nil
   ) async throws -> SessionSetup.Response {
-    let negotiateResponse = try await negotiate()
+    try await negotiate()
 
     let negotiateMessage = NTLM.NegotiateMessage(
       domainName: domain,
       workstationName: workstation
     )
+    let securityBuffer = negotiateMessage.encoded()
 
     let request = SessionSetup.Request(
       messageId: messageId.next(),
       securityMode: [.signingEnabled],
       capabilities: [],
       previousSessionId: 0,
-      securityBuffer: negotiateMessage.encoded()
+      securityBuffer: securityBuffer
     )
     let response = SessionSetup.Response(
       data: try await send(request.encoded())
@@ -159,14 +161,13 @@ public class Session {
         username: username,
         password: password,
         domain: domain,
-        negotiateResponse: negotiateResponse,
-        negotiateMessage: negotiateMessage
+        negotiateMessage: securityBuffer
       )
 
       let request = SessionSetup.Request(
         messageId: messageId.next(),
         sessionId: response.header.sessionId,
-        securityMode: .signingEnabled,
+        securityMode: [.signingEnabled],
         capabilities: [],
         previousSessionId: 0,
         securityBuffer: authenticateMessage.encoded()

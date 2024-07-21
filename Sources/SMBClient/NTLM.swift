@@ -71,6 +71,8 @@ public enum NTLM {
     public let targetName: Data
     public let targetInfo: Data
 
+    private let buffer: Data
+
     public init(data: Data) {
       let reader = ByteReader(data)
       signature = reader.read()
@@ -87,6 +89,8 @@ public enum NTLM {
       version = reader.read()
       targetName = reader.read(from: Int(targetNameBufferOffset), count: Int(targetNameLen))
       targetInfo = reader.read(from: Int(targetInfoBufferOffset), count: Int(targetInfoLen))
+
+      buffer = data
     }
 
     func ntowfv2(
@@ -110,8 +114,7 @@ public enum NTLM {
       username: String? = nil,
       password: String? = nil,
       domain: String? = nil,
-      negotiateResponse: Negotiate.Response,
-      negotiateMessage: NegotiateMessage
+      negotiateMessage: Data
     ) -> AuthenticateMessage {
       let responseKeyNT = ntowfv2(
         username: username ?? "",
@@ -141,18 +144,17 @@ public enum NTLM {
         userName: username,
         encryptedRandomSessionKey: Data(encryptedRandomSessionKey)
       )
-
       let mic = Crypto.hmacMD5(
         key: randomData,
-        data: negotiateResponse.securityBuffer + negotiateMessage.encoded() + authenticateMessage.encoded()
+        data: negotiateMessage + buffer + authenticateMessage.encoded()
       )
 
       return NTLM.AuthenticateMessage(
         ntChallengeResponse: ntChallengeResponse,
         userName: username,
         workstationName: "",
-        encryptedRandomSessionKey: Data(encryptedRandomSessionKey),
-        mic: Data(mic)
+        encryptedRandomSessionKey: encryptedRandomSessionKey,
+        mic: mic
       )
     }
   }
