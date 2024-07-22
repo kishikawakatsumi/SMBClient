@@ -7,7 +7,7 @@ public struct Header {
   public let status: UInt32
   public let command: UInt16
   public let creditRequestResponse: UInt16
-  public let flags: Flags
+  public internal(set) var flags: Flags
   public internal(set) var nextCommand: UInt32
   public let messageId: UInt64
   public let reserved: UInt32
@@ -16,7 +16,7 @@ public struct Header {
   public internal(set) var signature: Data
 
   public init(
-    creditCharge: UInt16 = 0,
+    creditCharge: UInt16 = 1,
     command: Command,
     creditRequest: UInt16 = 0,
     flags: Flags,

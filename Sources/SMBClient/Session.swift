@@ -68,11 +68,11 @@ public class Session {
     try await treeConnect(path: "IPC$")
 
     let createResponse = try await create(
-      desiredAccess: [],
+      desiredAccess: [.readData, .writeData, .appendData, .readAttributes],
       fileAttributes: [.normal],
       shareAccess: [.read, .write],
       createDisposition: .open,
-      createOptions: [],
+      createOptions: [.nonDirectoryFile],
       name: "srvsvc"
     )
     try await bind(fileId: createResponse.fileId)
@@ -717,8 +717,10 @@ public class Session {
 
   private func sign(_ payload: Data) -> Data {
     if let signingKey {
-      let signature = Crypto.hmacSHA256(key: signingKey, data: payload)[..<16]
       var header = Header(data: payload[..<64])
+      header.flags = header.flags.union(.signed)
+
+      let signature = Crypto.hmacSHA256(key: signingKey, data: header.encoded() + payload[64...])[..<16]
       header.signature = signature
       return header.encoded() + payload[64...]
     } else {

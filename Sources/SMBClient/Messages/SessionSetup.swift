@@ -58,7 +58,7 @@ public enum SessionSetup {
       header = Header(
         creditCharge: 1,
         command: .sessionSetup,
-        creditRequest: 64,
+        creditRequest: 0,
         flags: [],
         nextCommand: 0,
         messageId: messageId,
