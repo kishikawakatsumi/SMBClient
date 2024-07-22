@@ -559,13 +559,16 @@ enum DCERPC {
       let type: UInt32
       let comment: WStr
 
-      enum ShareType: UInt32 {
-        case diskTree = 0x00000000
-        case printQueue = 0x00000001
-        case device = 0x00000002
-        case IPC = 0x00000003
-        case special = 0x80000000
-        case temporary = 0x40000000
+      enum ShareType {
+        static let diskTree: UInt32 = 0x00000000
+        static let printQueue: UInt32 = 0x00000001
+        static let device: UInt32 = 0x00000002
+        static let ipc: UInt32 = 0x00000003
+        static let clusterFS: UInt32 = 0x02000000
+        static let clusterSOFS: UInt32 = 0x04000000
+        static let clusterDFS: UInt32 = 0x08000000
+        static let special: UInt32 = 0x80000000
+        static let temporary: UInt32 = 0x40000000
       }
     }
   }    

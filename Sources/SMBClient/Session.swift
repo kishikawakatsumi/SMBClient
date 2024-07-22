@@ -86,26 +86,16 @@ public class Session {
     try await close(fileId: createResponse.fileId)
 
     return shares.compactMap {
-      switch $0.type {
-      case 0x0:
-        return Share(name: $0.name.value, comment: $0.comment.value, type: .diskDrive)
-      case 0x1:
-        return Share(name: $0.name.value, comment: $0.comment.value, type: .printQueue)
-      case 0x2:
-        return Share(name: $0.name.value, comment: $0.comment.value, type: .device)
-      case 0x3:
-        return Share(name: $0.name.value, comment: $0.comment.value, type: .ipc)
-      case 0x80000000:
-        return Share(name: $0.name.value, comment: $0.comment.value, type: .diskDriveAdmin)
-      case 0x80000001:
-        return Share(name: $0.name.value, comment: $0.comment.value, type: .printQueueAdmin)
-      case 0x80000002:
-        return Share(name: $0.name.value, comment: $0.comment.value, type: .deviceAdmin)
-      case 0x80000003:
-        return Share(name: $0.name.value, comment: $0.comment.value, type: .ipcAdmin)
-      default:
-        return nil
+      var type = Share.ShareType(rawValue: $0.type & 0x0FFFFFFF)
+
+      if $0.type & Share.ShareType.special.rawValue != 0 {
+        type.insert(.special)
       }
+      if $0.type & Share.ShareType.temporary.rawValue != 0 {
+        type.insert(.temporary)
+      }
+
+      return Share(name: $0.name.value, comment: $0.comment.value, type: type)
     }
   }
 
@@ -211,7 +201,7 @@ public class Session {
 
     let data = try await send(request.encoded())
     let response = TreeDisconnect.Response(data: data)
-    
+
     treeId = 0
     connectedTree = nil
 

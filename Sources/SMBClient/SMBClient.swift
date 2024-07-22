@@ -164,21 +164,66 @@ public struct Share {
   public let comment: String
   public let type: ShareType
 
-  public enum ShareType {
-    case diskDrive
-    case printQueue
-    case device
-    case ipc
-    case diskDriveAdmin
-    case printQueueAdmin
-    case deviceAdmin
-    case ipcAdmin
+  public struct ShareType: OptionSet {
+    typealias ShareInfo = DCERPC.NetShareEnumResponse.ShareInfo1
+
+    public let rawValue: UInt32
+
+    public init(rawValue: UInt32) {
+      self.rawValue = rawValue
+    }
+
+    public static let diskTree = ShareType([])
+    public static let printQueue = ShareType(rawValue: ShareInfo.ShareType.printQueue)
+    public static let device = ShareType(rawValue: ShareInfo.ShareType.device)
+    public static let ipc = ShareType(rawValue: ShareInfo.ShareType.ipc)
+    public static let clusterFS = ShareType(rawValue: ShareInfo.ShareType.clusterFS)
+    public static let clusterSOFS = ShareType(rawValue: ShareInfo.ShareType.clusterSOFS)
+    public static let clusterDFS = ShareType(rawValue: ShareInfo.ShareType.clusterDFS)
+    public static let special = ShareType(rawValue: ShareInfo.ShareType.special)
+    public static let temporary = ShareType(rawValue: ShareInfo.ShareType.temporary)
   }
 }
 
 extension Share: CustomStringConvertible {
   public var description: String {
     "{ name: \(name), comment: \(comment), type: \(type) }"
+  }
+}
+
+extension Share.ShareType: CustomStringConvertible {
+  public var description: String {
+    typealias ShareType = DCERPC.NetShareEnumResponse.ShareInfo1.ShareType
+
+    var type = [String]()
+
+    switch rawValue & 0x0FFFFFFF {
+    case ShareType.diskTree:
+      type.append("Disk")
+    case ShareType.printQueue:
+      type.append("Print Queue")
+    case ShareType.device:
+      type.append("Device")
+    case ShareType.ipc:
+      type.append("IPC")
+    case ShareType.clusterFS:
+      type.append("Cluster FS")
+    case ShareType.clusterDFS:
+      type.append("Cluster SOFS")
+    case ShareType.clusterDFS:
+      type.append("Cluster DFS")
+    default:
+      break
+    }
+
+    if rawValue & 0x80000000 != 0 {
+      type.append("Special")
+    }
+    if rawValue & 0x40000000 != 0 {
+      type.append("Temporary")
+    }
+
+    return type.joined(separator: "|")
   }
 }
 
