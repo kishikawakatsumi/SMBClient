@@ -49,14 +49,14 @@ final class SMBClientTests: XCTestCase {
 
     let expectedShares: [String: [Share]] = [
       "Alice": [
-        Share(name: "Public", comment: "", type: .diskDrive),
-        Share(name: "Alice Share", comment: "", type: .diskDrive),
-        Share(name: "IPC$", comment: "IPC Service (Samba Server)", type: .ipcAdmin),
+        Share(name: "Public", comment: "", type: .diskTree),
+        Share(name: "Alice Share", comment: "", type: .diskTree),
+        Share(name: "IPC$", comment: "IPC Service (Samba Server)", type: [.ipc, .special]),
       ],
       "Bob": [
-        Share(name: "Public", comment: "", type: .diskDrive),
-        Share(name: "Bob Share", comment: "", type: .diskDrive),
-        Share(name: "IPC$", comment: "IPC Service (Samba Server)", type: .ipcAdmin),
+        Share(name: "Public", comment: "", type: .diskTree),
+        Share(name: "Bob Share", comment: "", type: .diskTree),
+        Share(name: "IPC$", comment: "IPC Service (Samba Server)", type: [.ipc, .special]),
       ],
     ]
 
