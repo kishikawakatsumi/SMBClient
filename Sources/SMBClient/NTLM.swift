@@ -18,7 +18,6 @@ public enum NTLM {
         .negotiateVersion,
         .negotiateTargetInfo,
         .negotiateExtendedSecurity,
-        .negotiateTargetTypeServer,
         .negotiateAlwaysSign,
         .negotiateNetware,
         .negotiateSeal,
@@ -203,13 +202,11 @@ public enum NTLM {
       self.encryptedRandomSessionKey = Fields(value: encryptedRandomSessionKey ?? Data(), offset: self.workstationName.bufferOffset + UInt32(self.workstationName.len))
 
       negotiateFlags = [
-        .negotiate56,
         .negotiateKeyExchange,
         .negotiate128,
         .negotiateVersion,
         .negotiateTargetInfo,
         .negotiateExtendedSecurity,
-        .negotiateTargetTypeServer,
         .negotiateAlwaysSign,
         .negotiateNetware,
         .negotiateSeal,
