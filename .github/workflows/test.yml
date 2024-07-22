@@ -19,8 +19,4 @@ jobs:
 
           docker compose up --detach
 
-          prefix="./Tests/SMBClientTests/Fixtures"
-          chmod -R 777 ${prefix}/shares
-          docker cp ${prefix}/shares samba:/
-
           swift test

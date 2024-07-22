@@ -2,8 +2,9 @@ version: "3"
 
 services:
   samba:
-    build: .
-    image: ghcr.io/servercontainers/samba
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: samba
     ports:
       - "139:139"
