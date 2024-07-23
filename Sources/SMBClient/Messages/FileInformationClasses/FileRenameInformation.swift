@@ -11,7 +11,7 @@ public struct FileRenameInformation: FileInformationClass {
 
   public init(replaceIfExists: Bool = false, fileName: String) {
     self.replaceIfExists = replaceIfExists ? Data(repeating: 0x01, count: 1) : Data(repeating: 0x00, count: 1)
-    reserved = Data(repeating: 0x00, count: 7)
+    reserved = Data(count: 7)
     rootDirectory = 0
     let fileNameData = fileName.data(using: .utf16LittleEndian)!
     fileNameLength = UInt32(truncatingIfNeeded: fileNameData.count)
@@ -29,7 +29,7 @@ public struct FileRenameInformation: FileInformationClass {
 
     let padding = 24 - data.count
     if padding > 0 {
-      data += Data(repeating: 0, count: padding)
+      data += Data(count: padding)
     }
 
     return data
