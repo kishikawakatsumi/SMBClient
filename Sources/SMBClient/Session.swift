@@ -681,7 +681,7 @@ public class Session {
   private func send(_ packets: Data...) async throws -> Data {
     return try await connection.send(
       packets.enumerated().reduce(into: Data()) {
-        let alignment = Data(repeating: 0, count: 8 - $1.element.count % 8)
+        let alignment = Data(count: 8 - $1.element.count % 8)
         if $1.offset < packets.count - 1 {
           let packet = $1.element + alignment
           var header = Header(data: packet[..<64])
