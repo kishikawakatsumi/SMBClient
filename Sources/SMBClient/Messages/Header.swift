@@ -142,7 +142,6 @@ public struct Header {
 
 extension ByteReader {
   func read() -> Header {
-    let data = read(count: 64)
-    return Header(data: Data(data))
+    Header(data: read(count: 64))
   }
 }
