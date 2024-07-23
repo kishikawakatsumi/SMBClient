@@ -28,9 +28,19 @@ public class SMBClient {
     onDisconnected = { _ in }
   }
 
-  public func login(username: String?, password: String?, domain: String? = nil) async throws {
+  public func login(
+    username: String?,
+    password: String?,
+    domain: String? = nil,
+    workstation: String? = nil
+  ) async throws {
     try await session.negotiate()
-    try await session.sessionSetup(username: username, password: password, domain: domain)
+    try await session.sessionSetup(
+      username: username,
+      password: password,
+      domain: domain,
+      workstation: workstation
+    )
   }
 
   public func logoff() async throws {
@@ -63,50 +73,50 @@ public class SMBClient {
   }
 
   public func listDirectory(path: String, pattern: String = "*") async throws -> [File] {
-    let files = try await session.queryDirectory(path: path, pattern: pattern)
+    let files = try await session.queryDirectory(path: escape(path), pattern: pattern)
     return files.map { File(fileInfo: $0) }
   }
 
   public func createDirectory(path: String) async throws {
-    try await session.createDirectory(path: path)
+    try await session.createDirectory(path: escape(path))
   }
 
   public func rename(from: String, to: String) async throws {
-    try await move(from: from, to: to)
+    try await move(from: escape(from), to: escape(to))
   }
 
   public func move(from: String, to: String) async throws {
-    try await session.move(from: from, to: to)
+    try await session.move(from: escape(from), to: escape(to))
   }
 
   public func deleteDirectory(path: String) async throws {
-    try await session.deleteDirectory(path: path)
+    try await session.deleteDirectory(path: escape(path))
   }
 
   public func deleteFile(path: String) async throws {
-    try await session.deleteFile(path: path)
+    try await session.deleteFile(path: escape(path))
   }
 
   public func fileStat(path: String) async throws -> FileStat {
-    let response = try await session.fileStat(path: path)
+    let response = try await session.fileStat(path: escape(path))
     return FileStat(response)
   }
 
   public func existFile(path: String) async throws -> Bool {
-    try await session.existFile(path: path)
+    try await session.existFile(path: escape(path))
   }
 
   public func existDirectory(path: String) async throws -> Bool {
-    try await session.existDirectory(path: path)
+    try await session.existDirectory(path: escape(path))
   }
 
   public func fileInfo(path: String) async throws -> FileAllInformation {
-    let response = try await session.queryInfo(path: path)
+    let response = try await session.queryInfo(path: escape(path))
     return FileAllInformation(data: response.buffer)
   }
 
   public func download(path: String) async throws -> Data {
-    let fileReader = fileReader(path: path)
+    let fileReader = fileReader(path: escape(path))
 
     let data = try await fileReader.download()
     try await fileReader.close()
@@ -115,11 +125,11 @@ public class SMBClient {
   }
 
   public func upload(content: Data, path: String) async throws {
-    try await upload(content: content, path: path, progressHandler: { _ in })
+    try await upload(content: content, path: escape(path), progressHandler: { _ in })
   }
 
   public func upload(content: Data, path: String, progressHandler: (_ progress: Double) -> Void) async throws {
-    let fileWriter = fileWriter(path: path)
+    let fileWriter = fileWriter(path: escape(path))
 
     try await fileWriter.upload(data: content, progressHandler: progressHandler)
     try await fileWriter.close()
@@ -130,7 +140,7 @@ public class SMBClient {
   }
 
   public func upload(fileHandle: FileHandle, path: String, progressHandler: (_ progress: Double) -> Void) async throws {
-    let fileWriter = fileWriter(path: path)
+    let fileWriter = fileWriter(path: escape(path))
 
     try await fileWriter.upload(fileHandle: fileHandle, progressHandler: progressHandler)
     try await fileWriter.close()
@@ -145,18 +155,18 @@ public class SMBClient {
     remotePath path: String,
     progressHandler: (_ completedFiles: Int, _ fileBeingTransferred: URL, _ bytesSent: Int64) -> Void
   ) async throws {
-    let fileWriter = fileWriter(path: path)
+    let fileWriter = fileWriter(path: escape(path))
 
     try await fileWriter.upload(localPath: localPath, progressHandler: progressHandler)
     try await fileWriter.close()
   }
 
   public func fileReader(path: String) -> FileReader {
-    FileReader(session: session, path: path)
+    FileReader(session: session, path: escape(path))
   }
 
   public func fileWriter(path: String) -> FileWriter {
-    FileWriter(session: session, path: path)
+    FileWriter(session: session, path: escape(path))
   }
 }
 
@@ -296,4 +306,8 @@ public struct FileReadResponse {
   public let dataRemaining: UInt32
   public let buffer: Data
   public let endOfFile: Bool
+}
+
+private func escape(_ path: String) -> String {
+  path.replacingOccurrences(of: "/", with: #"\"#)
 }
