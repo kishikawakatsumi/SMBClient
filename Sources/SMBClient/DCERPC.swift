@@ -36,17 +36,17 @@ enum DCERPC {
       let items: [PresentationContext]
 
       init(items: [PresentationContext]) {
-        self.numberOfItems = UInt8(items.count)
-        self.reserved = 0
-        self.reserved2 = 0
+        numberOfItems = UInt8(items.count)
+        reserved = 0
+        reserved2 = 0
         self.items = items
       }
 
       init(contextID: UInt16, abstractSyntax: AbstractSyntax, transferSyntaxes: [TransferSyntax]) {
-        self.numberOfItems = 1
-        self.reserved = 0
-        self.reserved2 = 0
-        self.items = [PresentationContext(contextID: contextID, abstractSyntax: abstractSyntax, transferSyntaxes: transferSyntaxes)]
+        numberOfItems = 1
+        reserved = 0
+        reserved2 = 0
+        items = [PresentationContext(contextID: contextID, abstractSyntax: abstractSyntax, transferSyntaxes: transferSyntaxes)]
       }
 
       func encoded() -> Data {
@@ -183,18 +183,18 @@ enum DCERPC {
     let contextData: Data
 
     init(callID: UInt32, context: Bind.ContextList) {
-      self.version = 5
-      self.minorVersion = 0
+      version = 5
+      minorVersion = 0
       self.packetType = .bindAck
-      self.flags = [.firstFragment, .lastFragment]
-      self.dataRepresentation = 0x10
+      flags = [.firstFragment, .lastFragment]
+      dataRepresentation = 0x10
       let contextData = context.encoded()
-      self.fragLength = UInt16(truncatingIfNeeded: 1 + 1 + 1 + 1 + 4 + 2 + 2 + 4 + 2 + 4 + 2 + contextData.count)
-      self.authLength = 0
+      fragLength = UInt16(truncatingIfNeeded: 1 + 1 + 1 + 1 + 4 + 2 + 2 + 4 + 2 + 4 + 2 + contextData.count)
+      authLength = 0
       self.callID = callID
-      self.maxRecvFrag = 0xFFFF
-      self.assocGroup = 0
-      self.secondaryAddress = 0
+      maxRecvFrag = 0xFFFF
+      assocGroup = 0
+      secondaryAddress = 0
       self.context = context
       self.contextData = contextData
     }
@@ -282,20 +282,21 @@ enum DCERPC {
     let stub: Data
 
     init(data: Data) {
-      let byteStream = ByteReader(data)
-      version = byteStream.read()
-      minorVersion = byteStream.read()
-      packetType = PacketType(rawValue: byteStream.read())!
-      flags = Bind.Flags(rawValue: byteStream.read())
-      dataRepresentation = byteStream.read()
-      fragLength = byteStream.read()
-      authLength = byteStream.read()
-      callID = byteStream.read()
-      allocHint = byteStream.read()
-      contextID = byteStream.read()
-      cancelCount = byteStream.read()
-      reserved = byteStream.read()
-      stub = byteStream.read(count: Int(fragLength) - 24)
+      let reader = ByteReader(data)
+
+      version = reader.read()
+      minorVersion = reader.read()
+      packetType = PacketType(rawValue: reader.read())!
+      flags = Bind.Flags(rawValue: reader.read())
+      dataRepresentation = reader.read()
+      fragLength = reader.read()
+      authLength = reader.read()
+      callID = reader.read()
+      allocHint = reader.read()
+      contextID = reader.read()
+      cancelCount = reader.read()
+      reserved = reader.read()
+      stub = reader.read(count: Int(fragLength) - 24)
     }
   }
 
