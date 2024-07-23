@@ -106,7 +106,7 @@ public enum NTLM {
       let usernameData = (username.uppercased() + domain).data(using: .utf16LittleEndian)!
       let responseKeyNT = Crypto.hmacMD5(key: Data(passwordHash), data: usernameData)
 
-      return Data() + responseKeyNT
+      return responseKeyNT
     }
 
     func authenticateMessage(
@@ -141,7 +141,7 @@ public enum NTLM {
       let authenticateMessage = NTLM.AuthenticateMessage(
         ntChallengeResponse: ntChallengeResponse,
         userName: username,
-        encryptedRandomSessionKey: Data(encryptedRandomSessionKey)
+        encryptedRandomSessionKey: encryptedRandomSessionKey
       )
       let mic = Crypto.hmacMD5(
         key: signingKey,

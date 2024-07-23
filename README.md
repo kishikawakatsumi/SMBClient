@@ -29,7 +29,9 @@ import SMBClient
 let session = Session(host: "198.51.100.50")
 
 try await session.connect()
-try await session.login(username: "alice", password: "secret")
+try await session.negotiate()
+
+try await session.sessionSetup(username: "alice", password: "secret")
 try await session.treeConnect(path: "Public")
 
 let files = try await session.queryDirectory(path: "", pattern: "*")

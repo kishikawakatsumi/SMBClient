@@ -61,14 +61,59 @@ public class Session {
   }
 
   @discardableResult
-  public func login(
+  public func sessionSetup(
     username: String?,
     password: String?,
-    domain: String? = nil
+    domain: String? = nil,
+    workstation: String? = nil
   ) async throws -> SessionSetup.Response {
-    let response = try await sessionSetup(username: username, password: password, domain: domain)
-    sessionId = response.header.sessionId
-    return response
+    let negotiateMessage = NTLM.NegotiateMessage(
+      domainName: domain,
+      workstationName: workstation
+    )
+    let securityBuffer = negotiateMessage.encoded()
+
+    let request = SessionSetup.Request(
+      messageId: messageId.next(),
+      securityMode: [.signingEnabled],
+      capabilities: [],
+      previousSessionId: 0,
+      securityBuffer: securityBuffer
+    )
+    let response = SessionSetup.Response(data: try await send(request.encoded()))
+
+    if response.header.status == NTStatus.moreProcessingRequired {
+      let challengeMessage = NTLM.ChallengeMessage(data: response.buffer)
+
+      let signingKey = Crypto.randomBytes(count: 16)
+      let authenticateMessage = challengeMessage.authenticateMessage(
+        username: username,
+        password: password,
+        domain: domain,
+        negotiateMessage: securityBuffer,
+        signingKey: signingKey
+      )
+
+      let request = SessionSetup.Request(
+        messageId: messageId.next(),
+        sessionId: response.header.sessionId,
+        securityMode: [.signingEnabled],
+        capabilities: [],
+        previousSessionId: 0,
+        securityBuffer: authenticateMessage.encoded()
+      )
+
+      let data = try await send(request.encoded())
+      let response = SessionSetup.Response(data: data)
+
+      sessionId = response.header.sessionId
+      self.signingKey = signingKey
+
+      return response
+    } else {
+      sessionId = response.header.sessionId
+      return response
+    }
   }
 
   @discardableResult
@@ -116,60 +161,6 @@ public class Session {
       }
 
       return Share(name: $0.name.value, comment: $0.comment.value, type: type)
-    }
-  }
-
-  public func sessionSetup(
-    username: String?,
-    password: String?,
-    domain: String? = nil,
-    workstation: String? = nil
-  ) async throws -> SessionSetup.Response {
-    let negotiateMessage = NTLM.NegotiateMessage(
-      domainName: domain,
-      workstationName: workstation
-    )
-    let securityBuffer = negotiateMessage.encoded()
-
-    let request = SessionSetup.Request(
-      messageId: messageId.next(),
-      securityMode: [.signingEnabled],
-      capabilities: [],
-      previousSessionId: 0,
-      securityBuffer: securityBuffer
-    )
-    let response = SessionSetup.Response(
-      data: try await send(request.encoded())
-    )
-
-    if response.header.status == NTStatus.moreProcessingRequired {
-      let challengeMessage = NTLM.ChallengeMessage(
-        data: response.buffer
-      )
-
-      let signingKey = Crypto.randomBytes(count: 16)
-      let authenticateMessage = challengeMessage.authenticateMessage(
-        username: username,
-        password: password,
-        domain: domain,
-        negotiateMessage: securityBuffer,
-        signingKey: signingKey
-      )
-
-      let request = SessionSetup.Request(
-        messageId: messageId.next(),
-        sessionId: response.header.sessionId,
-        securityMode: [.signingEnabled],
-        capabilities: [],
-        previousSessionId: 0,
-        securityBuffer: authenticateMessage.encoded()
-      )
-
-      let data = try await send(request.encoded())
-      self.signingKey = signingKey
-      return SessionSetup.Response(data: data)
-    } else {
-      return response
     }
   }
 
@@ -682,20 +673,22 @@ public class Session {
     return IOCtl.Response(data: data)
   }
 
-  private func send(_ payload: Data) async throws -> Data {
-    try await connection.send(sign(payload))
+  private func send(_ packet: Data) async throws -> Data {
+    try await connection.send(sign(packet))
   }
 
-  private func send(_ payloads: Data...) async throws -> Data {
+  private func send(_ packets: Data...) async throws -> Data {
     return try await connection.send(
-      payloads.enumerated().reduce(into: Data()) {
+      packets.enumerated().reduce(into: Data()) {
         let alignment = Data(repeating: 0, count: 8 - $1.element.count % 8)
-        if $1.offset < payloads.count - 1 {
-          let payload = $1.element + alignment
-          var header = Header(data: payload[..<64])
-          header.nextCommand = UInt32(payload.count)
+        if $1.offset < packets.count - 1 {
+          let packet = $1.element + alignment
+          var header = Header(data: packet[..<64])
+          let payload = $1.element[64...]
 
-          $0 += sign(header.encoded() + $1.element[64...] + alignment)
+          header.nextCommand = UInt32(packet.count)
+
+          $0 += sign(header.encoded() + payload + alignment)
         } else {
           $0 += sign($1.element + alignment)
         }
@@ -703,16 +696,19 @@ public class Session {
     )
   }
 
-  private func sign(_ payload: Data) -> Data {
+  private func sign(_ packet: Data) -> Data {
     if let signingKey {
-      var header = Header(data: payload[..<64])
+      var header = Header(data: packet[..<64])
+      let payload = packet[64...]
+
       header.flags = header.flags.union(.signed)
 
-      let signature = Crypto.hmacSHA256(key: signingKey, data: header.encoded() + payload[64...])[..<16]
+      let signature = Crypto.hmacSHA256(key: signingKey, data: header.encoded() + payload)[..<16]
       header.signature = signature
-      return header.encoded() + payload[64...]
+
+      return header.encoded() + payload
     } else {
-      return payload
+      return packet
     }
   }
 }
