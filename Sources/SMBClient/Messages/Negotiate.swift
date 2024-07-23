@@ -22,6 +22,7 @@ public enum Negotiate {
         messageId: messageId,
         sessionId: 0
       )
+
       structureSize  = 36
       dialectCount = UInt16(dialects.count)
       self.securityMode = securityMode
@@ -128,5 +129,70 @@ public enum Negotiate {
     case smb300 = 0x0300
     case smb302 = 0x0302
     case smb311 = 0x0311
+  }
+}
+
+extension Negotiate.Response: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    "{header: \(header), " +
+    "structureSize: \(structureSize), " +
+    "securityMode: \(securityMode), " +
+    "dialectRevision: \(String(format: "0x%04X", dialectRevision)), " +
+    "negotiateContextCount: \(negotiateContextCount), " +
+    "serverGuid: \(serverGuid), " +
+    "capabilities: \(capabilities), " +
+    "maxTransactSize: \(maxTransactSize), " +
+    "maxReadSize: \(maxReadSize), " +
+    "maxWriteSize: \(maxWriteSize), " +
+    "systemTime: \(FileTime(systemTime).date), " +
+    "serverStartTime: \(FileTime(serverStartTime).date), " +
+    "securityBufferOffset: \(securityBufferOffset), " +
+    "securityBufferLength: \(securityBufferLength), " +
+    "negotiateContextOffset: \(negotiateContextOffset), " +
+    "securityBuffer: \(securityBuffer.hex)}"
+  }
+}
+
+extension Negotiate.SecurityMode: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    var values = [String]()
+    if contains(.signingEnabled) {
+      values.append("signingEnabled")
+    }
+    if contains(.signingRequired) {
+      values.append("signingRequired")
+    }
+    return values.joined(separator: "|")
+  }
+}
+
+extension Negotiate.Capabilities: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    var values = [String]()
+    if contains(.dfs) {
+      values.append("dfs")
+    }
+    if contains(.leasing) {
+      values.append("leasing")
+    }
+    if contains(.largeMtu) {
+      values.append("largeMtu")
+    }
+    if contains(.multiChannel) {
+      values.append("multiChannel")
+    }
+    if contains(.persistentHandles) {
+      values.append("persistentHandles")
+    }
+    if contains(.directoryLeasing) {
+      values.append("directoryLeasing")
+    }
+    if contains(.encryption) {
+      values.append("encryption")
+    }
+    if contains(.notifications) {
+      values.append("notifications")
+    }
+    return values.joined(separator: "|")
   }
 }
