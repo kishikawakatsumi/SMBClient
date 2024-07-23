@@ -4,7 +4,7 @@ enum DCERPC {
   struct CommonFields {
     let version: UInt8
     let minorVersion: UInt8
-    let packetType: PacketType
+    let packetType: UInt8
     let flags: Flags
     let dataRepresentation: UInt32
     let fragLength: UInt16
@@ -14,7 +14,7 @@ enum DCERPC {
     init(packetType: PacketType, callID: UInt32, data: Data) {
       version = 5
       minorVersion = 0
-      self.packetType = packetType
+      self.packetType = packetType.rawValue
       flags = [.firstFragment, .lastFragment]
       dataRepresentation = 0x10
       // Common Fields(16) + max_xmit_frag(2) max_recv_frag(2) assoc_group_id(4) == 24
@@ -40,7 +40,7 @@ enum DCERPC {
       var data = Data()
       data += version
       data += minorVersion
-      data += packetType.rawValue
+      data += packetType
       data += flags.rawValue
       data += dataRepresentation
       data += fragLength
