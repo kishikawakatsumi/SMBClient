@@ -83,3 +83,11 @@ dependencies: [
 - [ ] CHANGE_NOTIFY
 - [x] QUERY_INFO
 - [x] SET_INFO
+
+## FAQ
+
+### How to connedct to macOS file sharing?
+
+To connect to macOS file sharing, you need to enable "Windows File Sharing" in the "Sharing" sytem settings in "File Sharing" section. This will enable NTLM v2 authentication on your macOS.
+
+<img width="600" src="https://github.com/user-attachments/assets/9d521df6-b899-4f10-ac8e-0dbbe371e5c2" alt="macOS File Sharing settings">
