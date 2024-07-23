@@ -25,10 +25,10 @@ public struct DirectTCPPacket {
   }
 
   public init(response: Data) {
-    let byteReader = ByteReader(response)
+    let reader = ByteReader(response)
     zero = 0
 
-    let length: UInt32 = byteReader.read()
+    let length: UInt32 = reader.read()
     
     var data = Data(capacity: 3)
     let byte1 = UInt8((length >> 16) & 0xFF)
@@ -41,7 +41,7 @@ public struct DirectTCPPacket {
     streamProtocolLength = data
     protocolLength = length.bigEndian
 
-    smb2Message = Data(byteReader.remaining())
+    smb2Message = Data(reader.remaining())
   }
 
   public func encoded() -> Data {

@@ -107,12 +107,10 @@ public enum QueryDirectory {
       var files = [FileIdBothDirectoryInformation]()
       if outputBufferLength > 0 {
         var data = Data(buffer)
-        var byteStream = ByteReader(data)
         repeat {
-          let fileInformation = FileIdBothDirectoryInformation(byteStream: byteStream)
+          let fileInformation = FileIdBothDirectoryInformation(data: data)
           files.append(fileInformation)
           data = Data(data[(fileInformation.nextEntryOffset)...])
-          byteStream = ByteReader(data)
         } while files.last!.nextEntryOffset != 0
       }
 
@@ -138,25 +136,27 @@ public enum QueryDirectory {
       public let fileId: Data
       public let fileName: String
 
-      init(byteStream: ByteReader) {
-        nextEntryOffset = byteStream.read()
-        fileIndex = byteStream.read()
-        creationTime = byteStream.read()
-        lastAccessTime = byteStream.read()
-        lastWriteTime = byteStream.read()
-        changeTime = byteStream.read()
-        endOfFile = byteStream.read()
-        allocationSize = byteStream.read()
-        fileAttributes = FileAttributes(rawValue: byteStream.read())
-        fileNameLength = byteStream.read()
-        eaSize = byteStream.read()
-        shortNameLength = byteStream.read()
-        reserved = byteStream.read()
-        let shortNameData = byteStream.read(count: 24)
+      public init(data: Data) {
+        let reader = ByteReader(data)
+
+        nextEntryOffset = reader.read()
+        fileIndex = reader.read()
+        creationTime = reader.read()
+        lastAccessTime = reader.read()
+        lastWriteTime = reader.read()
+        changeTime = reader.read()
+        endOfFile = reader.read()
+        allocationSize = reader.read()
+        fileAttributes = FileAttributes(rawValue: reader.read())
+        fileNameLength = reader.read()
+        eaSize = reader.read()
+        shortNameLength = reader.read()
+        reserved = reader.read()
+        let shortNameData = reader.read(count: 24)
         shortName = String(data: shortNameData, encoding: .utf16LittleEndian) ?? shortNameData.hex
-        reserved2 = byteStream.read()
-        fileId = byteStream.read(count: 8)
-        let fileNameData = byteStream.read(count: Int(fileNameLength))
+        reserved2 = reader.read()
+        fileId = reader.read(count: 8)
+        let fileNameData = reader.read(count: Int(fileNameLength))
         fileName = String(data: fileNameData, encoding: .utf16LittleEndian) ?? fileNameData.hex
       }
     }

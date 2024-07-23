@@ -132,18 +132,19 @@ struct NetShareEnumResponse {
   let status: UInt32
 
   init(data: Data) {
-    let byteReader = ByteReader(data)
-    level = byteReader.read()
-    shareCtr = byteReader.read()
+    let reader = ByteReader(data)
+
+    level = reader.read()
+    shareCtr = reader.read()
     netShareCtr = NetShareCtr(
-      refferentID: byteReader.read(),
-      count: byteReader.read()
+      refferentID: reader.read(),
+      count: reader.read()
     )
-    shareInfo1 = NetShareInfo1(byteReader: byteReader)
-    padding = byteReader.read(count: byteReader.offset % 4 == 0 ? 0 : 4 - byteReader.offset % 4)
-    totalEntries = byteReader.read()
-    resumeHandle = byteReader.read()
-    status = byteReader.read()
+    shareInfo1 = NetShareInfo1(byteReader: reader)
+    padding = reader.read(count: reader.offset % 4 == 0 ? 0 : 4 - reader.offset % 4)
+    totalEntries = reader.read()
+    resumeHandle = reader.read()
+    status = reader.read()
   }
 
   struct NetShareCtr {
