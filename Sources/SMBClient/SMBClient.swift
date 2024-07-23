@@ -29,6 +29,7 @@ public class SMBClient {
   }
 
   public func login(username: String?, password: String?, domain: String? = nil) async throws {
+    try await session.negotiate()
     try await session.login(username: username, password: password, domain: domain)
   }
 
