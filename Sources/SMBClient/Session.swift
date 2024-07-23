@@ -634,13 +634,13 @@ public class Session {
   func bind(fileId: Data) async throws -> IOCtl.Response {
     let input = DCERPC.Bind(
       callID: 1,
-      context: DCERPC.Bind.ContextList(
+      context: DCERPC.ContextList(
         items: [
-          DCERPC.Bind.PresentationContext(
+          DCERPC.PresentationContext(
             contextID: 0,
-            abstractSyntax: DCERPC.Bind.AbstractSyntax(),
+            abstractSyntax: DCERPC.AbstractSyntax(),
             transferSyntaxes: [
-              DCERPC.Bind.TransferSyntax()
+              DCERPC.TransferSyntax()
             ]
           )
         ]
