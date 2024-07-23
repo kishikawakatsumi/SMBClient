@@ -79,7 +79,7 @@ public class Session {
     let ioCtlResponse = try await netShareEnum(fileId: createResponse.fileId)
 
     let rpcResponse = DCERPC.Response(data: ioCtlResponse.buffer)
-    let netShareEnumResponse = DCERPC.NetShareEnumResponse(data: rpcResponse.stub)
+    let netShareEnumResponse = NetShareEnumResponse(data: rpcResponse.stub)
 
     let shares = netShareEnumResponse.shareInfo1.shareInfo
 
@@ -662,7 +662,7 @@ public class Session {
   }
 
   func netShareEnum(fileId: Data) async throws -> IOCtl.Response {
-    let netShareEnum = DCERPC.NetShareEnum(serverName: connection.host)
+    let netShareEnum = NetShareEnum(serverName: connection.host)
 
     let input = DCERPC.Request(
       callID: 0,

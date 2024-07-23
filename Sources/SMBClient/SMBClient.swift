@@ -165,8 +165,6 @@ public struct Share {
   public let type: ShareType
 
   public struct ShareType: OptionSet {
-    typealias ShareInfo = DCERPC.NetShareEnumResponse.ShareInfo1
-
     public let rawValue: UInt32
 
     public init(rawValue: UInt32) {
@@ -174,14 +172,14 @@ public struct Share {
     }
 
     public static let diskTree = ShareType([])
-    public static let printQueue = ShareType(rawValue: ShareInfo.ShareType.printQueue)
-    public static let device = ShareType(rawValue: ShareInfo.ShareType.device)
-    public static let ipc = ShareType(rawValue: ShareInfo.ShareType.ipc)
-    public static let clusterFS = ShareType(rawValue: ShareInfo.ShareType.clusterFS)
-    public static let clusterSOFS = ShareType(rawValue: ShareInfo.ShareType.clusterSOFS)
-    public static let clusterDFS = ShareType(rawValue: ShareInfo.ShareType.clusterDFS)
-    public static let special = ShareType(rawValue: ShareInfo.ShareType.special)
-    public static let temporary = ShareType(rawValue: ShareInfo.ShareType.temporary)
+    public static let printQueue = ShareType(rawValue: SType.printQueue)
+    public static let device = ShareType(rawValue: SType.device)
+    public static let ipc = ShareType(rawValue: SType.ipc)
+    public static let clusterFS = ShareType(rawValue: SType.clusterFS)
+    public static let clusterSOFS = ShareType(rawValue: SType.clusterSOFS)
+    public static let clusterDFS = ShareType(rawValue: SType.clusterDFS)
+    public static let special = ShareType(rawValue: SType.special)
+    public static let temporary = ShareType(rawValue: SType.temporary)
   }
 }
 
@@ -193,24 +191,22 @@ extension Share: CustomStringConvertible {
 
 extension Share.ShareType: CustomStringConvertible {
   public var description: String {
-    typealias ShareType = DCERPC.NetShareEnumResponse.ShareInfo1.ShareType
-
     var type = [String]()
 
     switch rawValue & 0x0FFFFFFF {
-    case ShareType.diskTree:
+    case SType.diskTree:
       type.append("Disk")
-    case ShareType.printQueue:
+    case SType.printQueue:
       type.append("Print Queue")
-    case ShareType.device:
+    case SType.device:
       type.append("Device")
-    case ShareType.ipc:
+    case SType.ipc:
       type.append("IPC")
-    case ShareType.clusterFS:
+    case SType.clusterFS:
       type.append("Cluster FS")
-    case ShareType.clusterDFS:
+    case SType.clusterDFS:
       type.append("Cluster SOFS")
-    case ShareType.clusterDFS:
+    case SType.clusterDFS:
       type.append("Cluster DFS")
     default:
       break
