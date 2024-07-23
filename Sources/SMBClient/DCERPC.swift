@@ -1,7 +1,7 @@
 import Foundation
 
 enum DCERPC {
-  struct Bind {
+  struct CommonFields {
     let version: UInt8
     let minorVersion: UInt8
     let packetType: PacketType
@@ -10,23 +10,75 @@ enum DCERPC {
     let fragLength: UInt16
     let authLength: UInt16
     let callID: UInt32
+
+    init(packetType: PacketType, callID: UInt32, data: Data) {
+      version = 5
+      minorVersion = 0
+      self.packetType = packetType
+      flags = [.firstFragment, .lastFragment]
+      dataRepresentation = 0x10
+      fragLength = UInt16(truncatingIfNeeded: 24 + data.count)
+      authLength = 0
+      self.callID = callID
+    }
+
+    init(data: Data) {
+      let reader = ByteReader(data)
+
+      version = reader.read()
+      minorVersion = reader.read()
+      packetType = PacketType(rawValue: reader.read())!
+      flags = Flags(rawValue: reader.read())
+      dataRepresentation = reader.read()
+      fragLength = reader.read()
+      authLength = reader.read()
+      callID = reader.read()
+    }
+
+    func encoded() -> Data {
+      var data = Data()
+      data += version
+      data += minorVersion
+      data += packetType.rawValue
+      data += flags.rawValue
+      data += dataRepresentation
+      data += fragLength
+      data += authLength
+      data += callID
+
+      return data
+    }
+  }
+
+  struct Bind {
+    let commonFields: CommonFields
+
     let maxXmitFrag: UInt16
     let maxRecvFrag: UInt16
     let assocGroup: UInt32
     let context: ContextList
     let contextData: Data
 
-    struct Flags: OptionSet {
-      let rawValue: UInt8
+    init(callID: UInt32, context: ContextList) {
+      let contextData = context.encoded()
+      commonFields = CommonFields(packetType: .bind, callID: callID, data: contextData)
+      
+      maxXmitFrag = 0xFFFF
+      maxRecvFrag = 0xFFFF
+      assocGroup = 0
+      self.context = context
+      self.contextData = contextData
+    }
 
-      static let lastFragment = Flags(rawValue: 0x01)
-      static let firstFragment = Flags(rawValue: 0x02)
-      static let pendingCancel = Flags(rawValue: 0x04)
-      static let reserved = Flags(rawValue: 0x08)
-      static let concurrentMultiplexing = Flags(rawValue: 0x10)
-      static let didNotExecute = Flags(rawValue: 0x20)
-      static let maybe = Flags(rawValue: 0x40)
-      static let objectUUID = Flags(rawValue: 0x80)
+    func encoded() -> Data {
+      var data = Data()
+      data += commonFields.encoded()
+      data += maxXmitFrag
+      data += maxRecvFrag
+      data += assocGroup
+      data += contextData
+
+      return data
     }
 
     struct ContextList {
@@ -130,52 +182,11 @@ enum DCERPC {
         return data
       }
     }
-
-    init(callID: UInt32, context: ContextList) {
-      version = 5
-      minorVersion = 0
-      packetType = .bind
-      flags = [.firstFragment, .lastFragment]
-      dataRepresentation = 0x10
-      let contextData = context.encoded()
-      fragLength = UInt16(truncatingIfNeeded: 1 + 1 + 1 + 1 + 4 + 2 + 2 + 4 + 2 + 2 + 4 + contextData.count)
-      authLength = 0
-      self.callID = callID
-      maxXmitFrag = 0xFFFF
-      maxRecvFrag = 0xFFFF
-      assocGroup = 0
-      self.context = context
-      self.contextData = contextData
-    }
-
-    func encoded() -> Data {
-      var data = Data()
-      data += version
-      data += minorVersion
-      data += packetType.rawValue
-      data += flags.rawValue
-      data += dataRepresentation
-      data += fragLength
-      data += authLength
-      data += callID
-      data += maxXmitFrag
-      data += maxRecvFrag
-      data += assocGroup
-      data += contextData
-
-      return data
-    }
   }
 
   struct BindAck {
-    let version: UInt8
-    let minorVersion: UInt8
-    let packetType: PacketType
-    let flags: Bind.Flags
-    let dataRepresentation: UInt32
-    let fragLength: UInt16
-    let authLength: UInt16
-    let callID: UInt32
+    let commonFields: CommonFields
+
     let maxRecvFrag: UInt16
     let assocGroup: UInt32
     let secondaryAddress: UInt16
@@ -183,15 +194,9 @@ enum DCERPC {
     let contextData: Data
 
     init(callID: UInt32, context: Bind.ContextList) {
-      version = 5
-      minorVersion = 0
-      self.packetType = .bindAck
-      flags = [.firstFragment, .lastFragment]
-      dataRepresentation = 0x10
       let contextData = context.encoded()
-      fragLength = UInt16(truncatingIfNeeded: 1 + 1 + 1 + 1 + 4 + 2 + 2 + 4 + 2 + 4 + 2 + contextData.count)
-      authLength = 0
-      self.callID = callID
+      commonFields = CommonFields(packetType: .bind, callID: callID, data: contextData)
+      
       maxRecvFrag = 0xFFFF
       assocGroup = 0
       secondaryAddress = 0
@@ -201,14 +206,7 @@ enum DCERPC {
 
     func encoded() -> Data {
       var data = Data()
-      data += version
-      data += minorVersion
-      data += packetType.rawValue
-      data += flags.rawValue
-      data += dataRepresentation
-      data += fragLength
-      data += authLength
-      data += callID
+      data += commonFields.encoded()
       data += maxRecvFrag
       data += assocGroup
       data += secondaryAddress
@@ -219,28 +217,16 @@ enum DCERPC {
   }
 
   struct Request {
-    let version: UInt8
-    let minorVersion: UInt8
-    let packetType: PacketType
-    let flags: Bind.Flags
-    let dataRepresentation: UInt32
-    let fragLength: UInt16
-    let authLength: UInt16
-    let callID: UInt32
+    let commonFields: CommonFields
+
     let allocHint: UInt32
     let contextID: UInt16
     let opnum: Opnum
     let stub: Data
 
     init(callID: UInt32, opnum: Opnum, stub: Data) {
-      version = 5
-      minorVersion = 0
-      packetType = .request
-      flags = [.firstFragment, .lastFragment]
-      dataRepresentation = 0x10
-      self.fragLength = UInt16(truncatingIfNeeded: 1 + 1 + 1 + 1 + 4 + 2 + 2 + 4 + 4 + 2 + 2 + stub.count)
-      authLength = 0
-      self.callID = callID
+      commonFields = CommonFields(packetType: .bind, callID: callID, data: stub)
+
       allocHint = 0
       contextID = 0
       self.opnum = opnum
@@ -249,14 +235,7 @@ enum DCERPC {
 
     func encoded() -> Data {
       var data = Data()
-      data += version
-      data += minorVersion
-      data += packetType.rawValue
-      data += flags.rawValue
-      data += dataRepresentation
-      data += fragLength
-      data += authLength
-      data += callID
+      data += commonFields.encoded()
       data += allocHint
       data += contextID
       data += opnum.rawValue
@@ -267,14 +246,8 @@ enum DCERPC {
   }
 
   struct Response {
-    let version: UInt8
-    let minorVersion: UInt8
-    let packetType: PacketType
-    let flags: Bind.Flags
-    let dataRepresentation: UInt32
-    let fragLength: UInt16
-    let authLength: UInt16
-    let callID: UInt32
+    let commonFields: CommonFields
+    
     let allocHint: UInt32
     let contextID: UInt16
     let cancelCount: UInt8
@@ -283,20 +256,13 @@ enum DCERPC {
 
     init(data: Data) {
       let reader = ByteReader(data)
-
-      version = reader.read()
-      minorVersion = reader.read()
-      packetType = PacketType(rawValue: reader.read())!
-      flags = Bind.Flags(rawValue: reader.read())
-      dataRepresentation = reader.read()
-      fragLength = reader.read()
-      authLength = reader.read()
-      callID = reader.read()
+      
+      commonFields = CommonFields(data: data)
       allocHint = reader.read()
       contextID = reader.read()
       cancelCount = reader.read()
       reserved = reader.read()
-      stub = reader.read(count: Int(fragLength) - 24)
+      stub = reader.read(count: Int(commonFields.fragLength) - reader.offset)
     }
   }
 
@@ -320,6 +286,19 @@ enum DCERPC {
     case shutdown = 17
     case coCancel = 18
     case orphaned = 19
+  }
+
+  struct Flags: OptionSet {
+    let rawValue: UInt8
+
+    static let lastFragment = Flags(rawValue: 0x01)
+    static let firstFragment = Flags(rawValue: 0x02)
+    static let pendingCancel = Flags(rawValue: 0x04)
+    static let reserved = Flags(rawValue: 0x08)
+    static let concurrentMultiplexing = Flags(rawValue: 0x10)
+    static let didNotExecute = Flags(rawValue: 0x20)
+    static let maybe = Flags(rawValue: 0x40)
+    static let objectUUID = Flags(rawValue: 0x80)
   }
 
   enum Opnum: UInt16 {
