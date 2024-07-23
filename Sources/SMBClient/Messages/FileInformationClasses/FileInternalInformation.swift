@@ -4,8 +4,8 @@ public struct FileInternalInformation {
   public let indexNumber: UInt64
 
   public init(data: Data) {
-    let byteReader = ByteReader(data)
-    indexNumber = byteReader.read()
+    let reader = ByteReader(data)
+    indexNumber = reader.read()
   }
 }
 

@@ -5,9 +5,11 @@ public struct FileNameInformation {
   public let fileName: String
 
   public init(data: Data) {
-    let byteReader = ByteReader(data)
-    fileNameLength = byteReader.read()
-    let fileNameData = byteReader.read(count: Int(fileNameLength))
+    let reader = ByteReader(data)
+
+    fileNameLength = reader.read()
+
+    let fileNameData = reader.read(count: Int(fileNameLength))
     fileName = String(data: fileNameData, encoding: .utf16LittleEndian) ?? fileNameData.hex
   }
 

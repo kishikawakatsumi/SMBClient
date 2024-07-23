@@ -9,18 +9,19 @@ public struct FileBasicInformation {
   public let reserved: UInt32
 
   public init(data: Data) {
-    let byteReader = ByteReader(data)
-    creationTime = byteReader.read()
-    lastAccessTime = byteReader.read()
-    lastWriteTime = byteReader.read()
-    changeTime = byteReader.read()
-    fileAttributes = FileAttributes(rawValue: byteReader.read())
-    reserved = byteReader.read()
+    let reader = ByteReader(data)
+    
+    creationTime = reader.read()
+    lastAccessTime = reader.read()
+    lastWriteTime = reader.read()
+    changeTime = reader.read()
+    fileAttributes = FileAttributes(rawValue: reader.read())
+    reserved = reader.read()
   }
 }
 
 extension ByteReader {
   func read() -> FileBasicInformation {
-    return FileBasicInformation(data: read(count: 40))
+    FileBasicInformation(data: read(count: 40))
   }
 }

@@ -9,8 +9,6 @@ public struct FileDispositionInformation: FileInformationClass {
   }
 
   public func encoded() -> Data {
-    var data = Data()
-    data += deletePending
-    return data
+    Data() + deletePending
   }
 }
