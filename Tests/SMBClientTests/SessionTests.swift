@@ -11,7 +11,37 @@ final class SessionTests: XCTestCase {
     XCTAssertEqual(response.dialectRevision , Negotiate.Dialects.smb210.rawValue)
   }
 
-  func testLoginSucceeded() async throws {
+  func testSessionSetup01() async throws {
+    let session = Session(host: "localhost", port: 4445)
+
+    try await session.connect()
+    try await session.negotiate()
+
+    try await session.sessionSetup(username: "alice", password: "alipass")
+    try await session.logoff()
+  }
+
+  func testSessionSetup02() async throws {
+    let session = Session(host: "localhost", port: 4445)
+
+    try await session.connect()
+    try await session.negotiate()
+
+    try await session.sessionSetup(username: "alice", password: "alipass", domain: ".")
+    try await session.logoff()
+  }
+
+  func testSessionSetup03() async throws {
+    let session = Session(host: "localhost", port: 4445)
+
+    try await session.connect()
+    try await session.negotiate()
+
+    try await session.sessionSetup(username: "alice", password: "alipass", domain: ".", workstation: "WORKSTATION")
+    try await session.logoff()
+  }
+
+  func testSessionSetup04() async throws {
     let session = Session(host: "localhost", port: 4445)
 
     try await session.connect()
