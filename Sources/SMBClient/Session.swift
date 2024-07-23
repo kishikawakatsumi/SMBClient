@@ -41,6 +41,26 @@ public class Session {
   }
 
   @discardableResult
+  public func negotiate(
+    securityMode: Negotiate.SecurityMode = [.signingEnabled],
+    dialects: [Negotiate.Dialects] = [.smb202, .smb210]
+  ) async throws -> Negotiate.Response {
+    let request = Negotiate.Request(
+      messageId: messageId.next(),
+      securityMode: securityMode,
+      dialects: dialects
+    )
+    let data = try await send(request.encoded())
+    let response = Negotiate.Response(data: data)
+
+    maxTransactSize = response.maxTransactSize
+    maxReadSize = response.maxReadSize
+    maxWriteSize = response.maxWriteSize
+
+    return response
+  }
+
+  @discardableResult
   public func login(
     username: String?,
     password: String?,
@@ -99,34 +119,12 @@ public class Session {
     }
   }
 
-  @discardableResult
-  public func negotiate(
-    securityMode: Negotiate.SecurityMode = [.signingEnabled],
-    dialects: [Negotiate.Dialects] = [.smb202, .smb210]
-  ) async throws -> Negotiate.Response {
-    let request = Negotiate.Request(
-      messageId: messageId.next(),
-      securityMode: securityMode,
-      dialects: dialects
-    )
-    let data = try await send(request.encoded())
-    let response = Negotiate.Response(data: data)
-
-    maxTransactSize = response.maxTransactSize
-    maxReadSize = response.maxReadSize
-    maxWriteSize = response.maxWriteSize
-
-    return response
-  }
-
   public func sessionSetup(
     username: String?,
     password: String?,
     domain: String? = nil,
     workstation: String? = nil
   ) async throws -> SessionSetup.Response {
-    try await negotiate()
-
     let negotiateMessage = NTLM.NegotiateMessage(
       domainName: domain,
       workstationName: workstation

@@ -40,33 +40,9 @@ public struct Header {
     self.signature = Data(count: 16)
   }
 
-  public init(
-    creditCharge: UInt16,
-    command: UInt16,
-    creditRequest: UInt16,
-    flags: Flags,
-    nextCommand: UInt32,
-    messageId: UInt64,
-    treeId: UInt32,
-    sessionId: UInt64
-  ) {
-    self.protocolId = 0x424D53FE
-    self.structureSize = 64
-    self.creditCharge = creditCharge
-    self.status = 0
-    self.command = command
-    self.creditRequestResponse = creditRequest
-    self.flags = flags
-    self.nextCommand = nextCommand
-    self.messageId = messageId
-    self.reserved = 0
-    self.treeId = treeId
-    self.sessionId = sessionId
-    self.signature = Data(count: 16)
-  }
-
   init(data: Data) {
     let reader = ByteReader(data)
+
     protocolId = reader.read()
     structureSize = reader.read()
     creditCharge = reader.read()
@@ -84,6 +60,7 @@ public struct Header {
 
   public func encoded() -> Data {
     var data = Data()
+
     data += protocolId
     data += structureSize
     data += creditCharge
@@ -97,6 +74,7 @@ public struct Header {
     data += treeId
     data += sessionId
     data += signature
+
     return data
   }
 
@@ -143,5 +121,79 @@ public struct Header {
 extension ByteReader {
   func read() -> Header {
     Header(data: read(count: 64))
+  }
+}
+
+extension Header: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    "{protocolId: \(String(protocolId.bigEndian, radix: 16)), " +
+    "structureSize: \(structureSize), " +
+    "creditCharge: \(creditCharge), " +
+    "status: \(status), " +
+    "command: \(Header.Command.debugDescription(command)), " +
+    "creditRequestResponse: \(creditRequestResponse), " +
+    "flags: \(flags), " +
+    "nextCommand: \(nextCommand), " +
+    "messageId: \(messageId), " +
+    "reserved: \(reserved), " +
+    "treeId: \(treeId), " +
+    "sessionId: \(sessionId), " +
+    "signature: \(signature.hex)}"
+  }
+}
+
+extension Header.Command {
+  static func debugDescription(_ rawValue: UInt16) -> String {
+    switch rawValue {
+    case Self.negotiate.rawValue: return "NEGOTIATE"
+    case Self.sessionSetup.rawValue: return "SESSION_SETUP"
+    case Self.logoff.rawValue: return "LOGOFF"
+    case Self.treeConnect.rawValue: return "TREE_CONNECT"
+    case Self.treeDisconnect.rawValue: return "TREE_DISCONNECT"
+    case Self.create.rawValue: return "CREATE"
+    case Self.close.rawValue: return "CLOSE"
+    case Self.flush.rawValue: return "FLUSH"
+    case Self.read.rawValue: return "READ"
+    case Self.write.rawValue: return "WRITE"
+    case Self.lock.rawValue: return "LOCK"
+    case Self.ioctl.rawValue: return "IOCTL"
+    case Self.cancel.rawValue: return "CANCEL"
+    case Self.echo.rawValue: return "ECHO"
+    case Self.queryDirectory.rawValue: return "QUERY_DIRECTORY"
+    case Self.changeNotify.rawValue: return "CHANGE_NOTIFY"
+    case Self.queryInfo.rawValue: return "QUERY_INFO"
+    case Self.setInfo.rawValue: return "SET_INFO"
+    case Self.oplockBreak.rawValue: return "OPLOCK_BREAK"
+    case Self.serverToClientNotification.rawValue: return "SERVER_TO_CLIENT_NOTIFICATION"
+    default: return "UNKNOWN"
+    }
+  }
+}
+
+extension Header.Flags: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    var flags: [String] = []
+    if contains(.serverToRedir) {
+      flags.append("SERVER_TO_REDIR")
+    }
+    if contains(.asyncCommand) {
+      flags.append("ASYNC_COMMAND")
+    }
+    if contains(.relatedOperations) {
+      flags.append("RELATED_OPERATIONS")
+    }
+    if contains(.signed) {
+      flags.append("SIGNED")
+    }
+    if contains(.priorityMask) {
+      flags.append("PRIORITY_MASK")
+    }
+    if contains(.dfsOperation) {
+      flags.append("DFS_OPERATION")
+    }
+    if contains(.replayOperation) {
+      flags.append("REPLAY_OPERATION")
+    }
+    return flags.joined(separator: "|")
   }
 }
