@@ -9,13 +9,14 @@ public struct FileStandardInformation {
   public let reserved: UInt16
 
   public init(data: Data) {
-    let byteReader = ByteReader(data)
-    allocationSize = byteReader.read()
-    endOfFile = byteReader.read()
-    numberOfLinks = byteReader.read()
-    deletePending = byteReader.read()
-    directory = byteReader.read()
-    reserved = byteReader.read()
+    let reader = ByteReader(data)
+
+    allocationSize = reader.read()
+    endOfFile = reader.read()
+    numberOfLinks = reader.read()
+    deletePending = reader.read()
+    directory = reader.read()
+    reserved = reader.read()
   }
 }
 

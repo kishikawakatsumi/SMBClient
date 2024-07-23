@@ -20,15 +20,18 @@ public struct FileRenameInformation: FileInformationClass {
 
   public func encoded() -> Data {
     var data = Data()
+
     data += replaceIfExists
     data += reserved
     data += rootDirectory
     data += fileNameLength
     data += fileName
+
     let padding = 24 - data.count
     if padding > 0 {
       data += Data(repeating: 0, count: padding)
     }
+
     return data
   }
 }

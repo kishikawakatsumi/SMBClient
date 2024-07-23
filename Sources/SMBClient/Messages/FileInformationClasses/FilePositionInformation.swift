@@ -4,8 +4,8 @@ public struct FilePositionInformation {
   public let currentByteOffset: UInt64
 
   public init(data: Data) {
-    let byteReader = ByteReader(data)
-    currentByteOffset = byteReader.read()
+    let reader = ByteReader(data)
+    currentByteOffset = reader.read()
   }
 }
 

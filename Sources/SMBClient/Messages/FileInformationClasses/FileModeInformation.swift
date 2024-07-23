@@ -19,13 +19,13 @@ public struct FileModeInformation {
   }
 
   public init(data: Data) {
-    let byteReader = ByteReader(data)
-    mode = Mode(rawValue: byteReader.read())
+    let reader = ByteReader(data)
+    mode = Mode(rawValue: reader.read())
   }
 }
 
 extension ByteReader {
   func read() -> FileModeInformation {
-    return FileModeInformation(data: read(count: 4))
+    FileModeInformation(data: read(count: 4))
   }
 }

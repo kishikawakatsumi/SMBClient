@@ -4,13 +4,13 @@ public struct FileAccessInformation {
   public let accessFlags: AccessMask
 
   public init(data: Data) {
-    let byteReader = ByteReader(data)
-    accessFlags = AccessMask(rawValue: byteReader.read())
+    let reader = ByteReader(data)
+    accessFlags = AccessMask(rawValue: reader.read())
   }
 }
 
 extension ByteReader {
   func read() -> FileAccessInformation {
-    return FileAccessInformation(data: read(count: 4))
+    FileAccessInformation(data: read(count: 4))
   }
 }
