@@ -90,6 +90,7 @@ public class Session {
         username: username,
         password: password,
         domain: domain,
+        workstation: workstation,
         negotiateMessage: securityBuffer,
         signingKey: signingKey
       )

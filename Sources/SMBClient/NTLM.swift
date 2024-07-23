@@ -6,8 +6,8 @@ public enum NTLM {
     public let signature: UInt64
     public let messageType: UInt32
     public let negotiateFlags: NegotiateFlags
-    public let domainName: Fields
-    public let workstationName: Fields
+    public let domainNameFields: Fields
+    public let workstationNameFields: Fields
     public let version: UInt64
 
     public init(
@@ -28,28 +28,48 @@ public enum NTLM {
       domainName: String? = nil,
       workstationName: String? = nil
     ) {
-      signature = 0x4e544c4d53535000
+      signature = 0x005053534D4C544E
       messageType = 0x00000001
       self.negotiateFlags = negotiateFlags
-      let offset: UInt32 = 64
-      self.domainName = Fields(value: domainName, offset: offset)
-      self.workstationName = Fields(value: workstationName, offset: offset + UInt32(self.domainName.len))
+
+      let domainNameFields = Fields(
+        value: domainName,
+        offset: 8 + // Signature
+                4 + // MessageType
+                4 + // NegotiateFlags
+                8 + // DomainNameFields
+                8 + // WorkstationFields
+                8   // Version
+      )
+      self.domainNameFields = domainNameFields
+
+      let workstationNameFields = Fields(
+        value: workstationName,
+        offset: domainNameFields.nextOffset
+      )
+      self.workstationNameFields = workstationNameFields
+
       version = 0x0000000000000000
     }
 
     public func encoded() -> Data {
       var data = Data()
-      data += signature.bigEndian
+
+      data += signature
       data += messageType
       data += negotiateFlags.rawValue
-      data += domainName.len
-      data += domainName.maxLen
-      data += domainName.bufferOffset
-      data += workstationName.len
-      data += workstationName.maxLen
-      data += workstationName.bufferOffset
+
+      data += domainNameFields.len
+      data += domainNameFields.maxLen
+      data += domainNameFields.bufferOffset
+
+      data += workstationNameFields.len
+      data += workstationNameFields.maxLen
+      data += workstationNameFields.bufferOffset
+
       data += version
-      data += domainName.encoded() + workstationName.encoded()
+      data += domainNameFields.value + workstationNameFields.value
+
       return data
     }
   }
@@ -74,6 +94,7 @@ public enum NTLM {
 
     public init(data: Data) {
       let reader = ByteReader(data)
+
       signature = reader.read()
       messageType = reader.read()
       targetNameLen = reader.read()
@@ -97,13 +118,13 @@ public enum NTLM {
       password: String,
       domain: String
     ) -> Data {
-      let passwordData = password.data(using: .utf16LittleEndian)!
+      let passwordData = password.data(using: .utf16LittleEndian) ?? Data()
       var passwordHash = [UInt8](repeating: 0, count: Int(CC_MD4_DIGEST_LENGTH))
       _ = passwordData.withUnsafeBytes { (bytes) in
         CC_MD4(bytes.baseAddress, CC_LONG(passwordData.count), &passwordHash)
       }
 
-      let usernameData = (username.uppercased() + domain).data(using: .utf16LittleEndian)!
+      let usernameData = (username.uppercased() + domain).data(using: .utf16LittleEndian) ?? Data()
       let responseKeyNT = Crypto.hmacMD5(key: Data(passwordHash), data: usernameData)
 
       return responseKeyNT
@@ -113,6 +134,7 @@ public enum NTLM {
       username: String? = nil,
       password: String? = nil,
       domain: String? = nil,
+      workstation: String? = nil,
       negotiateMessage: Data,
       signingKey: Data
     ) -> AuthenticateMessage {
@@ -138,9 +160,11 @@ public enum NTLM {
 
       let ntChallengeResponse = ntProofStr + temp
 
-      let authenticateMessage = NTLM.AuthenticateMessage(
+      var authenticateMessage = NTLM.AuthenticateMessage(
         ntChallengeResponse: ntChallengeResponse,
+        domainName: domain,
         userName: username,
+        workstationName: workstation,
         encryptedRandomSessionKey: encryptedRandomSessionKey
       )
       let mic = Crypto.hmacMD5(
@@ -148,28 +172,24 @@ public enum NTLM {
         data: negotiateMessage + buffer + authenticateMessage.encoded()
       )
 
-      return NTLM.AuthenticateMessage(
-        ntChallengeResponse: ntChallengeResponse,
-        userName: username,
-        workstationName: "",
-        encryptedRandomSessionKey: encryptedRandomSessionKey,
-        mic: mic
-      )
+      authenticateMessage.mic = mic
+
+      return authenticateMessage
     }
   }
 
   public struct AuthenticateMessage {
     public let signature: UInt64
     public let messageType: UInt32
-    public let lmChallengeResponse: Fields
-    public let ntChallengeResponse: Fields
-    public let domainName: Fields
-    public let userName: Fields
-    public let workstationName: Fields
-    public let encryptedRandomSessionKey: Fields
+    public let lmChallengeResponseFields: Fields
+    public let ntChallengeResponseFields: Fields
+    public let domainNameFields: Fields
+    public let userNameFields: Fields
+    public let workstationNameFields: Fields
+    public let encryptedRandomSessionKeyFields: Fields
     public let negotiateFlags: NegotiateFlags
     public let version: UInt64
-    public let mic: Data
+    public internal(set) var mic: Data
 
     public init(
       ntChallengeResponse: Data,
@@ -179,12 +199,13 @@ public enum NTLM {
       encryptedRandomSessionKey: Data? = nil,
       mic: Data = Data()
     ) {
-      signature = 0x4e544c4d53535000
+      signature = 0x005053534D4C544E
       messageType = 0x00000003
-      lmChallengeResponse = Fields(
+
+      let lmChallengeResponseFields = Fields(
         value: Data(count: 24),
-        offset: 8 + // signature
-                4 + // messageType
+        offset: 8 + // Signature
+                4 + // MessageType
                 8 + // LmChallengeResponseFields
                 8 + // NtChallengeResponseFields
                 8 + // DomainNameFields
@@ -195,11 +216,37 @@ public enum NTLM {
                 8 + // Version
                 16  // MIC
       )
-      self.ntChallengeResponse = Fields(value: ntChallengeResponse, offset: lmChallengeResponse.bufferOffset + UInt32(lmChallengeResponse.len))
-      self.domainName = Fields(value: domainName, offset: self.ntChallengeResponse.bufferOffset + UInt32(self.ntChallengeResponse.len))
-      self.userName = Fields(value: userName, offset: self.domainName.bufferOffset + UInt32(self.domainName.len))
-      self.workstationName = Fields(value: workstationName, offset: self.userName.bufferOffset + UInt32(self.userName.len))
-      self.encryptedRandomSessionKey = Fields(value: encryptedRandomSessionKey ?? Data(), offset: self.workstationName.bufferOffset + UInt32(self.workstationName.len))
+      self.lmChallengeResponseFields = lmChallengeResponseFields
+
+      let ntChallengeResponseFields = Fields(
+        value: ntChallengeResponse,
+        offset: lmChallengeResponseFields.nextOffset
+      )
+      self.ntChallengeResponseFields = ntChallengeResponseFields
+
+      let domainNameFields = Fields(
+        value: domainName?.data(using: .utf16LittleEndian),
+        offset: ntChallengeResponseFields.nextOffset
+      )
+      self.domainNameFields = domainNameFields
+
+      let userNameFields = Fields(
+        value: userName?.data(using: .utf16LittleEndian),
+        offset: domainNameFields.nextOffset
+      )
+      self.userNameFields = userNameFields
+
+      let workstationNameFields = Fields(
+        value: workstationName?.data(using: .utf16LittleEndian),
+        offset: userNameFields.nextOffset
+      )
+      self.workstationNameFields = workstationNameFields
+
+      let encryptedRandomSessionKeyFields = Fields(
+        value: encryptedRandomSessionKey,
+        offset: workstationNameFields.nextOffset
+      )
+      self.encryptedRandomSessionKeyFields = encryptedRandomSessionKeyFields
 
       negotiateFlags = [
         .negotiateKeyExchange,
@@ -215,29 +262,33 @@ public enum NTLM {
         .unicode,
       ]
 
-      version = UInt64(0x000a02000000000f).bigEndian
+      version = 0x0F00000000020A00
       self.mic = mic.isEmpty ? Data(count: 16) : mic
     }
     
     public func encoded() -> Data {
       var data = Data()
-      data += signature.bigEndian
+
+      data += signature
       data += messageType
-      data += lmChallengeResponse.encoded()
-      data += ntChallengeResponse.encoded()
-      data += domainName.encoded()
-      data += userName.encoded()
-      data += workstationName.encoded()
-      data += encryptedRandomSessionKey.encoded()
+      data += lmChallengeResponseFields.encoded()
+      data += ntChallengeResponseFields.encoded()
+      data += domainNameFields.encoded()
+      data += userNameFields.encoded()
+      data += workstationNameFields.encoded()
+      data += encryptedRandomSessionKeyFields.encoded()
       data += negotiateFlags.rawValue
       data += version
       data += mic
-      data += lmChallengeResponse.value
-      data += ntChallengeResponse.value
-      data += domainName.value
-      data += userName.value
-      data += workstationName.value
-      data += encryptedRandomSessionKey.value
+
+      data += lmChallengeResponseFields.value
+      data += ntChallengeResponseFields.value
+
+      data += domainNameFields.value
+      data += userNameFields.value
+      data += workstationNameFields.value
+      data += encryptedRandomSessionKeyFields.value
+
       return data
     }
   }
@@ -279,19 +330,36 @@ public enum NTLM {
     public let bufferOffset: UInt32
     public let value: Data
 
-    public init(value: Data, offset: UInt32) {
+    let nextOffset: UInt32
+
+    public init(value: Data?, offset: UInt32) {
+      let value = value ?? Data()
+
       len = UInt16(value.count)
       maxLen = len
       bufferOffset = offset
       self.value = value
+
+      nextOffset = offset + UInt32(len)
     }
 
     public init(value: String?, offset: UInt32) {
-      let data = Data() + (value ?? "")
-      len = UInt16(data.count)
-      maxLen = len
-      bufferOffset = offset
-      self.value = data
+      let value = value ?? ""
+      if let data = value.data(using: .ascii), !data.isEmpty {
+        len = UInt16(truncatingIfNeeded: data.count)
+        maxLen = len
+        bufferOffset = offset
+        self.value = data + Data(count: 1)
+
+        nextOffset = offset + UInt32(len) + 1
+      } else {
+        len = 0
+        maxLen = len
+        bufferOffset = offset
+        self.value = Data()
+
+        nextOffset = offset
+      }
     }
 
     public func encoded() -> Data {

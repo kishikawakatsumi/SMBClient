@@ -16,12 +16,6 @@ extension BinaryConvertible {
   }
 }
 
-extension BinaryConvertible {
-  func hexString() -> String {
-    (Data() + self).hex
-  }
-}
-
 extension UInt8: BinaryConvertible {}
 extension UInt16: BinaryConvertible {}
 extension UInt32: BinaryConvertible {}
@@ -31,13 +25,3 @@ extension Int16: BinaryConvertible {}
 extension Int32: BinaryConvertible {}
 extension Int64: BinaryConvertible {}
 extension Int: BinaryConvertible {}
-
-extension String: BinaryConvertible {
-  static func +(lhs: Data, rhs: Self) -> Data {
-    return lhs + (rhs.data(using: .utf16LittleEndian) ?? Data())
-  }
-
-  static func +=(lhs: inout Data, rhs: Self) {
-    lhs = lhs + rhs
-  }
-}
