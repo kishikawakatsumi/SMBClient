@@ -2,7 +2,7 @@ import Foundation
 
 class ByteReader {
   private let data: Data
-  private(set) var offset = 0
+  private(set) var offset: Data.Index
 
   var availableBytes: Int {
     return data.count - offset
@@ -10,6 +10,7 @@ class ByteReader {
 
   init(_ data: Data) {
     self.data = data
+    offset = data.startIndex
   }
 
   func read<T>() -> T {
@@ -26,16 +27,12 @@ class ByteReader {
   }
 
   func read(from: Int, count: Int) -> Data {
-    seek(to: from)
+    seek(to: data.startIndex + from)
     return read(count: count)
   }
 
   func seek(to: Int) {
-    offset = to
-  }
-
-  func skip(count: Int) {
-    offset += count
+    offset = data.startIndex + to
   }
 
   func remaining() -> Data {
