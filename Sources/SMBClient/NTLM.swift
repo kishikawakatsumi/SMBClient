@@ -119,14 +119,9 @@ public enum NTLM {
       domain: String
     ) -> Data {
       let passwordData = password.data(using: .utf16LittleEndian) ?? Data()
-      var passwordHash = [UInt8](repeating: 0, count: Int(CC_MD4_DIGEST_LENGTH))
-      _ = passwordData.withUnsafeBytes { (bytes) in
-        CC_MD4(bytes.baseAddress, CC_LONG(passwordData.count), &passwordHash)
-      }
-
       let usernameData = (username.uppercased() + domain).data(using: .utf16LittleEndian) ?? Data()
-      let responseKeyNT = Crypto.hmacMD5(key: Data(passwordHash), data: usernameData)
 
+      let responseKeyNT = Crypto.hmacMD5(key: Crypto.md4(passwordData), data: usernameData)
       return responseKeyNT
     }
 
