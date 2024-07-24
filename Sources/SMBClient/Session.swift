@@ -506,10 +506,12 @@ public class Session {
       guard file.fileName != "." && file.fileName != ".." else {
         continue
       }
+
+      let subpath = Pathname.join(path, file.fileName)
       if file.fileAttributes.contains(.directory) {
-        try await deleteDirectory(path: "\(path)/\(file.fileName)")
+        try await deleteDirectory(path: subpath)
       } else {
-        try await deleteFile(path: "\(path)/\(file.fileName)")
+        try await deleteFile(path: subpath)
       }
     }
 
