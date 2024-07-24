@@ -1,5 +1,7 @@
 # SMBClient
 
+[![Test](https://github.com/kishikawakatsumi/SMBClient/actions/workflows/test.yml/badge.svg)](https://github.com/kishikawakatsumi/SMBClient/actions/workflows/test.yml)
+
 Swift SMB client library and iOS/macOS file browser applications.
 
 ## Usage
