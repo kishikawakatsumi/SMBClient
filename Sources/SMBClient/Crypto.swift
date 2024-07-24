@@ -8,6 +8,14 @@ enum Crypto {
     return Data(bytes)
   }
 
+  public static func md4(_ data: Data) -> Data {
+    var hash = [UInt8](repeating: 0, count: Int(CC_MD4_DIGEST_LENGTH))
+    _ = data.withUnsafeBytes { (bytes) in
+      CC_MD4(bytes.baseAddress, CC_LONG(data.count), &hash)
+    }
+    return Data(hash)
+  }
+
   public static func hmacMD5(key: Data, data: Data) -> Data {
     let context = UnsafeMutablePointer<CCHmacContext>.allocate(capacity: 1)
     CCHmacInit(context, CCHmacAlgorithm(kCCHmacAlgMD5), (key as NSData).bytes, size_t(key.count))
