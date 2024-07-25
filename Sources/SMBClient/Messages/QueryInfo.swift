@@ -15,18 +15,6 @@ public enum QueryInfo {
     public let fileId: Data
     public let buffer: Data
 
-    public struct Flags: OptionSet, Sendable {
-      public let rawValue: UInt32
-
-      public init(rawValue: UInt32) {
-        self.rawValue = rawValue
-      }
-
-      public static let restartScans = Flags(rawValue: 0x00000001)
-      public static let returnSingleEntry = Flags(rawValue: 0x00000002)
-      public static let indexSpecified = Flags(rawValue: 0x00000004)
-    }
-
     public init(
       headerFlags: Header.Flags = [],
       messageId: UInt64,
@@ -42,7 +30,6 @@ public enum QueryInfo {
         command: .queryInfo,
         creditRequest: 64,
         flags: headerFlags,
-        nextCommand: 0,
         messageId: messageId,
         treeId: treeId,
         sessionId: sessionId
@@ -63,7 +50,9 @@ public enum QueryInfo {
 
     public func encoded() -> Data {
       var data = Data()
+
       data += header.encoded()
+      
       data += structureSize
       data += infoType.rawValue
       data += fileInfoClass.rawValue
@@ -75,6 +64,7 @@ public enum QueryInfo {
       data += flags.rawValue
       data += fileId
       data += buffer
+      
       return data
     }
   }
@@ -95,5 +85,17 @@ public enum QueryInfo {
       outputBufferLength = reader.read()
       buffer = reader.read(count: Int(outputBufferLength))
     }
+  }
+
+  public struct Flags: OptionSet, Sendable {
+    public let rawValue: UInt32
+
+    public init(rawValue: UInt32) {
+      self.rawValue = rawValue
+    }
+
+    public static let restartScans = Flags(rawValue: 0x00000001)
+    public static let returnSingleEntry = Flags(rawValue: 0x00000002)
+    public static let indexSpecified = Flags(rawValue: 0x00000004)
   }
 }

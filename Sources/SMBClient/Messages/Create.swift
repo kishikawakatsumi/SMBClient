@@ -85,6 +85,9 @@ public enum Create {
       data += createContextsOffset
       data += createContextsLength
       data += buffer
+      if buffer.isEmpty {
+        data += Data(count: 1)
+      }
 
       return data
     }

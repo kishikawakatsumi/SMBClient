@@ -16,7 +16,8 @@ public enum Write {
     public let buffer: Data
 
     public init(
-      creditRequest: UInt16,
+      creditCharge: UInt16,
+      headerFlags: Header.Flags = [],
       messageId: UInt64,
       treeId: UInt32,
       sessionId: UInt64,
@@ -25,15 +26,15 @@ public enum Write {
       data: Data
     ) {
       header = Header(
-        creditCharge: creditRequest,
+        creditCharge: creditCharge,
         command: .write,
-        creditRequest: creditRequest,
-        flags: [],
-        nextCommand: 0,
+        creditRequest: 256,
+        flags: headerFlags,
         messageId: messageId,
         treeId: treeId,
         sessionId: sessionId
       )
+
       structureSize = 49
       dataOffset = 112
       length = UInt32(data.count)
@@ -49,7 +50,9 @@ public enum Write {
 
     public func encoded() -> Data {
       var data = Data()
+
       data += header.encoded()
+
       data += structureSize
       data += dataOffset
       data += length
@@ -61,18 +64,8 @@ public enum Write {
       data += writeChannelInfoLength
       data += flags.rawValue
       data += buffer
+
       return data
-    }
-
-    public struct Flags: OptionSet, Sendable {
-      public let rawValue: UInt32
-
-      public init(rawValue: UInt32) {
-        self.rawValue = rawValue
-      }
-
-      public static let writeThrough = Flags(rawValue: 0x00000001)
-      public static let writeUnbuffered = Flags(rawValue: 0x00000002)
     }
   }
 
@@ -97,5 +90,16 @@ public enum Write {
       writeChannelInfoOffset = reader.read()
       writeChannelInfoLength = reader.read()
     }
+  }
+
+  public struct Flags: OptionSet, Sendable {
+    public let rawValue: UInt32
+
+    public init(rawValue: UInt32) {
+      self.rawValue = rawValue
+    }
+
+    public static let writeThrough = Flags(rawValue: 0x00000001)
+    public static let writeUnbuffered = Flags(rawValue: 0x00000002)
   }
 }

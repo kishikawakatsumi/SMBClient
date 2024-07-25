@@ -56,4 +56,27 @@ final class SessionTests: XCTestCase {
     try await session.treeDisconnect()
     try await session.logoff()
   }
+
+  func testCreate01() async throws {
+    let session = Session(host: "localhost", port: 4445)
+
+    try await session.connect()
+    try await session.negotiate()
+
+    try await session.sessionSetup(username: "alice", password: "alipass")
+    try await session.treeConnect(path: "Alice Share")
+
+    let response = try await session.create(
+      desiredAccess: [.readData, .readAttributes, .synchronize],
+      fileAttributes: [.directory],
+      shareAccess: [.read, .write, .delete],
+      createDisposition: .open,
+      createOptions: [.directoryFile],
+      name: ""
+    )
+    XCTAssertFalse(response.fileId.isEmpty)
+
+    try await session.treeDisconnect()
+    try await session.logoff()
+  }
 }

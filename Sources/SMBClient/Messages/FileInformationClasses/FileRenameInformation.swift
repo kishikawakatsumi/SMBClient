@@ -13,7 +13,7 @@ public struct FileRenameInformation: FileInformationClass {
     self.replaceIfExists = replaceIfExists ? Data(repeating: 0x01, count: 1) : Data(repeating: 0x00, count: 1)
     reserved = Data(count: 7)
     rootDirectory = 0
-    let fileNameData = fileName.data(using: .utf16LittleEndian)!
+    let fileNameData = fileName.encoded()
     fileNameLength = UInt32(truncatingIfNeeded: fileNameData.count)
     self.fileName = fileNameData
   }

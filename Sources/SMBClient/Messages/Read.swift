@@ -16,19 +16,9 @@ public enum Read {
     public let readChannelInfoLength: UInt16
     public let buffer: Data
 
-    public enum Flags: UInt8 {
-      case readUnbuffered = 0x01
-      case requestCompressed = 0x02
-    }
-
-    public enum Channel: UInt32 {
-      case none = 0x00000000
-      case rdmaV1 = 0x00000001
-      case rdmaV1Invalidate = 0x00000002
-    }
-
     public init(
-      creditRequest: UInt16,
+      creditCharge: UInt16,
+      headerFlags: Header.Flags = [],
       messageId: UInt64,
       treeId: UInt32,
       sessionId: UInt64,
@@ -37,11 +27,10 @@ public enum Read {
       length: UInt32
     ) {
       header = Header(
-        creditCharge: creditRequest,
+        creditCharge: creditCharge,
         command: .read,
-        creditRequest: creditRequest,
-        flags: [],
-        nextCommand: 0,
+        creditRequest: 256,
+        flags: headerFlags,
         messageId: messageId,
         treeId: treeId,
         sessionId: sessionId
@@ -63,7 +52,9 @@ public enum Read {
 
     public func encoded() -> Data {
       var data = Data()
+
       data += header.encoded()
+
       data += structureSize
       data += padding
       data += flags
@@ -76,6 +67,7 @@ public enum Read {
       data += readChannelInfoOffset
       data += readChannelInfoLength
       data += buffer
+
       return data
     }
   }
@@ -90,16 +82,10 @@ public enum Read {
     public let reserved2: UInt32
     public let buffer: Data
 
-    public enum ReadFlag: UInt32 {
-      case responseNone = 0x00000000
-      case responseRdmaTransform = 0x00000001
-    }
-
     public init(data: Data) {
       let reader = ByteReader(data)
 
       header = reader.read()
-
       structureSize = reader.read()
 
       if header.status != 0xc0000011 {
@@ -118,5 +104,21 @@ public enum Read {
         buffer = Data()
       }
     }
+  }
+
+  public enum Flags: UInt8 {
+    case readUnbuffered = 0x01
+    case requestCompressed = 0x02
+  }
+
+  public enum Channel: UInt32 {
+    case none = 0x00000000
+    case rdmaV1 = 0x00000001
+    case rdmaV1Invalidate = 0x00000002
+  }
+
+  public enum ReadFlag: UInt32 {
+    case responseNone = 0x00000000
+    case responseRdmaTransform = 0x00000001
   }
 }

@@ -21,8 +21,7 @@ enum SetInfo {
     }
 
     public init(
-      creditRequest: UInt16 = 1,
-      flags: Header.Flags = [],
+      headerFlags: Header.Flags = [],
       messageId: UInt64,
       treeId: UInt32,
       sessionId: UInt64,
@@ -31,11 +30,10 @@ enum SetInfo {
       fileInformation: FileInformationClass
     ) {
       header = Header(
-        creditCharge: creditRequest,
+        creditCharge: 1,
         command: .setInfo,
-        creditRequest: creditRequest,
-        flags: flags,
-        nextCommand: 0,
+        creditRequest: 0,
+        flags: headerFlags,
         messageId: messageId,
         treeId: treeId,
         sessionId: sessionId
@@ -55,6 +53,7 @@ enum SetInfo {
 
     public func encoded() -> Data {
       var data = Data()
+
       data += header.encoded()
       data += structureSize
       data += infoType.rawValue
@@ -65,6 +64,7 @@ enum SetInfo {
       data += additionalInformation
       data += fileId
       data += buffer
+
       return data
     }
   }
@@ -75,6 +75,7 @@ enum SetInfo {
 
     public init(data: Data) {
       let reader = ByteReader(data)
+      
       header = reader.read()
       structureSize = reader.read()
     }

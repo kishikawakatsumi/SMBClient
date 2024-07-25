@@ -60,7 +60,7 @@ struct WStr {
 
   init(value: String) {
     referentID = 1
-    let valueData = value.data(using: .utf16LittleEndian)!
+    let valueData = value.encoded()
     maxCount = UInt32(valueData.count / 2) + 1
     offset = 0
     actualCount = maxCount
