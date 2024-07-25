@@ -19,6 +19,7 @@ public enum IOCtl {
 
     public init(
       headerFlags: Header.Flags = [],
+      creditCharge: UInt16,
       messageId: UInt64,
       treeId: UInt32,
       sessionId: UInt64,
@@ -28,11 +29,10 @@ public enum IOCtl {
       output: Data
     ) {
       header = Header(
-        creditCharge: 1,
+        creditCharge: creditCharge,
         command: .ioctl,
-        creditRequest: 64,
-        flags: [],
-        nextCommand: 0,
+        creditRequest: 256,
+        flags: headerFlags,
         messageId: messageId,
         treeId: treeId,
         sessionId: sessionId
@@ -47,7 +47,7 @@ public enum IOCtl {
       maxInputResponse = 0
       outputOffset = 0
       outputCount = 0
-      maxOutputResponse = 0x00010000
+      maxOutputResponse = 65536
       flags = [.isFsctl]
       reserved2 = 0
       buffer = input + output
