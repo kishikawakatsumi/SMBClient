@@ -33,7 +33,7 @@ public enum NTLM {
       self.negotiateFlags = negotiateFlags
 
       let domainNameFields = Fields(
-        value: domainName,
+        oemEncoding: domainName,
         offset: 8 + // Signature
                 4 + // MessageType
                 4 + // NegotiateFlags
@@ -42,12 +42,7 @@ public enum NTLM {
                 8   // Version
       )
       self.domainNameFields = domainNameFields
-
-      let workstationNameFields = Fields(
-        value: workstationName,
-        offset: domainNameFields.nextOffset
-      )
-      self.workstationNameFields = workstationNameFields
+      self.workstationNameFields = Fields(oemEncoding: workstationName, offset: domainNameFields.nextOffset)
 
       version = 0x0000000000000000
     }
@@ -213,34 +208,19 @@ public enum NTLM {
       )
       self.lmChallengeResponseFields = lmChallengeResponseFields
 
-      let ntChallengeResponseFields = Fields(
-        value: ntChallengeResponse,
-        offset: lmChallengeResponseFields.nextOffset
-      )
+      let ntChallengeResponseFields = Fields(value: ntChallengeResponse, offset: lmChallengeResponseFields.nextOffset)
       self.ntChallengeResponseFields = ntChallengeResponseFields
 
-      let domainNameFields = Fields(
-        value: domainName?.data(using: .utf16LittleEndian),
-        offset: ntChallengeResponseFields.nextOffset
-      )
+      let domainNameFields = Fields(negotiatedEncoding: domainName, offset: ntChallengeResponseFields.nextOffset)
       self.domainNameFields = domainNameFields
 
-      let userNameFields = Fields(
-        value: userName?.data(using: .utf16LittleEndian),
-        offset: domainNameFields.nextOffset
-      )
+      let userNameFields = Fields(negotiatedEncoding: userName, offset: domainNameFields.nextOffset)
       self.userNameFields = userNameFields
 
-      let workstationNameFields = Fields(
-        value: workstationName?.data(using: .utf16LittleEndian),
-        offset: userNameFields.nextOffset
-      )
+      let workstationNameFields = Fields(negotiatedEncoding: workstationName, offset: userNameFields.nextOffset)
       self.workstationNameFields = workstationNameFields
 
-      let encryptedRandomSessionKeyFields = Fields(
-        value: encryptedRandomSessionKey,
-        offset: workstationNameFields.nextOffset
-      )
+      let encryptedRandomSessionKeyFields = Fields(value: encryptedRandomSessionKey, offset: workstationNameFields.nextOffset)
       self.encryptedRandomSessionKeyFields = encryptedRandomSessionKeyFields
 
       negotiateFlags = [
@@ -338,9 +318,28 @@ public enum NTLM {
       nextOffset = offset + UInt32(len)
     }
 
-    public init(value: String?, offset: UInt32) {
+    public init(oemEncoding value: String?, offset: UInt32) {
       let value = value ?? ""
-      if let data = value.data(using: .ascii), !data.isEmpty {
+      if let data = value.data(using: .ascii, allowLossyConversion: true), !data.isEmpty {
+        len = UInt16(truncatingIfNeeded: data.count)
+        maxLen = len
+        bufferOffset = offset
+        self.value = data + Data(count: 1)
+
+        nextOffset = offset + UInt32(len) + 1
+      } else {
+        len = 0
+        maxLen = len
+        bufferOffset = offset
+        self.value = Data()
+
+        nextOffset = offset
+      }
+    }
+
+    public init(negotiatedEncoding value: String?, offset: UInt32) {
+      let value = value ?? ""
+      if let data = value.data(using: .utf16LittleEndian, allowLossyConversion: true), !data.isEmpty {
         len = UInt16(truncatingIfNeeded: data.count)
         maxLen = len
         bufferOffset = offset
