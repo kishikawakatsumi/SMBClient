@@ -28,7 +28,6 @@ public enum QueryDirectory {
         command: .queryDirectory,
         creditRequest: 64,
         flags: headerFlags,
-        nextCommand: 0,
         messageId: messageId,
         treeId: treeId,
         sessionId: sessionId

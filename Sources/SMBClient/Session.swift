@@ -231,7 +231,7 @@ public class Session {
     let creditSize = creditSize(size: readSize)
 
     let request = Read.Request(
-      creditRequest: creditSize,
+      creditCharge: creditSize,
       messageId: messageId.next(count: UInt64(creditSize)),
       treeId: treeId,
       sessionId: sessionId,
@@ -255,7 +255,7 @@ public class Session {
     let creditSize = creditSize(size: writeSize)
 
     let request = Write.Request(
-      creditRequest: creditSize,
+      creditCharge: creditSize,
       messageId: messageId.next(count: UInt64(creditSize)),
       treeId: treeId,
       sessionId: sessionId,
@@ -468,7 +468,7 @@ public class Session {
 
     let creditSize = creditSize(size: maxReadSize)
     let request = Read.Request(
-      creditRequest: creditSize,
+      creditCharge: creditSize,
       messageId: messageId.next(count: UInt64(creditSize)),
       treeId: treeId,
       sessionId: sessionId,
@@ -483,7 +483,7 @@ public class Session {
 
     while response.header.status != NTStatus.endOfFile {
       let request = Read.Request(
-        creditRequest: creditSize,
+        creditCharge: creditSize,
         messageId: messageId.next(count: UInt64(creditSize)),
         treeId: treeId,
         sessionId: sessionId,
@@ -639,8 +639,10 @@ public class Session {
       )
     )
 
+    let creditSize = creditSize(size: maxReadSize)
     let request = IOCtl.Request(
-      messageId: messageId.next(),
+      creditCharge: creditSize,
+      messageId: messageId.next(count: UInt64(creditSize)),
       treeId: treeId,
       sessionId: sessionId,
       ctlCode: .pipeTransceive,
@@ -662,8 +664,10 @@ public class Session {
       stub: netShareEnum.encoded()
     )
 
+    let creditSize = creditSize(size: maxReadSize)
     let request = IOCtl.Request(
-      messageId: messageId.next(),
+      creditCharge: creditSize,
+      messageId: messageId.next(count: UInt64(creditSize)),
       treeId: treeId,
       sessionId: sessionId,
       ctlCode: .pipeTransceive,
