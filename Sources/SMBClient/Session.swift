@@ -75,6 +75,7 @@ public class Session {
 
     let request = SessionSetup.Request(
       messageId: messageId.next(),
+      sessionId: 0,
       securityMode: [.signingEnabled],
       capabilities: [],
       previousSessionId: 0,
@@ -527,7 +528,7 @@ public class Session {
       name: path
     )
     let setInfoRequest = SetInfo.Request(
-      flags: [.relatedOperations],
+      headerFlags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
@@ -563,7 +564,7 @@ public class Session {
       name: path
     )
     let setInfoRequest = SetInfo.Request(
-      flags: [.relatedOperations],
+      headerFlags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
@@ -599,7 +600,7 @@ public class Session {
       name: from
     )
     let setInfoRequest = SetInfo.Request(
-      flags: [.relatedOperations],
+      headerFlags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,

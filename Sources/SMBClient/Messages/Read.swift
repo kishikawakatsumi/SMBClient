@@ -82,16 +82,10 @@ public enum Read {
     public let reserved2: UInt32
     public let buffer: Data
 
-    public enum ReadFlag: UInt32 {
-      case responseNone = 0x00000000
-      case responseRdmaTransform = 0x00000001
-    }
-
     public init(data: Data) {
       let reader = ByteReader(data)
 
       header = reader.read()
-
       structureSize = reader.read()
 
       if header.status != 0xc0000011 {
@@ -121,5 +115,10 @@ public enum Read {
     case none = 0x00000000
     case rdmaV1 = 0x00000001
     case rdmaV1Invalidate = 0x00000002
+  }
+
+  public enum ReadFlag: UInt32 {
+    case responseNone = 0x00000000
+    case responseRdmaTransform = 0x00000001
   }
 }

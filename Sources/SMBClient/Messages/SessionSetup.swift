@@ -13,43 +13,10 @@ public enum SessionSetup {
     public let previousSessionId: UInt64
     public let securityBuffer: Data
 
-    public struct Flags: OptionSet, Sendable {
-      public let rawValue: UInt8
-
-      public init(rawValue: UInt8) {
-        self.rawValue = rawValue
-      }
-
-      public static let binding = Flags(rawValue: 0x0001)
-    }
-
-    public struct SecurityMode: OptionSet, Sendable {
-      public let rawValue: UInt8
-
-      public init(rawValue: UInt8) {
-        self.rawValue = rawValue
-      }
-
-      public static let signingEnabled = SecurityMode(rawValue: 0x0001)
-      public static let signingRequired = SecurityMode(rawValue: 0x0002)
-    }
-
-    public struct Capabilities: OptionSet, Sendable {
-      public let rawValue: UInt32
-
-      public init(rawValue: UInt32) {
-        self.rawValue = rawValue
-      }
-
-      public static let dfs = Capabilities(rawValue: 0x00000001)
-      public static let unused1 = Capabilities(rawValue: 0x00000002)
-      public static let unused2 = Capabilities(rawValue: 0x00000004)
-      public static let unused3 = Capabilities(rawValue: 0x00000008)
-    }
-
     public init(
+      headerFlags: Header.Flags = [],
       messageId: UInt64,
-      sessionId: UInt64 = 0,
+      sessionId: UInt64,
       securityMode: SecurityMode,
       capabilities: Capabilities,
       previousSessionId: UInt64,
@@ -59,8 +26,7 @@ public enum SessionSetup {
         creditCharge: 1,
         command: .sessionSetup,
         creditRequest: 0,
-        flags: [],
-        nextCommand: 0,
+        flags: headerFlags,
         messageId: messageId,
         sessionId: sessionId
       )
@@ -78,6 +44,7 @@ public enum SessionSetup {
 
     public func encoded() -> Data {
       var data = Data()
+
       data += header.encoded()
       data += structureSize
       data += flags.rawValue
@@ -88,6 +55,7 @@ public enum SessionSetup {
       data += securityBufferLength
       data += previousSessionId
       data += securityBuffer
+
       return data
     }
   }
@@ -101,18 +69,6 @@ public enum SessionSetup {
     public let securityBufferLength: UInt16
     public let buffer: Data
 
-    public struct SessionFlags: OptionSet, Sendable {
-      public let rawValue: UInt16
-
-      public init(rawValue: UInt16) {
-        self.rawValue = rawValue
-      }
-
-      public static let guest = SessionFlags(rawValue: 0x0001)
-      public static let nullSession = SessionFlags(rawValue: 0x0002)
-      public static let encryptData = SessionFlags(rawValue: 0x0004)
-    }
-
     public init(data: Data) {
       let reader = ByteReader(data)
 
@@ -124,5 +80,51 @@ public enum SessionSetup {
       securityBufferLength = reader.read()
       buffer = reader.read(from: Int(securityBufferOffset), count: Int(securityBufferLength))
     }
+  }
+
+  public struct Flags: OptionSet, Sendable {
+    public let rawValue: UInt8
+
+    public init(rawValue: UInt8) {
+      self.rawValue = rawValue
+    }
+
+    public static let binding = Flags(rawValue: 0x0001)
+  }
+
+  public struct SecurityMode: OptionSet, Sendable {
+    public let rawValue: UInt8
+
+    public init(rawValue: UInt8) {
+      self.rawValue = rawValue
+    }
+
+    public static let signingEnabled = SecurityMode(rawValue: 0x0001)
+    public static let signingRequired = SecurityMode(rawValue: 0x0002)
+  }
+
+  public struct Capabilities: OptionSet, Sendable {
+    public let rawValue: UInt32
+
+    public init(rawValue: UInt32) {
+      self.rawValue = rawValue
+    }
+
+    public static let dfs = Capabilities(rawValue: 0x00000001)
+    public static let unused1 = Capabilities(rawValue: 0x00000002)
+    public static let unused2 = Capabilities(rawValue: 0x00000004)
+    public static let unused3 = Capabilities(rawValue: 0x00000008)
+  }
+
+  public struct SessionFlags: OptionSet, Sendable {
+    public let rawValue: UInt16
+
+    public init(rawValue: UInt16) {
+      self.rawValue = rawValue
+    }
+
+    public static let guest = SessionFlags(rawValue: 0x0001)
+    public static let nullSession = SessionFlags(rawValue: 0x0002)
+    public static let encryptData = SessionFlags(rawValue: 0x0004)
   }
 }

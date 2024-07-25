@@ -113,8 +113,8 @@ public enum NTLM {
       password: String,
       domain: String
     ) -> Data {
-      let passwordData = password.data(using: .utf16LittleEndian) ?? Data()
-      let usernameData = (username.uppercased() + domain).data(using: .utf16LittleEndian) ?? Data()
+      let passwordData = password.encoded()
+      let usernameData = (username.uppercased() + domain).encoded()
 
       let responseKeyNT = Crypto.hmacMD5(key: Crypto.md4(passwordData), data: usernameData)
       return responseKeyNT
@@ -339,7 +339,9 @@ public enum NTLM {
 
     public init(negotiatedEncoding value: String?, offset: UInt32) {
       let value = value ?? ""
-      if let data = value.data(using: .utf16LittleEndian, allowLossyConversion: true), !data.isEmpty {
+      let data = value.encoded()
+
+      if !data.isEmpty {
         len = UInt16(truncatingIfNeeded: data.count)
         maxLen = len
         bufferOffset = offset
@@ -358,9 +360,11 @@ public enum NTLM {
 
     public func encoded() -> Data {
       var data = Data()
+
       data += len
       data += maxLen
       data += bufferOffset
+
       return data
     }
   }
@@ -393,6 +397,7 @@ struct NTLMv2ClientChallenge {
 
   func encoded() -> Data {
     var data = Data()
+
     data += respType
     data += hiRespType
     data += reserved1
@@ -402,6 +407,7 @@ struct NTLMv2ClientChallenge {
     data += reserved3
     data += avPairs
     data += Data(count: 8)
+
     return data
   }
 }
@@ -433,6 +439,7 @@ struct AVPair {
 
   init(data: Data) {
     let reader = ByteReader(data)
+    
     avId = AVId(rawValue: reader.read())!
     avLen = reader.read()
     avValue = reader.read(count: Int(avLen))
@@ -440,9 +447,11 @@ struct AVPair {
   
   func encoded() -> Data {
     var data = Data()
+
     data += avId.rawValue
     data += avLen
     data += avValue
+
     return data
   }
 }
