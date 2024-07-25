@@ -14,6 +14,7 @@ public enum QueryDirectory {
     public let buffer: Data
 
     public init(
+      creditCharge: UInt16 = 1,
       headerFlags: Header.Flags = [],
       messageId: UInt64,
       treeId: UInt32,
@@ -21,12 +22,13 @@ public enum QueryDirectory {
       fileInformationClass: FileInformationClass,
       flags: Flags = [.restartScans],
       fileId: Data,
-      fileName: String
+      fileName: String,
+      outputBufferLength: UInt32 = 65535
     ) {
       header = Header(
-        creditCharge: 1,
+        creditCharge: creditCharge,
         command: .queryDirectory,
-        creditRequest: 64,
+        creditRequest: 256,
         flags: headerFlags,
         messageId: messageId,
         treeId: treeId,
@@ -43,7 +45,7 @@ public enum QueryDirectory {
       fileNameOffset = 96
       fileNameLength = UInt16(truncatingIfNeeded: fileNameData.count)
 
-      outputBufferLength = 0x00010000
+      self.outputBufferLength = outputBufferLength
       buffer = fileNameData + Data(count: 2)
     }
 
