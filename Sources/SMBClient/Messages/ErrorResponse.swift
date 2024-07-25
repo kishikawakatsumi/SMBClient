@@ -8,6 +8,7 @@ public struct ErrorResponse: Error {
 
   public init(data: Data) {
     let reader = ByteReader(data)
+
     header = reader.read()
     structureSize = reader.read()
     errorContextCount = reader.read()

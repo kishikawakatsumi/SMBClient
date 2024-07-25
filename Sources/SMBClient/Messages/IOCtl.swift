@@ -4,8 +4,8 @@ public enum IOCtl {
   public struct Request {
     public let header: Header
     public let structureSize: UInt16
-    public let reserved: UInt16 = 0
-    public let ctlCode: CtlCode
+    public let reserved: UInt16
+    public let ctlCode: UInt32
     public let fileId: Data
     public let inputOffset: UInt32
     public let inputCount: UInt32
@@ -14,28 +14,11 @@ public enum IOCtl {
     public let outputCount: UInt32
     public let maxOutputResponse: UInt32
     public let flags: Flags
-    public let reserved2: UInt32 = 0
+    public let reserved2: UInt32
     public let buffer: Data
 
-    public enum CtlCode: UInt32 {
-      case dfsGetReferrals = 0x00060194
-      case pipePeek = 0x0011400C
-      case pipeWait = 0x00110018
-      case pipeTransceive = 0x0011C017
-      case srvCopyChunk = 0x001440F2
-      case srvEnumerateSnapshots = 0x00144064
-      case srvRequestResumeKey = 0x00140078
-      case srvReadHash = 0x001441BB
-      case srvCopyChunkWrite = 0x001480F2
-      case lmrRequestResiliency = 0x001401D4
-      case queryNetworkInterfaceInfo = 0x001401FC
-      case setReleasePoint = 0x000900A4
-      case dfsGetReferralsEx = 0x000601B0
-      case fileLevelTrim = 0x00098208
-      case validateNegotiateInfo = 0x00140204
-    }
-
     public init(
+      headerFlags: Header.Flags = [],
       messageId: UInt64,
       treeId: UInt32,
       sessionId: UInt64,
@@ -56,24 +39,27 @@ public enum IOCtl {
       )
 
       structureSize = 57
-      self.ctlCode = ctlCode
+      reserved = 0
+      self.ctlCode = ctlCode.rawValue
       self.fileId = fileId
       inputOffset = 120
-      inputCount = UInt32(input.count)
+      inputCount = UInt32(truncatingIfNeeded: input.count)
       maxInputResponse = 0
       outputOffset = 0
       outputCount = 0
       maxOutputResponse = 0x00010000
       flags = [.isFsctl]
+      reserved2 = 0
       buffer = input + output
     }
 
     public func encoded() -> Data {
       var data = Data()
+
       data += header.encoded()
       data += structureSize
       data += reserved
-      data += ctlCode.rawValue
+      data += ctlCode
       data += fileId
       data += inputOffset
       data += inputCount
@@ -84,6 +70,7 @@ public enum IOCtl {
       data += flags.rawValue
       data += reserved2
       data += buffer
+
       return data
     }
   }
@@ -119,6 +106,24 @@ public enum IOCtl {
       reserved2 = reader.read()
       buffer = reader.read(count: Int(outputCount))
     }
+  }
+
+  public enum CtlCode: UInt32 {
+    case dfsGetReferrals = 0x00060194
+    case pipePeek = 0x0011400C
+    case pipeWait = 0x00110018
+    case pipeTransceive = 0x0011C017
+    case srvCopyChunk = 0x001440F2
+    case srvEnumerateSnapshots = 0x00144064
+    case srvRequestResumeKey = 0x00140078
+    case srvReadHash = 0x001441BB
+    case srvCopyChunkWrite = 0x001480F2
+    case lmrRequestResiliency = 0x001401D4
+    case queryNetworkInterfaceInfo = 0x001401FC
+    case setReleasePoint = 0x000900A4
+    case dfsGetReferralsEx = 0x000601B0
+    case fileLevelTrim = 0x00098208
+    case validateNegotiateInfo = 0x00140204
   }
 
   public struct Flags: OptionSet, Sendable {

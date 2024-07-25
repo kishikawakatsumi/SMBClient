@@ -14,12 +14,19 @@ public enum Negotiate {
     public let padding: Data
     public let negotiateContextList: Data
 
-    public init(messageId: UInt64, securityMode: SecurityMode, dialects: [Dialects]) {
+    public init(
+      headerFlags: Header.Flags = [],
+      messageId: UInt64,
+      securityMode: SecurityMode,
+      dialects: [Dialects]
+    ) {
       header = Header(
+        creditCharge: 1,
         command: .negotiate,
-        flags: [],
-        nextCommand: 0,
+        creditRequest: 0,
+        flags: headerFlags,
         messageId: messageId,
+        treeId: 0,
         sessionId: 0
       )
 
@@ -37,7 +44,9 @@ public enum Negotiate {
 
     public func encoded() -> Data {
       var data = Data()
+
       data += header.encoded()
+
       data += structureSize
       data += dialectCount
       data += securityMode.rawValue
@@ -45,11 +54,13 @@ public enum Negotiate {
       data += capabilities.rawValue
       data += clientGuid.data
       data += clientStartTime
+
       for dialect in dialects {
         data += dialect.rawValue
       }
       data += padding
       data += negotiateContextList
+
       return data
     }
   }
