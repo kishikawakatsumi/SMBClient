@@ -295,14 +295,18 @@ public class Session {
       name: path
     )
 
+    let outputBufferLength = min(1048576, maxTransactSize)
+    let creditSize = creditSize(size: outputBufferLength)
     let queryDirectoryRequest = QueryDirectory.Request(
+      creditCharge: creditSize,
       headerFlags: [.relatedOperations],
-      messageId: messageId.next(),
+      messageId: messageId.next(count: UInt64(creditSize)),
       treeId: treeId,
       sessionId: sessionId,
       fileInformationClass: .fileIdBothDirectoryInformation,
       fileId: temporaryUUID,
-      fileName: pattern
+      fileName: pattern,
+      outputBufferLength: outputBufferLength
     )
 
     let data = try await send(
@@ -322,13 +326,15 @@ public class Session {
         let fileId = createResponse.fileId
 
         let queryDirectoryRequest = QueryDirectory.Request(
-          messageId: messageId.next(),
+          creditCharge: creditSize,
+          messageId: messageId.next(count: UInt64(creditSize)),
           treeId: treeId,
           sessionId: sessionId,
           fileInformationClass: .fileIdBothDirectoryInformation,
           flags: [],
           fileId: fileId,
-          fileName: pattern
+          fileName: pattern,
+          outputBufferLength: outputBufferLength
         )
 
         let data = try await send(queryDirectoryRequest.encoded())
