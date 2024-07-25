@@ -248,7 +248,7 @@ public struct File {
   
   private let fileStat: FileStat
 
-  init(fileInfo: QueryDirectory.Response.FileIdBothDirectoryInformation) {
+  init(fileInfo: QueryDirectory.FileIdBothDirectoryInformation) {
     name = fileInfo.fileName
     fileStat = FileStat(fileInfo)
   }
@@ -283,7 +283,7 @@ public struct FileStat {
     lastWriteTime = FileTime(response.lastWriteTime).date
   }
 
-  init(_ fileInfo: QueryDirectory.Response.FileIdBothDirectoryInformation) {
+  init(_ fileInfo: QueryDirectory.FileIdBothDirectoryInformation) {
     size = fileInfo.endOfFile
     isDirectory = fileInfo.fileAttributes.contains(.directory)
     isHidden = fileInfo.fileAttributes.contains(.hidden)

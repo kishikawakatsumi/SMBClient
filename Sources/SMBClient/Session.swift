@@ -201,9 +201,9 @@ public class Session {
   public func create(
     desiredAccess: FilePipePrinterAccessMask,
     fileAttributes: FileAttributes,
-    shareAccess: Create.Request.ShareAccess,
-    createDisposition: Create.Request.CreateDisposition,
-    createOptions: Create.Request.CreateOptions,
+    shareAccess: Create.ShareAccess,
+    createDisposition: Create.CreateDisposition,
+    createOptions: Create.CreateOptions,
     name: String
   ) async throws -> Create.Response {
     let request = Create.Request(
@@ -281,7 +281,7 @@ public class Session {
     return Close.Response(data: data)
   }
 
-  public func queryDirectory(path: String, pattern: String) async throws -> [QueryDirectory.Response.FileIdBothDirectoryInformation] {
+  public func queryDirectory(path: String, pattern: String) async throws -> [QueryDirectory.FileIdBothDirectoryInformation] {
     let createRequest = Create.Request(
       messageId: messageId.next(),
       treeId: treeId,
@@ -295,7 +295,7 @@ public class Session {
     )
 
     let queryDirectoryRequest = QueryDirectory.Request(
-      flags: [.relatedOperations],
+      headerFlags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
@@ -311,7 +311,7 @@ public class Session {
 
     let createResponse = Create.Response(data: data)
 
-    var files = [QueryDirectory.Response.FileIdBothDirectoryInformation]()
+    var files = [QueryDirectory.FileIdBothDirectoryInformation]()
 
     let queryDirectoryResponse = QueryDirectory.Response(data: Data(data[createResponse.header.nextCommand...]))
     files.append(contentsOf: queryDirectoryResponse.files)
@@ -325,7 +325,7 @@ public class Session {
           treeId: treeId,
           sessionId: sessionId,
           fileInformationClass: .fileIdBothDirectoryInformation,
-          flags2: [],
+          flags: [],
           fileId: fileId,
           fileName: pattern
         )
@@ -358,7 +358,7 @@ public class Session {
       name: path
     )
     let closeRequest = Close.Request(
-      flags: [.relatedOperations],
+      headerFlags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
@@ -424,7 +424,7 @@ public class Session {
       fileId: temporaryUUID
     )
     let closeRequest = Close.Request(
-      flags: [.relatedOperations],
+      headerFlags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
@@ -536,7 +536,7 @@ public class Session {
       fileInformation: FileDispositionInformation(deletePending: true)
     )
     let closeRequest = Close.Request(
-      flags: [.relatedOperations],
+      headerFlags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
@@ -572,7 +572,7 @@ public class Session {
       fileInformation: FileDispositionInformation(deletePending: true)
     )
     let closeRequest = Close.Request(
-      flags: [.relatedOperations],
+      headerFlags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
@@ -608,7 +608,7 @@ public class Session {
       fileInformation: FileRenameInformation(fileName: to)
     )
     let closeRequest = Close.Request(
-      flags: [.relatedOperations],
+      headerFlags: [.relatedOperations],
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,

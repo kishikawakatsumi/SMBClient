@@ -19,8 +19,8 @@ public struct Header {
     creditCharge: UInt16 = 1,
     command: Command,
     creditRequest: UInt16 = 0,
-    flags: Flags,
-    nextCommand: UInt32,
+    flags: Flags = [],
+    nextCommand: UInt32 = 0,
     messageId: UInt64,
     treeId: UInt32 = 0,
     sessionId: UInt64

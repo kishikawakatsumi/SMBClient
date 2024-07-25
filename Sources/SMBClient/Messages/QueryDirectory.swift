@@ -13,37 +13,13 @@ public enum QueryDirectory {
     public let outputBufferLength: UInt32
     public let buffer: Data
 
-    public enum FileInformationClass: UInt8 {
-      case fileDirectoryInformation = 0x01
-      case fileFullDirectoryInformation = 0x02
-      case fileIdFullDirectoryInformation = 0x26
-      case fileBothDirectoryInformation = 0x03
-      case fileIdBothDirectoryInformation = 0x25
-      case fileNamesInformation = 0x0C
-      case fileIdExtdDirectoryInformation = 0x3C
-      case fileInfomationClass_Reserved = 0x64
-    }
-
-    public struct Flags: OptionSet, Sendable {
-      public let rawValue: UInt8
-
-      public init(rawValue: UInt8) {
-        self.rawValue = rawValue
-      }
-
-      public static let restartScans = Flags(rawValue: 0x01)
-      public static let returnSingleEntry = Flags(rawValue: 0x02)
-      public static let indexSpecified = Flags(rawValue: 0x04)
-      public static let reopen = Flags(rawValue: 0x10)
-    }
-
     public init(
-      flags: Header.Flags = [],
+      headerFlags: Header.Flags = [],
       messageId: UInt64,
       treeId: UInt32,
       sessionId: UInt64,
       fileInformationClass: FileInformationClass,
-      flags2: Flags = [.restartScans],
+      flags: Flags = [.restartScans],
       fileId: Data,
       fileName: String
     ) {
@@ -51,7 +27,7 @@ public enum QueryDirectory {
         creditCharge: 1,
         command: .queryDirectory,
         creditRequest: 64,
-        flags: flags,
+        flags: headerFlags,
         nextCommand: 0,
         messageId: messageId,
         treeId: treeId,
@@ -60,18 +36,21 @@ public enum QueryDirectory {
 
       structureSize = 33
       self.fileInformationClass = fileInformationClass
-      self.flags = flags2
+      self.flags = flags
       fileIndex = 0
       self.fileId = fileId
-      let fileNameData = fileName.data(using: .utf16LittleEndian)!
+
+      let fileNameData = fileName.encoded()
       fileNameOffset = 96
       fileNameLength = UInt16(truncatingIfNeeded: fileNameData.count)
+
       outputBufferLength = 0x00010000
       buffer = fileNameData + Data(count: 2)
     }
 
     public func encoded() -> Data {
       var data = Data()
+
       data += header.encoded()
       data += structureSize
       data += fileInformationClass.rawValue
@@ -82,6 +61,7 @@ public enum QueryDirectory {
       data += fileNameLength
       data += outputBufferLength
       data += buffer
+
       return data
     }
   }
@@ -116,49 +96,76 @@ public enum QueryDirectory {
 
       self.files = files
     }
+  }
 
-    public struct FileIdBothDirectoryInformation {
-      public let nextEntryOffset: UInt32
-      public let fileIndex: UInt32
-      public let creationTime: UInt64
-      public let lastAccessTime: UInt64
-      public let lastWriteTime: UInt64
-      public let changeTime: UInt64
-      public let endOfFile: UInt64
-      public let allocationSize: UInt64
-      public let fileAttributes: FileAttributes
-      public let fileNameLength: UInt32
-      public let eaSize: UInt32
-      public let shortNameLength: UInt8
-      public let reserved: UInt8
-      public let shortName: String
-      public let reserved2: UInt16
-      public let fileId: Data
-      public let fileName: String
+  public enum FileInformationClass: UInt8 {
+    case fileDirectoryInformation = 0x01
+    case fileFullDirectoryInformation = 0x02
+    case fileIdFullDirectoryInformation = 0x26
+    case fileBothDirectoryInformation = 0x03
+    case fileIdBothDirectoryInformation = 0x25
+    case fileNamesInformation = 0x0C
+    case fileIdExtdDirectoryInformation = 0x3C
+    case fileInfomationClass_Reserved = 0x64
+  }
 
-      public init(data: Data) {
-        let reader = ByteReader(data)
+  public struct Flags: OptionSet, Sendable {
+    public let rawValue: UInt8
 
-        nextEntryOffset = reader.read()
-        fileIndex = reader.read()
-        creationTime = reader.read()
-        lastAccessTime = reader.read()
-        lastWriteTime = reader.read()
-        changeTime = reader.read()
-        endOfFile = reader.read()
-        allocationSize = reader.read()
-        fileAttributes = FileAttributes(rawValue: reader.read())
-        fileNameLength = reader.read()
-        eaSize = reader.read()
-        shortNameLength = reader.read()
-        reserved = reader.read()
-        let shortNameData = reader.read(count: 24)
-        shortName = String(data: shortNameData, encoding: .utf16LittleEndian) ?? shortNameData.hex
-        reserved2 = reader.read()
-        fileId = reader.read(count: 8)
-        let fileNameData = reader.read(count: Int(fileNameLength))
-        fileName = String(data: fileNameData, encoding: .utf16LittleEndian) ?? fileNameData.hex
-      }
+    public init(rawValue: UInt8) {
+      self.rawValue = rawValue
+    }
+
+    public static let restartScans = Flags(rawValue: 0x01)
+    public static let returnSingleEntry = Flags(rawValue: 0x02)
+    public static let indexSpecified = Flags(rawValue: 0x04)
+    public static let reopen = Flags(rawValue: 0x10)
+  }
+
+  public struct FileIdBothDirectoryInformation {
+    public let nextEntryOffset: UInt32
+    public let fileIndex: UInt32
+    public let creationTime: UInt64
+    public let lastAccessTime: UInt64
+    public let lastWriteTime: UInt64
+    public let changeTime: UInt64
+    public let endOfFile: UInt64
+    public let allocationSize: UInt64
+    public let fileAttributes: FileAttributes
+    public let fileNameLength: UInt32
+    public let eaSize: UInt32
+    public let shortNameLength: UInt8
+    public let reserved: UInt8
+    public let shortName: String
+    public let reserved2: UInt16
+    public let fileId: Data
+    public let fileName: String
+
+    public init(data: Data) {
+      let reader = ByteReader(data)
+
+      nextEntryOffset = reader.read()
+      fileIndex = reader.read()
+      creationTime = reader.read()
+      lastAccessTime = reader.read()
+      lastWriteTime = reader.read()
+      changeTime = reader.read()
+      endOfFile = reader.read()
+      allocationSize = reader.read()
+      fileAttributes = FileAttributes(rawValue: reader.read())
+      fileNameLength = reader.read()
+      eaSize = reader.read()
+      shortNameLength = reader.read()
+      reserved = reader.read()
+
+      let shortNameData = reader.read(count: 24)
+      shortName = String(data: shortNameData, encoding: .utf16LittleEndian) ?? shortNameData.hex
+
+      reserved2 = reader.read()
+      fileId = reader.read(count: 8)
+
+      let fileNameData = reader.read(count: Int(fileNameLength))
+      fileName = String(data: fileNameData, encoding: .utf16LittleEndian) ?? fileNameData.hex
     }
   }
 }

@@ -7,17 +7,16 @@ public enum Logoff {
     public let reserved: UInt16
 
     public init(
-      creditRequest: UInt16 = 1,
+      headerFlags: Header.Flags = [],
       messageId: UInt64,
       treeId: UInt32,
       sessionId: UInt64
     ) {
       header = Header(
-        creditCharge: creditRequest,
+        creditCharge: 1,
         command: .logoff,
-        creditRequest: creditRequest,
-        flags: [],
-        nextCommand: 0,
+        creditRequest: 0,
+        flags: headerFlags,
         messageId: messageId,
         treeId: treeId,
         sessionId: sessionId
@@ -29,9 +28,11 @@ public enum Logoff {
 
     public func encoded() -> Data {
       var data = Data()
+
       data += header.encoded()
       data += structureSize
       data += reserved
+
       return data
     }
   }
@@ -43,6 +44,7 @@ public enum Logoff {
 
     public init(data: Data) {
       let reader = ByteReader(data)
+
       header = reader.read()
       structureSize = reader.read()
       reserved = reader.read()
