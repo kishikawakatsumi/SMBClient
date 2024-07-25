@@ -1,5 +1,4 @@
 import Foundation
-import CommonCrypto
 
 public class SMBClient {
   public let host: String
