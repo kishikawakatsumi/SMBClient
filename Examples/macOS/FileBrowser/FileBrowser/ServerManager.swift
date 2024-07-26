@@ -21,12 +21,7 @@ class ServerManager {
       )
       servers.append(server)
 
-      let encoder = PropertyListEncoder()
-      encoder.outputFormat = .binary
-      if let data = try? encoder.encode(servers) {
-        UserDefaults.standard.setValue(data, forKey: "servers")
-      }
-
+      saveServers()
       NotificationCenter.default.post(name: Self.serversDidUpdate, object: self)
     }
   }
@@ -46,7 +41,24 @@ class ServerManager {
     NotificationCenter.default.post(name: Self.serversDidUpdate, object: self)
   }
 
+  func removeServer(_ server: Server) {
+    if let index = servers.firstIndex(where: { $0.id == server.id }) {
+      servers.remove(at: index)
+      
+      saveServers()
+      NotificationCenter.default.post(name: Self.serversDidUpdate, object: self)
+    }
+  }
+
   func server(for id: ID) -> Server? {
     servers.first { $0.id == id }
+  }
+
+  private func saveServers() {
+    let encoder = PropertyListEncoder()
+    encoder.outputFormat = .binary
+    if let data = try? encoder.encode(servers) {
+      UserDefaults.standard.setValue(data, forKey: "servers")
+    }
   }
 }
