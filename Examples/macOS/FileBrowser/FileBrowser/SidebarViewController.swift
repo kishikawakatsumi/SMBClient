@@ -22,6 +22,17 @@ class SidebarViewController: NSViewController {
     sourceList.reloadData()
   }
 
+  @IBAction
+  private func removeServerContextMenuAction(_ sender: Any) {
+    let clickedRow = sourceList.clickedRow
+    guard let serverNode = sourceList.item(atRow: clickedRow) as? ServerNode else { return }
+
+    let serverManager = ServerManager.shared
+    if let server = serverManager.server(for: serverNode.id) {
+      serverManager.removeServer(server)
+    }
+  }
+
   private func navigationController() -> NavigationController? {
     guard let splitViewController = parent as? SplitViewController else {
       return nil
@@ -159,5 +170,20 @@ extension SidebarViewController: NSOutlineViewDelegate {
 
   func outlineView(_ outlineView: NSOutlineView, shouldCollapseItem item: Any) -> Bool {
     return false
+  }
+}
+
+extension SidebarViewController: NSMenuItemValidation {
+  func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+    switch menuItem.menu?.title {
+    case "File":
+      return false
+    default:
+      let clickedRow = sourceList.clickedRow
+      guard let serverNode = sourceList.item(atRow: clickedRow) as? ServerNode else { return false }
+
+      let servers = ServerManager.shared.servers
+      return servers.contains { $0.id == serverNode.id }
+    }
   }
 }

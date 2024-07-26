@@ -398,6 +398,9 @@ CA
                                                     </prototypeCellViews>
                                                 </tableColumn>
                                             </tableColumns>
+                                            <connections>
+                                                <outlet property="menu" destination="ViI-nB-zPW" id="Wnh-GJ-L4T"/>
+                                            </connections>
                                         </outlineView>
                                     </subviews>
                                     <nil key="backgroundColor"/>
@@ -426,6 +429,16 @@ CA
                     </connections>
                 </viewController>
                 <customObject id="HqA-QY-9kV" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+                <menu id="ViI-nB-zPW">
+                    <items>
+                        <menuItem title="Forget Server" id="fEy-Va-jmb">
+                            <modifierMask key="keyEquivalentModifierMask"/>
+                            <connections>
+                                <action selector="removeServerContextMenuAction:" target="h8h-Ha-NuQ" id="cNl-p6-eSp"/>
+                            </connections>
+                        </menuItem>
+                    </items>
+                </menu>
             </objects>
             <point key="canvasLocation" x="649" y="1089.5"/>
         </scene>
