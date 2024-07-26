@@ -4,6 +4,11 @@
 
 Swift SMB client library and iOS/macOS file browser applications. This library provides a high-level interface to the SMB protocol and allows you to access files on remote SMB servers. Written in Swift, no dependencies on external libraries.
 
+## Twitter
+
+Released SMBClient, a Swift SMB client library and iOS/macOS sample file browser applications.
+You can access files on remote SMB servers from iOS/macOS apps. Written in Swift, no dependencies on external libraries.
+
 ## Usage
 
 `SMBClient` class hides the low-layer SMB protocol and provides a higher-layer interface suitable for common use cases. The following example demonstrates how to list files in a share drive on a remote SMB server.
@@ -41,6 +46,45 @@ print(files.map { $0.fileName })
 
 try await session.treeDisconnect()
 try await session.logoff()
+```
+
+### Log in to the remote SMB server
+
+```swift
+let client = SMBClient(host: "198.51.100.50")
+try await client.login(username: "alice", password: "secret")
+```
+
+### List share drives
+
+```swift
+let shares = try await client.listShares()
+print(shares.map { $0.name })
+```
+
+### Connect to a share drive
+
+```swift
+try await client.connectShare("Public")
+```
+
+### List files in a directory
+
+```swift
+let files = try await client.listDirectory("Documents/Presentations")
+print(files.map { $0.fileName })
+```
+
+### Download a file
+
+```swift
+let data = try await client.download(path: "Pictures/IMG_0001.jpg")
+```
+
+### Upload a file/directory
+
+```swift
+try await client.upload(data: data, path: "Documents/Presentations/Keynote.key")
 ```
 
 ## Example Applications
