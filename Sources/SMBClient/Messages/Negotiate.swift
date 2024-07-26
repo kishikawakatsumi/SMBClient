@@ -145,22 +145,25 @@ public enum Negotiate {
 
 extension Negotiate.Response: CustomDebugStringConvertible {
   public var debugDescription: String {
-    "{header: \(header), " +
-    "structureSize: \(structureSize), " +
-    "securityMode: \(securityMode), " +
-    "dialectRevision: \(String(format: "0x%04X", dialectRevision)), " +
-    "negotiateContextCount: \(negotiateContextCount), " +
-    "serverGuid: \(serverGuid), " +
-    "capabilities: \(capabilities), " +
-    "maxTransactSize: \(maxTransactSize), " +
-    "maxReadSize: \(maxReadSize), " +
-    "maxWriteSize: \(maxWriteSize), " +
-    "systemTime: \(FileTime(systemTime).date), " +
-    "serverStartTime: \(FileTime(serverStartTime).date), " +
-    "securityBufferOffset: \(securityBufferOffset), " +
-    "securityBufferLength: \(securityBufferLength), " +
-    "negotiateContextOffset: \(negotiateContextOffset), " +
-    "securityBuffer: \(securityBuffer.hex)}"
+    """
+    \(header)
+    Negotiate Protocol Response (\(String(format: "0x%02x", header.command)))
+      StructureSize: \(structureSize)
+      Security mode: 0x\(String(format: "%04x", securityMode.rawValue)) (\(securityMode))
+      Dialect: 0x\(String(format: "%04x", dialectRevision))
+      NegotiateContextCount: \(negotiateContextCount)
+      Server Guid: \(serverGuid)
+      Capabilities: 0x\(String(format: "%08x", capabilities.rawValue)) (\(capabilities))
+      Max Transaction Size: \(maxTransactSize)
+      Max Read Size: \(maxReadSize)
+      Max Write Size: \(maxWriteSize)
+      Current Time: \(FileTime(systemTime))
+      Boot Time: \(FileTime(serverStartTime))
+      Blob Offset: \(securityBufferOffset)
+      Blob Length: \(securityBufferLength)
+      Security Blob: \(securityBuffer.hex)
+      NegotiateContextOffset: \(String(format: "0x%08x", negotiateContextOffset))
+    """
   }
 }
 

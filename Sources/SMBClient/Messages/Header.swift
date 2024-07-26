@@ -126,19 +126,42 @@ extension ByteReader {
 
 extension Header: CustomDebugStringConvertible {
   public var debugDescription: String {
-    "{protocolId: \(String(protocolId.bigEndian, radix: 16)), " +
-    "structureSize: \(structureSize), " +
-    "creditCharge: \(creditCharge), " +
-    "status: \(status), " +
-    "command: \(Header.Command.debugDescription(command)), " +
-    "creditRequestResponse: \(creditRequestResponse), " +
-    "flags: \(flags), " +
-    "nextCommand: \(nextCommand), " +
-    "messageId: \(messageId), " +
-    "reserved: \(reserved), " +
-    "treeId: \(treeId), " +
-    "sessionId: \(sessionId), " +
-    "signature: \(signature.hex)}"
+    if flags.contains(.serverToRedir) {
+      return
+        """
+        SMB2 Header
+          ProtocolId: 0x\(String(format: "%08x", protocolId.bigEndian))
+          Credit Charge: \(creditCharge)
+          NT Status: 0x\(String(format: "%08x", status))
+          Command: \(Command.debugDescription(command)) (\(command))
+          Credits granted: \(creditRequestResponse)
+          Flags: 0x\(String(format: "%08x", flags.rawValue)) (\(flags))
+          Chain Offset: \(nextCommand)
+          Message ID: \(String(messageId, radix: 16))
+          Process Id: 0x\(String(format: "%08x", reserved))
+          Tree Id: 0x\(String(format: "%08x", treeId))
+          Session Id: 0x\(String(format: "%016llx", sessionId))
+          Signature: \(signature.hex)
+        """
+    } else {
+      return
+        """
+        SMB2 Header
+          ProtocolId: 0x\(String(format: "%08x", protocolId.bigEndian))
+          Credit Charge: \(creditCharge)
+          Channel Sequence: \(String((status & 0xFFFF0000) >> 16, radix: 16))
+          Reserved: \(String(format: "%04x", status & 0x0000FFFF))
+          Command: \(Command.debugDescription(command)) (\(command))
+          Credits requested: \(creditRequestResponse)
+          Flags: 0x\(String(format: "%08x", flags.rawValue)) (\(flags))
+          Chain Offset: \(nextCommand)
+          Message ID: \(String(messageId, radix: 16))
+          Process Id: 0x\(String(format: "%08x", reserved))
+          Tree Id: 0x\(String(format: "%08x", treeId))
+          Session Id: 0x\(String(format: "%016llx", sessionId))
+          Signature: \(signature.hex)
+        """
+    }
   }
 }
 
