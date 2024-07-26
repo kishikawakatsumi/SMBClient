@@ -88,10 +88,14 @@ class FilesViewController: UIViewController, UITableViewDataSource, UITableViewD
     configuration.secondaryTextProperties.font = UIFont.monospacedDigitSystemFont(ofSize: fontSize, weight: .regular)
 
     if file .isDirectory {
+      cell.accessoryType = .disclosureIndicator
+
       configuration.image = UIImage(systemName: "folder")
       configuration.text = file.name
       configuration.secondaryText = dateFormatter.string(from: file.lastWriteTime)
     } else {
+      cell.accessoryType = .none
+
       configuration.image = UIImage(systemName: "doc")
       configuration.text = file.name
 
