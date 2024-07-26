@@ -58,9 +58,8 @@ try await session.logoff()
 Add the following line to the dependencies in your `Package.swift` file:
 
 ```swift
-
 dependencies: [
-  .package(url: "https://github.com/kishikawakatsumi/SMBClient.git", .branch("main")),
+  .package(url: "https://github.com/kishikawakatsumi/SMBClient.git", .upToNextMajor(from: "0.1.0"))
 ]
 ```
 
