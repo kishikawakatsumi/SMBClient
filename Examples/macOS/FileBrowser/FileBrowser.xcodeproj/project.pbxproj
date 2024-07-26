@@ -31,8 +31,8 @@
 		145299A82C356A23003B035C /* FilesViewController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 145299A72C356A23003B035C /* FilesViewController.storyboard */; };
 		145299AA2C356A30003B035C /* FilesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299A92C356A30003B035C /* FilesViewController.swift */; };
 		145299AC2C3612C6003B035C /* CredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299AB2C3612C6003B035C /* CredentialStore.swift */; };
-		145299B02C3A5C0B003B035C /* VideoPlayerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299AF2C3A5C0B003B035C /* VideoPlayerWindowController.swift */; };
-		145299B22C3A5C42003B035C /* VideoPlayerWindowController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 145299B12C3A5C42003B035C /* VideoPlayerWindowController.storyboard */; };
+		145299B02C3A5C0B003B035C /* MediaPlayerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299AF2C3A5C0B003B035C /* MediaPlayerWindowController.swift */; };
+		145299B22C3A5C42003B035C /* MediaPlayerWindowController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 145299B12C3A5C42003B035C /* MediaPlayerWindowController.storyboard */; };
 		145299B42C3A5DAD003B035C /* SMBAVAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299B32C3A5DAD003B035C /* SMBAVAsset.swift */; };
 		145299E72C3AC3DD003B035C /* DocumentWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299E62C3AC3DD003B035C /* DocumentWindowController.swift */; };
 		145299E92C3AC3EF003B035C /* DocumentWindowController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 145299E82C3AC3EF003B035C /* DocumentWindowController.storyboard */; };
@@ -84,8 +84,8 @@
 		145299A72C356A23003B035C /* FilesViewController.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = FilesViewController.storyboard; sourceTree = "<group>"; };
 		145299A92C356A30003B035C /* FilesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilesViewController.swift; sourceTree = "<group>"; };
 		145299AB2C3612C6003B035C /* CredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialStore.swift; sourceTree = "<group>"; };
-		145299AF2C3A5C0B003B035C /* VideoPlayerWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerWindowController.swift; sourceTree = "<group>"; };
-		145299B12C3A5C42003B035C /* VideoPlayerWindowController.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = VideoPlayerWindowController.storyboard; sourceTree = "<group>"; };
+		145299AF2C3A5C0B003B035C /* MediaPlayerWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPlayerWindowController.swift; sourceTree = "<group>"; };
+		145299B12C3A5C42003B035C /* MediaPlayerWindowController.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = MediaPlayerWindowController.storyboard; sourceTree = "<group>"; };
 		145299B32C3A5DAD003B035C /* SMBAVAsset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMBAVAsset.swift; sourceTree = "<group>"; };
 		145299E62C3AC3DD003B035C /* DocumentWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentWindowController.swift; sourceTree = "<group>"; };
 		145299E82C3AC3EF003B035C /* DocumentWindowController.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = DocumentWindowController.storyboard; sourceTree = "<group>"; };
@@ -158,7 +158,7 @@
 				145299A92C356A30003B035C /* FilesViewController.swift */,
 				14C15E972C49827600F2F9A9 /* DirectoryStructure.swift */,
 				145299E62C3AC3DD003B035C /* DocumentWindowController.swift */,
-				145299AF2C3A5C0B003B035C /* VideoPlayerWindowController.swift */,
+				145299AF2C3A5C0B003B035C /* MediaPlayerWindowController.swift */,
 				145299B32C3A5DAD003B035C /* SMBAVAsset.swift */,
 				14529A3F2C3EB153003B035C /* AuthManager.swift */,
 				14529A3D2C3E8B5D003B035C /* SessionManager.swift */,
@@ -185,7 +185,7 @@
 				147EC5AD2C3F77D200C08ED3 /* ConnectServer.storyboard */,
 				145299A52C355D7B003B035C /* SharesViewController.storyboard */,
 				145299A72C356A23003B035C /* FilesViewController.storyboard */,
-				145299B12C3A5C42003B035C /* VideoPlayerWindowController.storyboard */,
+				145299B12C3A5C42003B035C /* MediaPlayerWindowController.storyboard */,
 				145299E82C3AC3EF003B035C /* DocumentWindowController.storyboard */,
 				147EC5B92C40F88C00C08ED3 /* Activities.storyboard */,
 				1446801E2C347E200029A1AB /* Assets.xcassets */,
@@ -266,7 +266,7 @@
 			files = (
 				145299982C34E5FF003B035C /* ConnectService.storyboard in Resources */,
 				145299A82C356A23003B035C /* FilesViewController.storyboard in Resources */,
-				145299B22C3A5C42003B035C /* VideoPlayerWindowController.storyboard in Resources */,
+				145299B22C3A5C42003B035C /* MediaPlayerWindowController.storyboard in Resources */,
 				147EC5AE2C3F77D200C08ED3 /* ConnectServer.storyboard in Resources */,
 				145299A62C355D7B003B035C /* SharesViewController.storyboard in Resources */,
 				147EC5BA2C40F88C00C08ED3 /* Activities.storyboard in Resources */,
@@ -296,7 +296,7 @@
 				147EC5BC2C40F97100C08ED3 /* ActivitiesViewController.swift in Sources */,
 				144680342C34941D0029A1AB /* Service.swift in Sources */,
 				141AF3E42C4ABCCA0050C7A5 /* URL.swift in Sources */,
-				145299B02C3A5C0B003B035C /* VideoPlayerWindowController.swift in Sources */,
+				145299B02C3A5C0B003B035C /* MediaPlayerWindowController.swift in Sources */,
 				1446802A2C347FA40029A1AB /* WindowController.swift in Sources */,
 				14529A1A2C3D201B003B035C /* ConnectServerWindowController.swift in Sources */,
 				14529A3C2C3E7724003B035C /* SidebarCellView.swift in Sources */,

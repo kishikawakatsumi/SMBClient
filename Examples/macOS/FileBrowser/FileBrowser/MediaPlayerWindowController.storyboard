@@ -10,7 +10,7 @@
         <!--Window Controller-->
         <scene sceneID="UeV-6C-cNp">
             <objects>
-                <windowController storyboardIdentifier="VideoPlayerWindowController" id="z5E-vX-Qcz" customClass="VideoPlayerWindowController" customModule="FileBrowser" customModuleProvider="target" sceneMemberID="viewController">
+                <windowController storyboardIdentifier="MediaPlayerWindowController" id="z5E-vX-Qcz" customClass="MediaPlayerWindowController" customModule="FileBrowser" customModuleProvider="target" sceneMemberID="viewController">
                     <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="g1f-Kd-iou">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" fullSizeContentView="YES"/>
                         <rect key="contentRect" x="255" y="323" width="854" height="480"/>
@@ -31,10 +31,10 @@
             </objects>
             <point key="canvasLocation" x="-54" y="119"/>
         </scene>
-        <!--Video Player View Controller-->
+        <!--Media Player View Controller-->
         <scene sceneID="IyJ-GH-W8P">
             <objects>
-                <viewController id="A6n-vB-Wwx" customClass="VideoPlayerViewController" customModule="FileBrowser" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="A6n-vB-Wwx" customClass="MediaPlayerViewController" customModule="FileBrowser" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="bjr-hr-T5e">
                         <rect key="frame" x="0.0" y="0.0" width="854" height="480"/>
                         <autoresizingMask key="autoresizingMask"/>

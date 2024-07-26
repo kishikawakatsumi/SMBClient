@@ -229,8 +229,9 @@ class FilesViewController: NSViewController {
 
       let windowController: NSWindowController
 
-      if path.hasSuffix(".mov") || path.hasSuffix(".mp4") {
-        windowController = VideoPlayerWindowController.instantiate(path: path, client: client)
+      let pathExtension = URL(fileURLWithPath: path).pathExtension
+      if MediaPlayerWindowController.supportedExtensions.contains(pathExtension) {
+        windowController = MediaPlayerWindowController.instantiate(path: path, client: client)
         windowController.showWindow(nil)
       } else {
         windowController = DocumentWindowController.instantiate(path: path, client: client)
