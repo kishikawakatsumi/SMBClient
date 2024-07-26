@@ -2,11 +2,18 @@ import Cocoa
 import AVKit
 import SMBClient
 
-private let storyboardID = "VideoPlayerWindowController"
+private let storyboardID = "MediaPlayerWindowController"
 
-class VideoPlayerWindowController: NSWindowController, NSWindowDelegate {
-  let client: SMBClient
-  let path: String
+class MediaPlayerWindowController: NSWindowController, NSWindowDelegate {
+  static let supportedExtensions = {
+    let fileTypes: [AVFileType] = AVURLAsset.audiovisualTypes()
+    let extensions = fileTypes
+      .compactMap { UTType($0.rawValue)?.preferredFilenameExtension }
+    return extensions
+  }()
+
+  private let client: SMBClient
+  private let path: String
 
   private var observation: NSKeyValueObservation?
   private var windowController: NSWindowController?
@@ -43,7 +50,7 @@ class VideoPlayerWindowController: NSWindowController, NSWindowDelegate {
 
     window.delegate = self
 
-    guard let videoPlayerViewController = contentViewController as? VideoPlayerViewController else { return }
+    guard let videoPlayerViewController = contentViewController as? MediaPlayerViewController else { return }
 
     let asset = SMBAVAsset(client: client, path: path)
     let playerItem = AVPlayerItem(asset: asset)
@@ -81,7 +88,7 @@ class VideoPlayerWindowController: NSWindowController, NSWindowDelegate {
   }
 }
 
-class VideoPlayerViewController: NSViewController {
+class MediaPlayerViewController: NSViewController {
   @IBOutlet var playerView: AVPlayerView!
 
   override func viewDidAppear() {
