@@ -57,6 +57,29 @@
 		147EC5C02C41590400C08ED3 /* FileTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147EC5BF2C41590400C08ED3 /* FileTransfer.swift */; };
 		14C15E982C49827600F2F9A9 /* DirectoryStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C15E972C49827600F2F9A9 /* DirectoryStructure.swift */; };
 		14C15E9A2C49F90C00F2F9A9 /* DataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C15E992C49F90C00F2F9A9 /* DataRepository.swift */; };
+		14C23C832C53962F00CEA8CF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C822C53962F00CEA8CF /* AppDelegate.swift */; };
+		14C23C852C53962F00CEA8CF /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C842C53962F00CEA8CF /* SceneDelegate.swift */; };
+		14C23C8A2C53962F00CEA8CF /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 14C23C892C53962F00CEA8CF /* Base */; };
+		14C23C8C2C53962F00CEA8CF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14C23C8B2C53962F00CEA8CF /* Assets.xcassets */; };
+		14C23C8F2C53962F00CEA8CF /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 14C23C8E2C53962F00CEA8CF /* Base */; };
+		14C23CA22C53966A00CEA8CF /* FilesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C942C53966900CEA8CF /* FilesViewController.swift */; };
+		14C23CA32C53966A00CEA8CF /* ConnectServiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C952C53966900CEA8CF /* ConnectServiceView.swift */; };
+		14C23CA42C53966A00CEA8CF /* CredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C962C53966900CEA8CF /* CredentialStore.swift */; };
+		14C23CA52C53966A00CEA8CF /* SMBAVAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C972C53966900CEA8CF /* SMBAVAsset.swift */; };
+		14C23CA62C53966A00CEA8CF /* ConnectServerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C982C53966A00CEA8CF /* ConnectServerView.swift */; };
+		14C23CA72C53966A00CEA8CF /* SharesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C992C53966A00CEA8CF /* SharesViewController.swift */; };
+		14C23CA82C53966A00CEA8CF /* ID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9A2C53966A00CEA8CF /* ID.swift */; };
+		14C23CA92C53966A00CEA8CF /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9B2C53966A00CEA8CF /* File.swift */; };
+		14C23CAA2C53966A00CEA8CF /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9C2C53966A00CEA8CF /* Server.swift */; };
+		14C23CAB2C53966A00CEA8CF /* MediaPlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9D2C53966A00CEA8CF /* MediaPlayerViewController.swift */; };
+		14C23CAC2C53966A00CEA8CF /* DocumentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9E2C53966A00CEA8CF /* DocumentViewController.swift */; };
+		14C23CAD2C53966A00CEA8CF /* ServersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9F2C53966A00CEA8CF /* ServersViewController.swift */; };
+		14C23CAE2C53966A00CEA8CF /* ServiceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23CA02C53966A00CEA8CF /* ServiceDiscovery.swift */; };
+		14C23CAF2C53966A00CEA8CF /* ServerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23CA12C53966A00CEA8CF /* ServerManager.swift */; };
+		14C23CB22C5396C600CEA8CF /* FlyingFox in Frameworks */ = {isa = PBXBuildFile; productRef = 14C23CB12C5396C600CEA8CF /* FlyingFox */; };
+		14C23CB42C5396C600CEA8CF /* FlyingSocks in Frameworks */ = {isa = PBXBuildFile; productRef = 14C23CB32C5396C600CEA8CF /* FlyingSocks */; };
+		14C23CB62C5396C600CEA8CF /* SMBClient in Frameworks */ = {isa = PBXBuildFile; productRef = 14C23CB52C5396C600CEA8CF /* SMBClient */; };
+		14C23CB82C5396F600CEA8CF /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23CB72C5396F600CEA8CF /* Service.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -109,6 +132,28 @@
 		14C15E972C49827600F2F9A9 /* DirectoryStructure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryStructure.swift; sourceTree = "<group>"; };
 		14C15E992C49F90C00F2F9A9 /* DataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataRepository.swift; sourceTree = "<group>"; };
 		14C23C632C5388FF00CEA8CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		14C23C802C53962F00CEA8CF /* File Browser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "File Browser.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		14C23C822C53962F00CEA8CF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		14C23C842C53962F00CEA8CF /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		14C23C892C53962F00CEA8CF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		14C23C8B2C53962F00CEA8CF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		14C23C8E2C53962F00CEA8CF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		14C23C902C53962F00CEA8CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		14C23C942C53966900CEA8CF /* FilesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FilesViewController.swift; sourceTree = "<group>"; };
+		14C23C952C53966900CEA8CF /* ConnectServiceView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectServiceView.swift; sourceTree = "<group>"; };
+		14C23C962C53966900CEA8CF /* CredentialStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CredentialStore.swift; sourceTree = "<group>"; };
+		14C23C972C53966900CEA8CF /* SMBAVAsset.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMBAVAsset.swift; sourceTree = "<group>"; };
+		14C23C982C53966A00CEA8CF /* ConnectServerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectServerView.swift; sourceTree = "<group>"; };
+		14C23C992C53966A00CEA8CF /* SharesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharesViewController.swift; sourceTree = "<group>"; };
+		14C23C9A2C53966A00CEA8CF /* ID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ID.swift; sourceTree = "<group>"; };
+		14C23C9B2C53966A00CEA8CF /* File.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
+		14C23C9C2C53966A00CEA8CF /* Server.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Server.swift; sourceTree = "<group>"; };
+		14C23C9D2C53966A00CEA8CF /* MediaPlayerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaPlayerViewController.swift; sourceTree = "<group>"; };
+		14C23C9E2C53966A00CEA8CF /* DocumentViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentViewController.swift; sourceTree = "<group>"; };
+		14C23C9F2C53966A00CEA8CF /* ServersViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServersViewController.swift; sourceTree = "<group>"; };
+		14C23CA02C53966A00CEA8CF /* ServiceDiscovery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServiceDiscovery.swift; sourceTree = "<group>"; };
+		14C23CA12C53966A00CEA8CF /* ServerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerManager.swift; sourceTree = "<group>"; };
+		14C23CB72C5396F600CEA8CF /* Service.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,14 +168,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		14C23C7D2C53962F00CEA8CF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				14C23CB62C5396C600CEA8CF /* SMBClient in Frameworks */,
+				14C23CB22C5396C600CEA8CF /* FlyingFox in Frameworks */,
+				14C23CB42C5396C600CEA8CF /* FlyingSocks in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		1446800E2C347E1F0029A1AB = {
 			isa = PBXGroup;
 			children = (
-				144680192C347E1F0029A1AB /* FileBrowser */,
+				144680192C347E1F0029A1AB /* FileBrowser (macOS) */,
+				14C23C812C53962F00CEA8CF /* FileBrowser (iOS) */,
 				144680182C347E1F0029A1AB /* Products */,
+				14C23CB02C5396C600CEA8CF /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -138,11 +195,12 @@
 			isa = PBXGroup;
 			children = (
 				144680172C347E1F0029A1AB /* File Browser.app */,
+				14C23C802C53962F00CEA8CF /* File Browser.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		144680192C347E1F0029A1AB /* FileBrowser */ = {
+		144680192C347E1F0029A1AB /* FileBrowser (macOS) */ = {
 			isa = PBXGroup;
 			children = (
 				1446801A2C347E1F0029A1AB /* AppDelegate.swift */,
@@ -194,15 +252,50 @@
 				14C23C632C5388FF00CEA8CF /* Info.plist */,
 				144680232C347E200029A1AB /* FileBrowser.entitlements */,
 			);
-			path = FileBrowser;
+			path = "FileBrowser (macOS)";
+			sourceTree = "<group>";
+		};
+		14C23C812C53962F00CEA8CF /* FileBrowser (iOS) */ = {
+			isa = PBXGroup;
+			children = (
+				14C23C822C53962F00CEA8CF /* AppDelegate.swift */,
+				14C23C842C53962F00CEA8CF /* SceneDelegate.swift */,
+				14C23C9F2C53966A00CEA8CF /* ServersViewController.swift */,
+				14C23C982C53966A00CEA8CF /* ConnectServerView.swift */,
+				14C23C952C53966900CEA8CF /* ConnectServiceView.swift */,
+				14C23C992C53966A00CEA8CF /* SharesViewController.swift */,
+				14C23C942C53966900CEA8CF /* FilesViewController.swift */,
+				14C23C9A2C53966A00CEA8CF /* ID.swift */,
+				14C23C9B2C53966A00CEA8CF /* File.swift */,
+				14C23C9D2C53966A00CEA8CF /* MediaPlayerViewController.swift */,
+				14C23C9E2C53966A00CEA8CF /* DocumentViewController.swift */,
+				14C23CA12C53966A00CEA8CF /* ServerManager.swift */,
+				14C23C9C2C53966A00CEA8CF /* Server.swift */,
+				14C23CA02C53966A00CEA8CF /* ServiceDiscovery.swift */,
+				14C23CB72C5396F600CEA8CF /* Service.swift */,
+				14C23C962C53966900CEA8CF /* CredentialStore.swift */,
+				14C23C972C53966900CEA8CF /* SMBAVAsset.swift */,
+				14C23C882C53962F00CEA8CF /* Main.storyboard */,
+				14C23C8D2C53962F00CEA8CF /* LaunchScreen.storyboard */,
+				14C23C8B2C53962F00CEA8CF /* Assets.xcassets */,
+				14C23C902C53962F00CEA8CF /* Info.plist */,
+			);
+			path = "FileBrowser (iOS)";
+			sourceTree = "<group>";
+		};
+		14C23CB02C5396C600CEA8CF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		144680162C347E1F0029A1AB /* FileBrowser */ = {
+		144680162C347E1F0029A1AB /* FileBrowser (macOS) */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 144680262C347E200029A1AB /* Build configuration list for PBXNativeTarget "FileBrowser" */;
+			buildConfigurationList = 144680262C347E200029A1AB /* Build configuration list for PBXNativeTarget "FileBrowser (macOS)" */;
 			buildPhases = (
 				144680132C347E1F0029A1AB /* Sources */,
 				144680142C347E1F0029A1AB /* Frameworks */,
@@ -212,7 +305,7 @@
 			);
 			dependencies = (
 			);
-			name = FileBrowser;
+			name = "FileBrowser (macOS)";
 			packageProductDependencies = (
 				145299952C34D95B003B035C /* SMBClient */,
 				145299EB2C3AC745003B035C /* FlyingFox */,
@@ -221,6 +314,28 @@
 			);
 			productName = FileBrowser;
 			productReference = 144680172C347E1F0029A1AB /* File Browser.app */;
+			productType = "com.apple.product-type.application";
+		};
+		14C23C7F2C53962F00CEA8CF /* FileBrowser (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 14C23C912C53962F00CEA8CF /* Build configuration list for PBXNativeTarget "FileBrowser (iOS)" */;
+			buildPhases = (
+				14C23C7C2C53962F00CEA8CF /* Sources */,
+				14C23C7D2C53962F00CEA8CF /* Frameworks */,
+				14C23C7E2C53962F00CEA8CF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "FileBrowser (iOS)";
+			packageProductDependencies = (
+				14C23CB12C5396C600CEA8CF /* FlyingFox */,
+				14C23CB32C5396C600CEA8CF /* FlyingSocks */,
+				14C23CB52C5396C600CEA8CF /* SMBClient */,
+			);
+			productName = "FileBrowser (iOS)";
+			productReference = 14C23C802C53962F00CEA8CF /* File Browser.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -234,6 +349,9 @@
 				LastUpgradeCheck = 1530;
 				TargetAttributes = {
 					144680162C347E1F0029A1AB = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					14C23C7F2C53962F00CEA8CF = {
 						CreatedOnToolsVersion = 15.3;
 					};
 				};
@@ -256,7 +374,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				144680162C347E1F0029A1AB /* FileBrowser */,
+				144680162C347E1F0029A1AB /* FileBrowser (macOS) */,
+				14C23C7F2C53962F00CEA8CF /* FileBrowser (iOS) */,
 			);
 		};
 /* End PBXProject section */
@@ -276,6 +395,16 @@
 				1446801F2C347E200029A1AB /* Assets.xcassets in Resources */,
 				1452999C2C3500C5003B035C /* Localizable.xcstrings in Resources */,
 				144680222C347E200029A1AB /* Base in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		14C23C7E2C53962F00CEA8CF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				14C23C8C2C53962F00CEA8CF /* Assets.xcassets in Resources */,
+				14C23C8F2C53962F00CEA8CF /* Base in Resources */,
+				14C23C8A2C53962F00CEA8CF /* Base in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -325,6 +454,30 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		14C23C7C2C53962F00CEA8CF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				14C23CAF2C53966A00CEA8CF /* ServerManager.swift in Sources */,
+				14C23CA42C53966A00CEA8CF /* CredentialStore.swift in Sources */,
+				14C23CA72C53966A00CEA8CF /* SharesViewController.swift in Sources */,
+				14C23CAD2C53966A00CEA8CF /* ServersViewController.swift in Sources */,
+				14C23CB82C5396F600CEA8CF /* Service.swift in Sources */,
+				14C23C832C53962F00CEA8CF /* AppDelegate.swift in Sources */,
+				14C23CA22C53966A00CEA8CF /* FilesViewController.swift in Sources */,
+				14C23CA32C53966A00CEA8CF /* ConnectServiceView.swift in Sources */,
+				14C23C852C53962F00CEA8CF /* SceneDelegate.swift in Sources */,
+				14C23CAB2C53966A00CEA8CF /* MediaPlayerViewController.swift in Sources */,
+				14C23CA62C53966A00CEA8CF /* ConnectServerView.swift in Sources */,
+				14C23CAE2C53966A00CEA8CF /* ServiceDiscovery.swift in Sources */,
+				14C23CA82C53966A00CEA8CF /* ID.swift in Sources */,
+				14C23CA92C53966A00CEA8CF /* File.swift in Sources */,
+				14C23CAC2C53966A00CEA8CF /* DocumentViewController.swift in Sources */,
+				14C23CAA2C53966A00CEA8CF /* Server.swift in Sources */,
+				14C23CA52C53966A00CEA8CF /* SMBAVAsset.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
@@ -334,6 +487,22 @@
 				144680212C347E200029A1AB /* Base */,
 			);
 			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		14C23C882C53962F00CEA8CF /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				14C23C892C53962F00CEA8CF /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		14C23C8D2C53962F00CEA8CF /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				14C23C8E2C53962F00CEA8CF /* Base */,
+			);
+			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -462,14 +631,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = FileBrowser/FileBrowser.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "FileBrowser (macOS)/FileBrowser.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 27AEDK3C9F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = FileBrowser/Info.plist;
+				INFOPLIST_FILE = "FileBrowser (macOS)/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
@@ -492,14 +661,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = FileBrowser/FileBrowser.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "FileBrowser (macOS)/FileBrowser.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 27AEDK3C9F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = FileBrowser/Info.plist;
+				INFOPLIST_FILE = "FileBrowser (macOS)/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
@@ -517,6 +686,69 @@
 			};
 			name = Release;
 		};
+		14C23C922C53962F00CEA8CF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 27AEDK3C9F;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "FileBrowser (iOS)/Info.plist";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kishikawakatsumi.FileBrowser;
+				PRODUCT_MODULE_NAME = FileBrowser;
+				PRODUCT_NAME = "File Browser";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		14C23C932C53962F00CEA8CF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 27AEDK3C9F;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "FileBrowser (iOS)/Info.plist";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kishikawakatsumi.FileBrowser;
+				PRODUCT_MODULE_NAME = FileBrowser;
+				PRODUCT_NAME = "File Browser";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -529,11 +761,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		144680262C347E200029A1AB /* Build configuration list for PBXNativeTarget "FileBrowser" */ = {
+		144680262C347E200029A1AB /* Build configuration list for PBXNativeTarget "FileBrowser (macOS)" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				144680272C347E200029A1AB /* Debug */,
 				144680282C347E200029A1AB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		14C23C912C53962F00CEA8CF /* Build configuration list for PBXNativeTarget "FileBrowser (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				14C23C922C53962F00CEA8CF /* Debug */,
+				14C23C932C53962F00CEA8CF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -578,6 +819,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */;
 			productName = FlyingSocks;
+		};
+		14C23CB12C5396C600CEA8CF /* FlyingFox */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */;
+			productName = FlyingFox;
+		};
+		14C23CB32C5396C600CEA8CF /* FlyingSocks */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */;
+			productName = FlyingSocks;
+		};
+		14C23CB52C5396C600CEA8CF /* SMBClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 141AF3E02C4ABA550050C7A5 /* XCRemoteSwiftPackageReference "SMBClient" */;
+			productName = SMBClient;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

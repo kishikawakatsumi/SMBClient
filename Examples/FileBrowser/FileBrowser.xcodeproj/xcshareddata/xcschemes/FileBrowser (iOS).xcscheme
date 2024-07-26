@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "144680162C347E1F0029A1AB"
+               BlueprintIdentifier = "14C23C7F2C53962F00CEA8CF"
                BuildableName = "File Browser.app"
-               BlueprintName = "FileBrowser"
+               BlueprintName = "FileBrowser (iOS)"
                ReferencedContainer = "container:FileBrowser.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -44,9 +44,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "144680162C347E1F0029A1AB"
+            BlueprintIdentifier = "14C23C7F2C53962F00CEA8CF"
             BuildableName = "File Browser.app"
-            BlueprintName = "FileBrowser"
+            BlueprintName = "FileBrowser (iOS)"
             ReferencedContainer = "container:FileBrowser.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -61,9 +61,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "144680162C347E1F0029A1AB"
+            BlueprintIdentifier = "14C23C7F2C53962F00CEA8CF"
             BuildableName = "File Browser.app"
-            BlueprintName = "FileBrowser"
+            BlueprintName = "FileBrowser (iOS)"
             ReferencedContainer = "container:FileBrowser.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
