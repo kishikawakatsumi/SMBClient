@@ -4,11 +4,6 @@
 
 Swift SMB client library and iOS/macOS file browser applications. This library provides a high-level interface to the SMB protocol and allows you to access files on remote SMB servers. Written in Swift, no dependencies on external libraries.
 
-## Twitter
-
-Released SMBClient, a Swift SMB client library and iOS/macOS sample file browser applications.
-You can access files on remote SMB servers from iOS/macOS apps. Written in Swift, no dependencies on external libraries.
-
 ## Usage
 
 `SMBClient` class hides the low-layer SMB protocol and provides a higher-layer interface suitable for common use cases. The following example demonstrates how to list files in a share drive on a remote SMB server.
