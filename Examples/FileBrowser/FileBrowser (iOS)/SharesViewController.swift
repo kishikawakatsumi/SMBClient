@@ -69,6 +69,7 @@ class SharesViewController: UIViewController, UITableViewDataSource, UITableView
   func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
 
+    cell.accessoryType = .disclosureIndicator
     cell.imageView?.image = UIImage(systemName: "externaldrive.connected.to.line.below")
     cell.textLabel?.text = shares[indexPath.row].name
 
