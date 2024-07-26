@@ -108,6 +108,7 @@
 		147EC5BF2C41590400C08ED3 /* FileTransfer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTransfer.swift; sourceTree = "<group>"; };
 		14C15E972C49827600F2F9A9 /* DirectoryStructure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryStructure.swift; sourceTree = "<group>"; };
 		14C15E992C49F90C00F2F9A9 /* DataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataRepository.swift; sourceTree = "<group>"; };
+		14C23C632C5388FF00CEA8CF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -190,6 +191,7 @@
 				147EC5B92C40F88C00C08ED3 /* Activities.storyboard */,
 				1446801E2C347E200029A1AB /* Assets.xcassets */,
 				1452999B2C3500C5003B035C /* Localizable.xcstrings */,
+				14C23C632C5388FF00CEA8CF /* Info.plist */,
 				144680232C347E200029A1AB /* FileBrowser.entitlements */,
 			);
 			path = FileBrowser;
@@ -467,6 +469,7 @@
 				DEVELOPMENT_TEAM = 27AEDK3C9F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FileBrowser/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
@@ -496,6 +499,7 @@
 				DEVELOPMENT_TEAM = 27AEDK3C9F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FileBrowser/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
