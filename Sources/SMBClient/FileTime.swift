@@ -18,4 +18,9 @@ public struct FileTime {
     return Date(timeIntervalSince1970: timeInterval - 11644473600)
   }
 }
-  
+
+extension FileTime: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    date.debugDescription
+  }
+}
