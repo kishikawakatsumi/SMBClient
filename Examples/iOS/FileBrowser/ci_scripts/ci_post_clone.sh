@@ -2,7 +2,7 @@
 
 if [ $CI_PRODUCT_PLATFORM = 'macOS' ]
 then
-  rm -rf "../../iOS"
+  rm -rf "../../../iOS"
 else
-  rm -rf "../../macOS"
+  rm -rf "../../../macOS"
 fi
