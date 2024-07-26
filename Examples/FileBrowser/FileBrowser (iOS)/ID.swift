@@ -20,10 +20,10 @@ extension ID: ExpressibleByStringLiteral {
 
 extension ID: Hashable {
   static func == (lhs: ID, rhs: ID) -> Bool {
-    lhs.rawValue == rhs.rawValue
+    Data(lhs.rawValue.utf8) == Data(rhs.rawValue.utf8)
   }
 
   func hash(into hasher: inout Hasher) {
-    hasher.combine(rawValue)
+    hasher.combine(Data(rawValue.utf8))
   }
 }
