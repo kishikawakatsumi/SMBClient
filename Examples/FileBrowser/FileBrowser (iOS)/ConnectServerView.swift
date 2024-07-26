@@ -2,11 +2,23 @@ import SwiftUI
 import SMBClient
 
 struct ConnectServerView: View {
+  enum FocusedField {
+    case displayName
+    case server
+    case port
+    case username
+    case password
+  }
+
   @State private var displayName: String
+
   @State private var server: String
   @State private var port: String
   @State private var username: String
   @State private var password: String
+  
+  @FocusState
+  private var focusedField: FocusedField?
 
   @State private var presentAlert: Bool = false
   @State private var error: Error? = nil
@@ -33,10 +45,12 @@ struct ConnectServerView: View {
     onCancel: @escaping () -> Void
   ) {
     self.displayName = displayName
+
     self.server = server
     self.port = port
     self.username = username
     self.password = password
+    
     self.onSuccess = onSuccess
     self.onCancel = onCancel
   }
@@ -48,18 +62,21 @@ struct ConnectServerView: View {
           LabeledContent {
             TextField("Display Name", text: $displayName)
               .multilineTextAlignment(.trailing)
+              .focused($focusedField, equals: .displayName)
           } label: {
             Text("Display Name")
           }
           LabeledContent {
             TextField("Server", text: $server)
               .multilineTextAlignment(.trailing)
+              .focused($focusedField, equals: .server)
           } label: {
             Text("Server")
           }
           LabeledContent {
             TextField("Port", text: $port)
               .multilineTextAlignment(.trailing)
+              .focused($focusedField, equals: .port)
           } label: {
             Text("Port")
           }
@@ -69,8 +86,10 @@ struct ConnectServerView: View {
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
             .textContentType(.username)
+            .focused($focusedField, equals: .username)
           SecureField("Password", text: $password)
             .textContentType(.password)
+            .focused($focusedField, equals: .password)
         } header: {
           Text("Login")
         }
@@ -79,6 +98,7 @@ struct ConnectServerView: View {
             submit()
           }
           .frame(maxWidth: .infinity)
+          .disabled(server.isEmpty || username.isEmpty || password.isEmpty)
         }
       }
       .navigationTitle("Connect to Server")
@@ -88,6 +108,9 @@ struct ConnectServerView: View {
           onCancel()
           dismiss()
         }
+      }
+      .onAppear {
+        focusedField = .server
       }
       .onSubmit {
         submit()

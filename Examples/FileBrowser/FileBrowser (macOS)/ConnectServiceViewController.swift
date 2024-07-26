@@ -19,6 +19,6 @@ class ConnectServiceViewController: NSViewController {
 
 extension ConnectServiceViewController: NSTextFieldDelegate {
   func controlTextDidChange(_ obj: Notification) {
-    connectButton.isEnabled = !usernameField.stringValue.isEmpty
+    connectButton.isEnabled = !usernameField.stringValue.isEmpty && !passwordField.stringValue.isEmpty
   }
 }

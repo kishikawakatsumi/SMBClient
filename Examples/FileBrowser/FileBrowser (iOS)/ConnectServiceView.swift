@@ -2,10 +2,18 @@ import SwiftUI
 import SMBClient
 
 struct ConnectServiceView: View {
+  enum FocusedField {
+    case username
+    case password
+  }
+
   @State private var server: String
 
   @State private var username: String
   @State private var password: String
+  
+  @FocusState
+  private var focusedField: FocusedField?
 
   @State private var presentAlert: Bool = false
   @State private var error: Error? = nil
@@ -40,8 +48,10 @@ struct ConnectServiceView: View {
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
             .textContentType(.username)
+            .focused($focusedField, equals: .username)
           SecureField("Password", text: $password)
             .textContentType(.password)
+            .focused($focusedField, equals: .password)
         } header: {
           Text("Login")
         }
@@ -60,6 +70,9 @@ struct ConnectServiceView: View {
           onCancel()
           dismiss()
         }
+      }
+      .onAppear {
+        focusedField = .username
       }
       .onSubmit {
         submit()
