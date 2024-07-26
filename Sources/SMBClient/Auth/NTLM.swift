@@ -320,7 +320,7 @@ public enum NTLM {
 
     public init(oemEncoding value: String?, offset: UInt32) {
       let value = value ?? ""
-      if let data = value.data(using: .ascii, allowLossyConversion: true), !data.isEmpty {
+      if let data = value.data(using: .windowsCP1252, allowLossyConversion: true), !data.isEmpty {
         len = UInt16(truncatingIfNeeded: data.count)
         maxLen = len
         bufferOffset = offset
