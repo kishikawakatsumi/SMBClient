@@ -4,7 +4,7 @@ import SMBClient
 
 class ServersViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
   private let tableView = UITableView(frame: .zero, style: .insetGrouped)
-  private var tree = Tree()
+  private var sessions = [String: SMBClient]()
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -58,14 +58,7 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
         guard let self else { return }
 
         ServerManager.shared.addServer(id: id, displayName: displayName, server: server, port: Int(port))
-
-        let store = CredentialStore.shared
-        store.save(server: server, securityDomain: id.rawValue, username: username, password: password)
-
-        tableView.reloadData()
-
-        let viewController = SharesViewController(client: client)
-        navigationController?.pushViewController(viewController, animated: true)
+        loginSucceeded(server: server, securityDomain: id.rawValue, username: username, password: password, client: client)
       } onCancel: { [weak self] in
         guard let self else { return }
         if let indexPathForSelectedRow = tableView.indexPathForSelectedRow {
@@ -128,11 +121,23 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
       let service = services[indexPath.row]
 
       cell.textLabel?.text = service.name
+
+      if let _ = sessions[service.id.rawValue] {
+        cell.accessoryType = .disclosureIndicator
+      } else {
+        cell.accessoryType = .none
+      }
     case 1:
       let servers = ServerManager.shared.servers
       let server = servers[indexPath.row]
 
       cell.textLabel?.text = server.displayName
+
+      if let _ = sessions[server.id.rawValue] {
+        cell.accessoryType = .disclosureIndicator
+      } else {
+        cell.accessoryType = .none
+      }
     default:
       break
     }
@@ -146,6 +151,12 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
       case 0:
         let services = ServiceDiscovery.shared.services
         let service = services[indexPath.row]
+
+        if let client = sessions[service.id.rawValue] {
+          let viewController = SharesViewController(client: client)
+          navigationController?.pushViewController(viewController, animated: true)
+          return
+        }
 
         let username: String
         let password: String
@@ -162,11 +173,7 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
           rootView: ConnectServiceView(server: service.name, username: username, password: password) { [weak self] (username, password, client) in
             guard let self else { return }
 
-            let store = CredentialStore.shared
-            store.save(server: service.name, securityDomain: service.id.rawValue, username: username, password: password)
-
-            let viewController = SharesViewController(client: client)
-            navigationController?.pushViewController(viewController, animated: true)
+            loginSucceeded(server: service.name, securityDomain: service.id.rawValue, username: username, password: password, client: client)
           } onCancel: {
             if let indexPathForSelectedRow = tableView.indexPathForSelectedRow {
               tableView.deselectRow(at: indexPathForSelectedRow, animated: true)
@@ -179,6 +186,12 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
       case 1:
         let servers = ServerManager.shared.servers
         let server = servers[indexPath.row]
+
+        if let client = sessions[server.id.rawValue] {
+          let viewController = SharesViewController(client: client)
+          navigationController?.pushViewController(viewController, animated: true)
+          return
+        }
 
         let username: String
         let password: String
@@ -209,14 +222,7 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
             guard let self else { return }
 
             ServerManager.shared.addServer(id: server.id, displayName: displayName, server: serverName, port: Int(port))
-
-            let store = CredentialStore.shared
-            store.save(server: serverName, securityDomain: server.id.rawValue, username: username, password: password)
-
-            tableView.reloadData()
-
-            let viewController = SharesViewController(client: client)
-            navigationController?.pushViewController(viewController, animated: true)
+            loginSucceeded(server: serverName, securityDomain: server.id.rawValue, username: username, password: password, client: client)
           } onCancel: {
             if let indexPathForSelectedRow = tableView.indexPathForSelectedRow {
               tableView.deselectRow(at: indexPathForSelectedRow, animated: true)
@@ -244,6 +250,24 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
       ServerManager.shared.removeServer(server)
       tableView.deleteRows(at: [indexPath], with: .automatic)
     }
+  }
+
+  private func loginSucceeded(
+    server: String,
+    securityDomain: String,
+    username: String,
+    password: String,
+    client: SMBClient
+  ) {
+    let store = CredentialStore.shared
+    store.save(server: server, securityDomain: securityDomain, username: username, password: password)
+
+    sessions[securityDomain] = client
+
+    tableView.reloadData()
+
+    let viewController = SharesViewController(client: client)
+    navigationController?.pushViewController(viewController, animated: true)
   }
 }
 
