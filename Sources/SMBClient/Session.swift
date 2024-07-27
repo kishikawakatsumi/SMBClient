@@ -50,6 +50,7 @@ public class Session {
       securityMode: securityMode,
       dialects: dialects
     )
+
     let data = try await send(request.encoded())
     let response = Negotiate.Response(data: data)
 
@@ -83,7 +84,7 @@ public class Session {
     )
     let response = SessionSetup.Response(data: try await send(request.encoded()))
 
-    if response.header.status == NTStatus.moreProcessingRequired {
+    if NTStatus(response.header.status) == .moreProcessingRequired {
       let challengeMessage = NTLM.ChallengeMessage(data: response.buffer)
 
       let signingKey = Crypto.randomBytes(count: 16)
@@ -125,9 +126,12 @@ public class Session {
       treeId: treeId,
       sessionId: sessionId
     )
+
     let data = try await send(request.encoded())
     let response = Logoff.Response(data: data)
+
     sessionId = 0
+    
     return response
   }
 
@@ -321,7 +325,7 @@ public class Session {
     let queryDirectoryResponse = QueryDirectory.Response(data: Data(data[createResponse.header.nextCommand...]))
     files.append(contentsOf: queryDirectoryResponse.files)
 
-    if createResponse.header.status != NTStatus.noMoreFiles {
+    if NTStatus(createResponse.header.status) != .noMoreFiles {
       repeat {
         let fileId = createResponse.fileId
 
@@ -341,7 +345,7 @@ public class Session {
         let queryDirectoryResponse = QueryDirectory.Response(data: data)
         files.append(contentsOf: queryDirectoryResponse.files)
 
-        if queryDirectoryResponse.header.status == NTStatus.noMoreFiles {
+        if NTStatus(queryDirectoryResponse.header.status) == .noMoreFiles {
           break
         }
       } while true
@@ -386,7 +390,7 @@ public class Session {
       _ = try await fileStat(path: path)
       return true
     } catch let error as ErrorResponse {
-      if error.header.status == ErrorCodes.objectNameNotFound {
+      if NTStatus(error.header.status) == .objectNameNotFound {
         return false
       }
       throw error
@@ -400,7 +404,7 @@ public class Session {
       let stat = try await fileStat(path: path)
       return stat.fileAttributes.contains(.directory)
     } catch let error as ErrorResponse {
-      if error.header.status == ErrorCodes.objectNameNotFound {
+      if NTStatus(error.header.status) == .objectNameNotFound {
         return false
       }
       throw error
@@ -488,7 +492,7 @@ public class Session {
     var response = Read.Response(data: try await send(request.encoded()))
     buffer.append(response.buffer)
 
-    while response.header.status != NTStatus.endOfFile {
+    while NTStatus(response.header.status) != .endOfFile {
       let request = Read.Request(
         creditCharge: creditSize,
         messageId: messageId.next(count: UInt64(creditSize)),
