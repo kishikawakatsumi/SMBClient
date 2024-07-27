@@ -56,6 +56,7 @@ class ServiceAuthManager: AuthManager {
     
     let username = authViewController.usernameField.stringValue
     let password = authViewController.passwordField.stringValue
+    let rememberPassword = authViewController.rememberPasswordCheckbox.state == .on
 
     Task { @MainActor in
       do {
@@ -65,7 +66,8 @@ class ServiceAuthManager: AuthManager {
           displayName: nil,
           server: service,
           username: username,
-          password: password
+          password: password,
+          savePassword: rememberPassword
         )
         self.session = session
 
@@ -152,6 +154,7 @@ class ServerAuthManager: AuthManager {
     let port = authViewController.portField.integerValue
     let username = authViewController.usernameField.stringValue
     let password = authViewController.passwordField.stringValue
+    let rememberPassword = authViewController.rememberPasswordCheckbox.state == .on
 
     Task { @MainActor in
       do {
@@ -162,7 +165,8 @@ class ServerAuthManager: AuthManager {
           server: server,
           port: port == 0 ? nil : port,
           username: username,
-          password: password
+          password: password,
+          savePassword: rememberPassword
         )
 
         self.session = session

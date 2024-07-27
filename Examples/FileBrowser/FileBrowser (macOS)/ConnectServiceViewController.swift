@@ -9,6 +9,8 @@ class ConnectServiceViewController: NSViewController {
   @IBOutlet private(set) var cancelButton: NSButton!
   @IBOutlet private(set) var connectButton: NSButton!
 
+  @IBOutlet private(set) var rememberPasswordCheckbox: NSButton!
+
   override func viewDidLoad() {
     super.viewDidLoad()
 
