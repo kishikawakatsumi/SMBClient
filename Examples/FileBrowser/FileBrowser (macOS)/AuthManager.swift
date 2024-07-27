@@ -75,7 +75,7 @@ class ServiceAuthManager: AuthManager {
         authWindowController.window?.orderOut(nil)
       } catch {
         await MainActor.run {
-          if let error = error as? ErrorResponse, error.header.status == ErrorCodes.logonFailure {
+          if let error = error as? ErrorResponse, NTStatus(error.header.status) == .logonFailure {
             authWindowController.window?.performSelector(
               onMainThread: NSSelectorFromString("_shake"),
               with: nil,
@@ -175,7 +175,7 @@ class ServerAuthManager: AuthManager {
         authWindowController.window?.orderOut(nil)
       } catch {
         await MainActor.run {
-          if let error = error as? ErrorResponse, error.header.status == ErrorCodes.logonFailure {
+          if let error = error as? ErrorResponse, NTStatus(error.header.status) == .logonFailure {
             authWindowController.window?.performSelector(
               onMainThread: NSSelectorFromString("_shake"),
               with: nil,
