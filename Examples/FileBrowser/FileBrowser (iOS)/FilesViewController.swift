@@ -53,6 +53,10 @@ class FilesViewController: UIViewController, UITableViewDataSource, UITableViewD
           .sorted { $0.name < $1.name }
         self.files.append(contentsOf: files)
         tableView.reloadData()
+      } catch let error as LocalizedError {
+        let controller = UIAlertController(title: error.errorDescription, message: error.failureReason, preferredStyle: .alert)
+        controller.addAction(UIAlertAction(title: NSLocalizedString("Close", comment: ""), style: .default))
+        present(controller, animated: true)
       } catch {
         let controller = UIAlertController(title: "", message: error.localizedDescription, preferredStyle: .alert)
         controller.addAction(UIAlertAction(title: NSLocalizedString("Close", comment: ""), style: .default))
