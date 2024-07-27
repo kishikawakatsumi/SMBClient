@@ -151,9 +151,15 @@ class DocumentViewController: UIViewController {
 
 extension DocumentViewController: WKNavigationDelegate {
   func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
-    let controller = UIAlertController(title: "", message: error.localizedDescription, preferredStyle: .alert)
-    controller.addAction(UIAlertAction(title: NSLocalizedString("Close", comment: ""), style: .default))
-    present(controller, animated: true)
+    if let error = error as? LocalizedError {
+      let controller = UIAlertController(title: error.errorDescription, message: error.failureReason, preferredStyle: .alert)
+      controller.addAction(UIAlertAction(title: NSLocalizedString("Close", comment: ""), style: .default))
+      present(controller, animated: true)
+    } else {
+      let controller = UIAlertController(title: "", message: error.localizedDescription, preferredStyle: .alert)
+      controller.addAction(UIAlertAction(title: NSLocalizedString("Close", comment: ""), style: .default))
+      present(controller, animated: true)
+    }
   }
 }
 

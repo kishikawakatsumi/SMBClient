@@ -42,6 +42,10 @@ class SharesViewController: UIViewController, UITableViewDataSource, UITableView
         self.shares.append(contentsOf: shares)
 
         tableView.reloadData()
+      } catch let error as LocalizedError {
+        let controller = UIAlertController(title: error.errorDescription, message: error.failureReason, preferredStyle: .alert)
+        controller.addAction(UIAlertAction(title: NSLocalizedString("Close", comment: ""), style: .default))
+        present(controller, animated: true)
       } catch {
         let controller = UIAlertController(title: "", message: error.localizedDescription, preferredStyle: .alert)
         controller.addAction(UIAlertAction(title: NSLocalizedString("Close", comment: ""), style: .default))

@@ -2,7 +2,7 @@ import SwiftUI
 import SMBClient
 
 struct ConnectServiceView: View {
-  enum FocusedField {
+  private enum FocusedField {
     case username
     case password
   }
@@ -18,6 +18,9 @@ struct ConnectServiceView: View {
 
   @FocusState
   private var focusedField: FocusedField?
+
+  @State private var presentLocalizedAlert: Bool = false
+  @State private var localizedError: ErrorResponse? = nil
 
   @State private var presentAlert: Bool = false
   @State private var error: Error? = nil
@@ -82,12 +85,15 @@ struct ConnectServiceView: View {
         guard canSubmit else { return }
         submit()
       }
-      .alert(isPresented: $presentAlert) {
-        if let error {
-          Alert(title: Text("Login Failed"), message: Text(error.localizedDescription), dismissButton: .default(Text("Close")))
-        } else {
-          Alert(title: Text("Login Failed"), dismissButton: .default(Text("Close")))
-        }
+      .alert(isPresented: $presentLocalizedAlert, error: localizedError) { _ in
+        Button("Close") {}
+      } message: { error in
+        Text(error.failureReason ?? error.recoverySuggestion ?? "")
+      }
+      .alert("", isPresented: $presentAlert) {
+        Button("Close") {}
+      } message: {
+        Text(error?.localizedDescription ?? "")
       }
     }
   }
@@ -100,9 +106,12 @@ struct ConnectServiceView: View {
 
         dismiss()
         onSuccess(username, password, client)
+      } catch let error as ErrorResponse {
+        self.localizedError = error
+        presentLocalizedAlert = true
       } catch {
-        presentAlert = true
         self.error = error
+        presentAlert = true
       }
     }
   }
