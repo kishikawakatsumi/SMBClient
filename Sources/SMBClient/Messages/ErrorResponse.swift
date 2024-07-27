@@ -18,7 +18,7 @@ public struct ErrorResponse: Error {
 
 extension ErrorResponse: CustomStringConvertible {
   public var description: String {
-    return ErrorCodes.description(header.status)
+    return NTStatus(header.status).description
   }
 }
 

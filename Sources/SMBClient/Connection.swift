@@ -158,14 +158,14 @@ public class Connection {
           repeat {
             header = reader.read()
 
-            switch header.status {
+            switch NTStatus(header.status) {
             case
-              NTStatus.success,
-              NTStatus.moreProcessingRequired,
-              NTStatus.noMoreFiles,
-              NTStatus.endOfFile:
+              .success,
+              .moreProcessingRequired,
+              .noMoreFiles,
+              .endOfFile:
               response += data
-            case NTStatus.pending:
+            case .pending:
               if self.buffer.count > 0 {
                 let transportPacket = DirectTCPPacket(response: self.buffer)
                 let length = Int(transportPacket.protocolLength)
@@ -181,12 +181,12 @@ public class Connection {
                 let reader = ByteReader(data)
                 let header: Header = reader.read()
 
-                switch header.status {
+                switch NTStatus(header.status) {
                 case
-                  NTStatus.success,
-                  NTStatus.moreProcessingRequired,
-                  NTStatus.noMoreFiles,
-                  NTStatus.endOfFile:
+                  .success,
+                  .moreProcessingRequired,
+                  .noMoreFiles,
+                  .endOfFile:
                   response += data
                   break
                 default:

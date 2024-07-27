@@ -37,7 +37,7 @@ final class SMBClientTests: XCTestCase {
         try await client.login(username: username, password: password)
         XCTFail("Login should fail")
       } catch let error as ErrorResponse {
-        XCTAssertEqual(error.header.status, NTStatus.logonFailure)
+        XCTAssert(NTStatus(error.header.status) == .logonFailure)
       } catch {
         XCTFail("Unexpected error: \(error)")
       }
@@ -89,6 +89,7 @@ final class SMBClientTests: XCTestCase {
     let fileManager = FileManager()
     let root = fixtureURL.appending(component: user.sharePath)
     let testFiles = try fileManager.contentsOfDirectory(atPath: root.path(percentEncoded: false))
+      .filter { $0 != ".DS_Store" }
       .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
 
     for (actualFile, expectedFile) in zip(files, testFiles) {
@@ -121,6 +122,7 @@ final class SMBClientTests: XCTestCase {
       let fileManager = FileManager()
       let root = fixtureURL.appending(component: "\(shareDirectory)/\(path)")
       let testFiles = try fileManager.contentsOfDirectory(atPath: root.path(percentEncoded: false))
+        .filter { $0 != ".DS_Store" }
         .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
 
       for (actualFile, expectedFile) in zip(files, testFiles) {
@@ -163,6 +165,7 @@ final class SMBClientTests: XCTestCase {
       let fileManager = FileManager()
       let root = fixtureURL.appending(component: "\(shareDirectory)/\(path)")
       let testFiles = try fileManager.contentsOfDirectory(atPath: root.path(percentEncoded: false))
+        .filter { $0 != ".DS_Store" }
         .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
 
       for (actualFile, expectedFile) in zip(files, testFiles) {
@@ -199,7 +202,7 @@ final class SMBClientTests: XCTestCase {
         try await client.connectShare("Nonexistent Share")
         XCTFail("Tree connect should fail")
       } catch let error as ErrorResponse {
-        XCTAssertEqual(error.header.status, ErrorCodes.badNetworkName)
+        XCTAssert(NTStatus(error.header.status) == .badNetworkName)
       } catch {
         XCTFail("Unexpected error: \(error)")
       }
@@ -217,7 +220,7 @@ final class SMBClientTests: XCTestCase {
       _ = try await client.listDirectory(path: "Nonexistent Directory")
       XCTFail("List directory should fail")
     } catch let error as ErrorResponse {
-      XCTAssertEqual(error.header.status, ErrorCodes.objectNameNotFound)
+      XCTAssert(NTStatus(error.header.status) == .objectNameNotFound)
     } catch {
       XCTFail("Unexpected error: \(error)")
     }
