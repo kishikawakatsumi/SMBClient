@@ -603,6 +603,16 @@ final class SMBClientTests: XCTestCase {
     XCTAssertTrue(directory.standardInformation.directory)
     XCTAssertEqual(directory.nameInformation.fileName, "\\test_data\\dir2\\subdir2")
   }
+
+  func testKeepAlive() async throws {
+    let user = alice
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password)
+    try await client.connectShare(user.share)
+
+    let response = try await client.keepAlive()
+    XCTAssert(NTStatus(response.header.status) == .success)
+  }
 }
 
 func assertFileExists(

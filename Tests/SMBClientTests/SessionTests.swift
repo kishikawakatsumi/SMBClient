@@ -79,4 +79,20 @@ final class SessionTests: XCTestCase {
     try await session.treeDisconnect()
     try await session.logoff()
   }
+
+  func testEcho() async throws {
+    let session = Session(host: "localhost", port: 4445)
+
+    try await session.connect()
+    try await session.negotiate()
+
+    try await session.sessionSetup(username: "alice", password: "alipass")
+    try await session.treeConnect(path: "Alice Share")
+
+    let response = try await session.echo()
+    print(response)
+
+    try await session.treeDisconnect()
+    try await session.logoff()
+  }
 }
