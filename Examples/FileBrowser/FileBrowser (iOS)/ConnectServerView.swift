@@ -17,6 +17,10 @@ struct ConnectServerView: View {
   @State private var username: String
   @State private var password: String
   
+  private var canSubmit: Bool {
+    !server.isEmpty && !username.isEmpty && !password.isEmpty
+  }
+
   @FocusState
   private var focusedField: FocusedField?
 
@@ -98,7 +102,7 @@ struct ConnectServerView: View {
             submit()
           }
           .frame(maxWidth: .infinity)
-          .disabled(server.isEmpty || username.isEmpty || password.isEmpty)
+          .disabled(!canSubmit)
         }
       }
       .navigationTitle("Connect to Server")
@@ -113,6 +117,7 @@ struct ConnectServerView: View {
         focusedField = .server
       }
       .onSubmit {
+        guard canSubmit else { return }
         submit()
       }
       .alert(isPresented: $presentAlert) {
