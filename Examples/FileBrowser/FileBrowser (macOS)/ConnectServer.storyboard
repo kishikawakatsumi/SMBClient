@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="KD4-ng-Ikr">
     <dependencies>
+        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22689"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -202,6 +203,7 @@ DQ
                         <outlet property="displayNameField" destination="jN3-eh-Fex" id="8lT-oW-FHF"/>
                         <outlet property="passwordField" destination="E07-DE-0Qj" id="5cK-xj-YRv"/>
                         <outlet property="portField" destination="te5-Hr-KG2" id="w8d-86-Rtc"/>
+                        <outlet property="rememberPasswordCheckbox" destination="Pcf-AR-0yA" id="geM-Pv-cHN"/>
                         <outlet property="serverField" destination="Dc1-jB-8C2" id="dPm-Iw-y0L"/>
                         <outlet property="usernameField" destination="ynY-CW-ozK" id="PUd-Xg-bw4"/>
                     </connections>

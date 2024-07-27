@@ -23,7 +23,8 @@ class SessionManager {
     server: String,
     port: Int? = nil,
     username: String,
-    password: String
+    password: String,
+    savePassword: Bool
   ) async throws -> Session {
     let client = ClientRegistry.shared.client(id: id, displayName: displayName, server: server, port: port) { (error) in
       ClientRegistry.shared.removeClient(id: id)
@@ -41,9 +42,11 @@ class SessionManager {
     }
     try await client.login(username: username, password: password)
 
-    let store = CredentialStore.shared
-    store.save(server: server, securityDomain: id.rawValue, username: username, password: password)
-    
+    if savePassword {
+      let store = CredentialStore.shared
+      store.save(server: server, securityDomain: id.rawValue, username: username, password: password)
+    }
+
     let session = Session(id: id, displayName: displayName, server: server, port: port, client: client)
     sessions[id] = session
 
