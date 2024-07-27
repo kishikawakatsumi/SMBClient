@@ -18,7 +18,7 @@ struct ConnectServerView: View {
   @State private var password: String
   
   private var canSubmit: Bool {
-    !server.isEmpty && !username.isEmpty && !password.isEmpty
+    !server.isEmpty && (port.isEmpty || Int(port) != nil ) && !username.isEmpty && !password.isEmpty
   }
 
   @FocusState
@@ -81,6 +81,7 @@ struct ConnectServerView: View {
             TextField("Port", text: $port)
               .multilineTextAlignment(.trailing)
               .focused($focusedField, equals: .port)
+              .keyboardType(.numberPad)
           } label: {
             Text("Port")
           }
@@ -133,7 +134,12 @@ struct ConnectServerView: View {
   private func submit() {
     Task { @MainActor in
       do {
-        let client = SMBClient(host: server, port: Int(port)!)
+        let client: SMBClient
+        if let port = Int(port) {
+          client = SMBClient(host: server, port: port)
+        } else {
+          client = SMBClient(host: server)
+        }
         try await client.login(username: username, password: password)
 
         dismiss()
