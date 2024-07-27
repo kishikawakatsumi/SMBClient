@@ -634,6 +634,18 @@ public class Session {
   }
 
   @discardableResult
+  public func echo() async throws -> Echo.Response {
+    let request = Echo.Request(
+      messageId: messageId.next(),
+      treeId: treeId,
+      sessionId: sessionId
+    )
+
+    let data = try await send(request.encoded())
+    return Echo.Response(data: data)
+  }
+
+  @discardableResult
   func bind(fileId: Data) async throws -> IOCtl.Response {
     let input = DCERPC.Bind(
       callID: 1,

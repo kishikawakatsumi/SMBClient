@@ -120,7 +120,7 @@ dependencies: [
 - [x] READ
 - [x] WRITE
 - [ ] LOCK
-- [ ] ECHO
+- [x] ECHO
 - [ ] CANCEL
 - [x] IOCTL
 - [x] QUERY_DIRECTORY

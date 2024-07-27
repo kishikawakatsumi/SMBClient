@@ -167,6 +167,10 @@ public class SMBClient {
   public func fileWriter(path: String) -> FileWriter {
     FileWriter(session: session, path: Pathname.escape(path))
   }
+
+  public func keepAlive() async throws -> Echo.Response {
+    try await session.echo()
+  }
 }
 
 public struct Share {
