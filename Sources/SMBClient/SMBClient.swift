@@ -27,14 +27,15 @@ public class SMBClient {
     onDisconnected = { _ in }
   }
 
+  @discardableResult
   public func login(
     username: String?,
     password: String?,
     domain: String? = nil,
     workstation: String? = nil
-  ) async throws {
+  ) async throws -> SessionSetup.Response {
     try await session.negotiate()
-    try await session.sessionSetup(
+    return try await session.sessionSetup(
       username: username,
       password: password,
       domain: domain,
@@ -42,7 +43,8 @@ public class SMBClient {
     )
   }
 
-  public func logoff() async throws {
+  @discardableResult
+  public func logoff() async throws -> Logoff.Response {
     try await session.logoff()
   }
 
