@@ -10,7 +10,7 @@ public struct NTStatus {
 
 extension NTStatus: CustomStringConvertible {
   public var description: String {
-    switch Status(rawValue: rawValue) {
+    switch ErrorCode(rawValue: rawValue) {
     case .success:
       return "The client request is successful."
     case .pending:
@@ -97,7 +97,7 @@ extension NTStatus: CustomStringConvertible {
 
 extension NTStatus: CustomDebugStringConvertible {
   public var debugDescription: String {
-    switch Status(rawValue: rawValue) {
+    switch ErrorCode(rawValue: rawValue) {
     case .success:
       return "SUCCESS"
     case .pending:
@@ -182,7 +182,7 @@ extension NTStatus: CustomDebugStringConvertible {
   }
 }
 
-public enum Status: UInt32 {
+public enum ErrorCode: UInt32 {
   case success = 0x00000000
   case pending = 0x00000103
   case invalidSMB = 0x00010002
@@ -224,22 +224,22 @@ public enum Status: UInt32 {
   case smbTooManyUIDs = 0xC000205A
 }
 
-public func ==(lhs: NTStatus, rhs: Status) -> Bool {
+public func ==(lhs: NTStatus, rhs: ErrorCode) -> Bool {
   return lhs.rawValue == rhs.rawValue
 }
 
-public func ==(lhs: Status, rhs: NTStatus) -> Bool {
+public func ==(lhs: ErrorCode, rhs: NTStatus) -> Bool {
   return lhs.rawValue == rhs.rawValue
 }
 
-public func !=(lhs: NTStatus, rhs: Status) -> Bool {
+public func !=(lhs: NTStatus, rhs: ErrorCode) -> Bool {
   return lhs.rawValue != rhs.rawValue
 }
 
-public func !=(lhs: Status, rhs: NTStatus) -> Bool {
+public func !=(lhs: ErrorCode, rhs: NTStatus) -> Bool {
   return lhs.rawValue != rhs.rawValue
 }
 
-public func ~=(pattern: Status, value: NTStatus) -> Bool {
+public func ~=(pattern: ErrorCode, value: NTStatus) -> Bool {
   return pattern.rawValue == value.rawValue
 }

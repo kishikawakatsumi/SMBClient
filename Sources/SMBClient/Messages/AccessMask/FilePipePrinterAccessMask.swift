@@ -28,3 +28,72 @@ public struct FilePipePrinterAccessMask: OptionSet, Sendable {
   public static let genericWrite = FilePipePrinterAccessMask(rawValue: 0x40000000)
   public static let genericRead = FilePipePrinterAccessMask(rawValue: 0x80000000)
 }
+
+extension FilePipePrinterAccessMask: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    var values = [String]()
+
+    if contains(.readData) {
+      values.append("Read")
+    }
+    if contains(.writeData) {
+      values.append("Write")
+    }
+    if contains(.appendData) {
+      values.append("Append")
+    }
+    if contains(.readEa) {
+      values.append("Read EA")
+    }
+    if contains(.writeEa) {
+      values.append("Write EA")
+    }
+    if contains(.execute) {
+      values.append("Execute")
+    }
+    if contains(.deleteChild) {
+      values.append("Delete Child")
+    }
+    if contains(.readAttributes) {
+      values.append("Read Attributes")
+    }
+    if contains(.writeAttributes) {
+      values.append("Write Attributes")
+    }
+    if contains(.delete) {
+      values.append("Delete")
+    }
+    if contains(.readControl) {
+      values.append("Read Control")
+    }
+    if contains(.writeDac) {
+      values.append("Write DAC")
+    }
+    if contains(.writeOwner) {
+      values.append("Write Owner")
+    }
+    if contains(.synchronize) {
+      values.append("Synchronize")
+    }
+    if contains(.accessSystemSecurity) {
+      values.append("Access System Security")
+    }
+    if contains(.maximumAllowed) {
+      values.append("Maximum Allowed")
+    }
+    if contains(.genericAll) {
+      values.append("Generic All")
+    }
+    if contains(.genericExecute) {
+      values.append("Generic Execute")
+    }
+    if contains(.genericWrite) {
+      values.append("Generic Write")
+    }
+    if contains(.genericRead) {
+      values.append("Generic Read")
+    }
+
+    return "\(String(format: "0x%08x", rawValue)) (\(values.joined(separator: ", ")))"
+  }
+}
