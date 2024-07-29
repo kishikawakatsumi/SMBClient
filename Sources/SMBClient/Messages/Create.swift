@@ -112,23 +112,6 @@ public enum Create {
     public let createContextsLength: UInt32
     public let buffer: Data
 
-    public struct Flags: OptionSet, Sendable {
-      public let rawValue: UInt8
-
-      public init(rawValue: UInt8) {
-        self.rawValue = rawValue
-      }
-
-      public static let releasePoint = Flags(rawValue: 0x00000001)
-    }
-
-    public enum CreateAction: UInt32 {
-      case superseded = 0x00000000
-      case opened = 0x00000001
-      case created = 0x00000002
-      case overwritten = 0x00000003
-    }
-
     public init(data: Data) {
       let reader = ByteReader(data)
 
@@ -221,5 +204,22 @@ public enum Create {
     public static let openReparsePoint = CreateOptions(rawValue: 0x00200000)
     public static let openNoRecall = CreateOptions(rawValue: 0x00400000)
     public static let openForFreeSpaceQuery = CreateOptions(rawValue: 0x00800000)
+  }
+
+  public struct Flags: OptionSet, Sendable {
+    public let rawValue: UInt8
+
+    public init(rawValue: UInt8) {
+      self.rawValue = rawValue
+    }
+
+    public static let releasePoint = Flags(rawValue: 0x00000001)
+  }
+
+  public enum CreateAction: UInt32 {
+    case superseded = 0x00000000
+    case opened = 0x00000001
+    case created = 0x00000002
+    case overwritten = 0x00000003
   }
 }

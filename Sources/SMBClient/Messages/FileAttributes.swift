@@ -28,67 +28,72 @@ public struct FileAttributes: OptionSet, Sendable {
   public static let recallOnDataAccess = FileAttributes(rawValue: 0x00400000)
 }
 
-extension FileAttributes: CustomStringConvertible {
-  public var description: String {
-    var attributes = [String]()
+extension FileAttributes: CustomDebugStringConvertible {
+  public var debugDescription: String {
+    var values = [String]()
 
     if contains(.readonly) {
-      attributes.append("readonly")
+      values.append("Read Only")
     }
     if contains(.hidden) {
-      attributes.append("hidden")
+      values.append("Hidden")
     }
     if contains(.system) {
-      attributes.append("system")
+      values.append("System")
     }
     if contains(.directory) {
-      attributes.append("directory")
+      values.append("Directory")
     }
     if contains(.archive) {
-      attributes.append("archive")
+      values.append("Requires archived")
     }
     if contains(.normal) {
-      attributes.append("normal")
+      values.append("Normal")
     }
     if contains(.temporary) {
-      attributes.append("temporary")
+      values.append("Temporary")
     }
     if contains(.sparseFile) {
-      attributes.append("sparseFile")
+      values.append("Sparse")
     }
     if contains(.reparsePoint) {
-      attributes.append("reparsePoint")
+      values.append("Reparse Point")
     }
     if contains(.compressed) {
-      attributes.append("compressed")
+      values.append("Compressed")
     }
     if contains(.offline) {
-      attributes.append("offline")
+      values.append("Offline")
     }
     if contains(.notContentIndexed) {
-      attributes.append("notContentIndexed")
+      values.append("Not Content Indexed")
     }
     if contains(.encrypted) {
-      attributes.append("encrypted")
+      values.append("Encrypted")
     }
     if contains(.integrityStream) {
-      attributes.append("integrityStream")
+      values.append("Integrity Stream")
     }
     if contains(.noScrubData) {
-      attributes.append("noScrubData")
+      values.append("No Scrub Data")
     }
     if contains(.recallOnOpen) {
-      attributes.append("recallOnOpen")
+      values.append("Recall On Open")
     }
     if contains(.pinned) {
-      attributes.append("pinned")
+      values.append("Pinned")
     }
     if contains(.unpinned) {
-      attributes.append("unpinned")
+      values.append("Unpinned")
     }
     if contains(.recallOnDataAccess) {
-      attributes.append("recallOnDataAccess")
+      values.append("Recall On Data Access")
     }
-    return attributes.joined(separator: ", ")
+
+    if values.isEmpty {
+      return "0x\(String(format: "%08x", rawValue))"
+    } else {
+      return "0x\(String(format: "%08x", rawValue)) (\(values.joined(separator: ", ")))"
+    }
   }
 }

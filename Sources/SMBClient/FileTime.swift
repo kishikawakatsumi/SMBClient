@@ -21,6 +21,10 @@ public struct FileTime {
 
 extension FileTime: CustomDebugStringConvertible {
   public var debugDescription: String {
-    date.debugDescription
+    if raw == 0 {
+      return "No time specified \(raw)"
+    } else {
+      return date.description
+    }
   }
 }
