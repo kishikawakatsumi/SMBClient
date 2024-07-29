@@ -10,7 +10,9 @@ enum Pathname {
     }
   }
 
-  static func escape(_ path: String) -> String {
-    path.replacingOccurrences(of: "/", with: #"\"#)
+  static func normalize(_ path: String) -> String {
+    path
+      .trimmingCharacters(in: CharacterSet(charactersIn: #"/\"#))
+      .replacingOccurrences(of: "/", with: #"\"#)
   }
 }

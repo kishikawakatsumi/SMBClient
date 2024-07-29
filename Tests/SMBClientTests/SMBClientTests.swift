@@ -229,6 +229,92 @@ final class SMBClientTests: XCTestCase {
     try await client.logoff()
   }
 
+  func testListDirectory06() async throws {
+    let user = bob
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password)
+
+    let share = user.share
+    let shareDirectory = user.sharePath
+    try await client.connectShare(share)
+
+    func listDirectory(share: String, shareDirectory: String, path: String) async throws {
+      let files = try await client.listDirectory(path: path)
+        .filter { $0.name != "." && $0.name != ".." }
+        .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+
+      let fileManager = FileManager()
+      let root = fixtureURL.appending(component: "\(shareDirectory)/\(path)")
+      let testFiles = try fileManager.contentsOfDirectory(atPath: root.path(percentEncoded: false))
+        .filter { $0 != ".DS_Store" }
+        .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+
+      for (actualFile, expectedFile) in zip(files, testFiles) {
+        XCTAssertEqual(actualFile.name, expectedFile)
+
+        var isDirectory: ObjCBool = false
+        fileManager.fileExists(atPath: root.appending(component: expectedFile).path(percentEncoded: false), isDirectory: &isDirectory)
+        XCTAssertEqual(isDirectory.boolValue, actualFile.isDirectory)
+
+        if actualFile.isDirectory {
+          if path.isEmpty {
+            try await listDirectory(share: share, shareDirectory: shareDirectory, path: actualFile.name)
+          } else {
+            try await listDirectory(share: share, shareDirectory: shareDirectory, path: "\(path)/\(actualFile.name)")
+          }
+        }
+      }
+    }
+
+    try await listDirectory(share: share, shareDirectory: shareDirectory, path: "/test_files")
+
+    try await client.treeDisconnect()
+    try await client.logoff()
+  }
+
+  func testListDirectory07() async throws {
+    let user = bob
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password)
+
+    let share = user.share
+    let shareDirectory = user.sharePath
+    try await client.connectShare(share)
+
+    func listDirectory(share: String, shareDirectory: String, path: String) async throws {
+      let files = try await client.listDirectory(path: path)
+        .filter { $0.name != "." && $0.name != ".." }
+        .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+
+      let fileManager = FileManager()
+      let root = fixtureURL.appending(component: "\(shareDirectory)/\(path)")
+      let testFiles = try fileManager.contentsOfDirectory(atPath: root.path(percentEncoded: false))
+        .filter { $0 != ".DS_Store" }
+        .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+
+      for (actualFile, expectedFile) in zip(files, testFiles) {
+        XCTAssertEqual(actualFile.name, expectedFile)
+
+        var isDirectory: ObjCBool = false
+        fileManager.fileExists(atPath: root.appending(component: expectedFile).path(percentEncoded: false), isDirectory: &isDirectory)
+        XCTAssertEqual(isDirectory.boolValue, actualFile.isDirectory)
+
+        if actualFile.isDirectory {
+          if path.isEmpty {
+            try await listDirectory(share: share, shareDirectory: shareDirectory, path: actualFile.name)
+          } else {
+            try await listDirectory(share: share, shareDirectory: shareDirectory, path: "\(path)/\(actualFile.name)")
+          }
+        }
+      }
+    }
+
+    try await listDirectory(share: share, shareDirectory: shareDirectory, path: "/")
+
+    try await client.treeDisconnect()
+    try await client.logoff()
+  }
+
   func testCreateDirectory() async throws {
     let user = alice
     let client = SMBClient(host: "localhost", port: 4445)
