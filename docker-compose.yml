@@ -11,6 +11,7 @@ services:
       - "4445:445"
     environment:
       AVAHI_DISABLE: 1
+      SAMBA_CONF_LOG_LEVEL: 3
 
       SAMBA_GLOBAL_CONFIG_client_SPACE_signing: mandatory
       SAMBA_GLOBAL_CONFIG_access_SPACE_based_SPACE_share_SPACE_enum: yes

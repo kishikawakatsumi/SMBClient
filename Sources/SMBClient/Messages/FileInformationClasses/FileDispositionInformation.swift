@@ -12,3 +12,9 @@ public struct FileDispositionInformation: FileInformationClass {
     Data() + deletePending
   }
 }
+
+extension FileDispositionInformation: CustomStringConvertible {
+  public var description: String {
+    "SMB2_FILE_DISPOSITION_INFO: Delete on close: \(deletePending == 1 ? "DELETE this file when closed" : "Normal access, do not delete on close")"
+  }
+}
