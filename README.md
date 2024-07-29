@@ -135,3 +135,9 @@ dependencies: [
 To connect to macOS file sharing, you need to enable "Windows File Sharing" in the "Sharing" sytem settings in "File Sharing" section. This will enable NTLM v2 authentication on your macOS.
 
 <img width="600" src="https://github.com/user-attachments/assets/9d521df6-b899-4f10-ac8e-0dbbe371e5c2" alt="macOS File Sharing settings">
+
+## Supporters & Sponsors
+
+Open source projects thrive on the generosity and support of people like you. If you find this project valuable, please consider extending your support. Contributing to the project not only sustains its growth, but also helps drive innovation and improve its features.
+
+To support this project, you can become a sponsor through [GitHub Sponsors](https://github.com/sponsors/kishikawakatsumi). Your contribution will be greatly appreciated and will help keep the project alive and thriving. Thanks for your consideration! :heart:
