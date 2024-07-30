@@ -8,7 +8,7 @@ public class FileWriter {
 
   init(session: Session, path: String) {
     self.session = session
-    self.path = path
+    self.path = path.precomposedStringWithCanonicalMapping
   }
 
   public func upload(data: Data) async throws {

@@ -77,6 +77,8 @@ extension NTStatus: CustomStringConvertible {
       return "The network name specified by the client has been deleted on the server. This error is returned if the client specifies an incorrect TID or the share on the server represented by the TID was deleted."
     case .badNetworkName:
       return "The specified share name cannot be found on the remote server."
+    case .directoryNotEmpty:
+      return "Indicates that the directory trying to be deleted is not empty."
     case .notADirectory:
       return "A requested opened file is not a directory."
     case .fileClosed:
@@ -87,6 +89,8 @@ extension NTStatus: CustomStringConvertible {
       return "The transport-connection attempt was refused by the remote system."
     case .networkSessionExpired:
       return "The client's session has expired; therefore, the client MUST re-authenticate to continue accessing remote resources."
+    case .fileSystemLimitation:
+      return "The requested operation could not be completed due to a file system limitation."
     case .smbTooManyUIDs:
       return "The client has requested too many UID values from the server or the client already has an SMB session setup with this UID value."
     default:
@@ -164,6 +168,8 @@ extension NTStatus: CustomDebugStringConvertible {
       return "NETWORK_NAME_DELETED"
     case .badNetworkName:
       return "BAD_NETWORK_NAME"
+    case .directoryNotEmpty:
+      return "DIRECTORY_NOT_EMPTY"
     case .notADirectory:
       return "NOT_A_DIRECTORY"
     case .fileClosed:
@@ -174,6 +180,8 @@ extension NTStatus: CustomDebugStringConvertible {
       return "CONNECTION_REFUSED"
     case .networkSessionExpired:
       return "NETWORK_SESSION_EXPIRED"
+    case .fileSystemLimitation:
+      return "FILE_SYSTEM_LIMITATION"
     case .smbTooManyUIDs:
       return "SMB_TOO_MANY_UIDS"
     default:
@@ -216,11 +224,13 @@ public enum ErrorCode: UInt32 {
   case notSupported = 0xC00000BB
   case networkNameDeleted = 0xC00000C9
   case badNetworkName = 0xC00000CC
+  case directoryNotEmpty = 0xC0000101
   case notADirectory = 0xC0000103
   case fileClosed = 0xC0000128
   case userSessionDeleted = 0xC0000203
   case connectionRefused = 0xC0000236
   case networkSessionExpired = 0xC000035C
+  case fileSystemLimitation = 0xC0000427
   case smbTooManyUIDs = 0xC000205A
 }
 
