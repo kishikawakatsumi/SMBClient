@@ -80,7 +80,7 @@ extension Header.Command: CustomDebugStringConvertible {
 
 extension Header.Flags: CustomDebugStringConvertible {
   public var debugDescription: String {
-    var values: [String] = []
+    var values = [String]()
     
     if contains(.serverToRedir) {
       values.append("Response")

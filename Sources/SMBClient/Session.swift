@@ -131,7 +131,7 @@ public class Session {
     let response = Logoff.Response(data: data)
 
     sessionId = 0
-    
+
     return response
   }
 
@@ -461,54 +461,10 @@ public class Session {
       shareAccess: [.read, .write, .delete],
       createDisposition: .create,
       createOptions: [.directoryFile],
-      name: path
+      name: path.precomposedStringWithCanonicalMapping
     )
     try await close(fileId: response.fileId)
     return response
-  }
-
-  public func copy(path source: String, path dest: String) async throws {
-    let createResponse = try await create(
-      desiredAccess: [.genericRead],
-      fileAttributes: [],
-      shareAccess: [.read],
-      createDisposition: .open,
-      createOptions: [],
-      name: source
-    )
-
-    let creditSize = creditSize(size: maxReadSize)
-    let request = Read.Request(
-      creditCharge: creditSize,
-      messageId: messageId.next(count: UInt64(creditSize)),
-      treeId: treeId,
-      sessionId: sessionId,
-      fileId: createResponse.fileId,
-      offset: 0,
-      length: maxReadSize
-    )
-
-    var buffer = Data()
-    var response = Read.Response(data: try await send(request.encoded()))
-    buffer.append(response.buffer)
-
-    while NTStatus(response.header.status) != .endOfFile {
-      let request = Read.Request(
-        creditCharge: creditSize,
-        messageId: messageId.next(count: UInt64(creditSize)),
-        treeId: treeId,
-        sessionId: sessionId,
-        fileId: createResponse.fileId,
-        offset: UInt64(buffer.count),
-        length: maxReadSize
-      )
-
-      let data = try await send(request.encoded())
-      response = Read.Response(data: data)
-      buffer.append(response.buffer)
-    }
-
-    try await close(fileId: createResponse.fileId)
   }
 
   public func deleteDirectory(path: String) async throws {
@@ -616,7 +572,7 @@ public class Session {
       sessionId: sessionId,
       fileId: temporaryUUID,
       infoType: .file,
-      fileInformation: FileRenameInformation(fileName: to)
+      fileInformation: FileRenameInformation(fileName: to.precomposedStringWithCanonicalMapping)
     )
     let closeRequest = Close.Request(
       headerFlags: [.relatedOperations],
