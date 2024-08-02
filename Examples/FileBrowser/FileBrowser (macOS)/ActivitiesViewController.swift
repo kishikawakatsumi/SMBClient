@@ -50,6 +50,15 @@ class ActivitiesViewController: NSViewController {
     let reversedIndex = tableView.numberOfRows - 1 - context.index
     tableView.reloadData(forRowIndexes: [reversedIndex], columnIndexes: [0])
   }
+
+  @IBAction
+  private func clearActivities(_ sender: NSSegmentedControl) {
+    let deleted = TransferQueue.shared.clearFinishedTransfers()
+
+    for index in deleted {
+      tableView.removeRows(at: [tableView.numberOfRows - 1 - index])
+    }
+  }
 }
 
 extension ActivitiesViewController: NSTableViewDataSource {

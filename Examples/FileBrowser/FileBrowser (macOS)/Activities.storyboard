@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="bU7-R8-ocO">
     <dependencies>
+        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="22689"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -9,18 +10,18 @@
         <scene sceneID="PEd-7d-5j0">
             <objects>
                 <viewController id="bU7-R8-ocO" customClass="ActivitiesViewController" customModule="FileBrowser" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="tOy-S4-hL0">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="300"/>
+                    <view key="view" misplaced="YES" id="tOy-S4-hL0">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="281"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="54" horizontalPageScroll="10" verticalLineScroll="54" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3yl-4W-mwl">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="300"/>
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="243"/>
                                 <clipView key="contentView" drawsBackground="NO" id="bIn-ew-JA0">
-                                    <rect key="frame" x="0.0" y="0.0" width="320" height="300"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="243"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="54" rowSizeStyle="automatic" viewBased="YES" id="bcf-fH-7vk">
-                                            <rect key="frame" x="0.0" y="0.0" width="320" height="300"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="320" height="243"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
@@ -127,11 +128,47 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="vbY-gI-sS1">
+                                <rect key="frame" x="0.0" y="243" width="320" height="36"/>
+                                <subviews>
+                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="JWg-fk-nMF">
+                                        <rect key="frame" x="18" y="10" width="284" height="16"/>
+                                        <textFieldCell key="cell" lineBreakMode="clipping" alignment="center" title="Activities" id="p1n-jx-TLx">
+                                            <font key="font" metaFont="system"/>
+                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                        </textFieldCell>
+                                    </textField>
+                                    <segmentedControl verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="VN5-sF-5Ol">
+                                        <rect key="frame" x="261" y="6" width="54" height="24"/>
+                                        <segmentedCell key="cell" borderStyle="border" alignment="left" style="rounded" trackingMode="momentary" id="JF4-3K-wwg">
+                                            <font key="font" metaFont="system"/>
+                                            <segments>
+                                                <segment label="Clear" width="48"/>
+                                            </segments>
+                                        </segmentedCell>
+                                        <connections>
+                                            <action selector="clearActivities:" target="bU7-R8-ocO" id="0G2-Rj-HoF"/>
+                                        </connections>
+                                    </segmentedControl>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="VN5-sF-5Ol" secondAttribute="bottom" constant="8" id="F9n-3F-Hyz"/>
+                                    <constraint firstItem="VN5-sF-5Ol" firstAttribute="top" secondItem="vbY-gI-sS1" secondAttribute="top" constant="8" id="GAo-9S-2U9"/>
+                                    <constraint firstItem="JWg-fk-nMF" firstAttribute="centerY" secondItem="vbY-gI-sS1" secondAttribute="centerY" id="MBp-45-Txp"/>
+                                    <constraint firstItem="JWg-fk-nMF" firstAttribute="leading" secondItem="vbY-gI-sS1" secondAttribute="leading" constant="20" symbolic="YES" id="RUY-Aq-CyJ"/>
+                                    <constraint firstAttribute="trailing" secondItem="VN5-sF-5Ol" secondAttribute="trailing" constant="8" id="YGE-dz-qL0"/>
+                                    <constraint firstAttribute="trailing" secondItem="JWg-fk-nMF" secondAttribute="trailing" constant="20" symbolic="YES" id="pQN-A7-Edh"/>
+                                </constraints>
+                            </customView>
                         </subviews>
                         <constraints>
                             <constraint firstItem="3yl-4W-mwl" firstAttribute="leading" secondItem="tOy-S4-hL0" secondAttribute="leading" id="IdD-jU-9ov"/>
+                            <constraint firstAttribute="trailing" secondItem="vbY-gI-sS1" secondAttribute="trailing" id="Jqd-mE-ANG"/>
+                            <constraint firstItem="3yl-4W-mwl" firstAttribute="top" secondItem="vbY-gI-sS1" secondAttribute="bottom" id="ONt-aR-QUi"/>
+                            <constraint firstItem="vbY-gI-sS1" firstAttribute="leading" secondItem="tOy-S4-hL0" secondAttribute="leading" id="Rjh-yy-AfE"/>
                             <constraint firstAttribute="bottom" secondItem="3yl-4W-mwl" secondAttribute="bottom" id="Wfh-Jc-D4N"/>
-                            <constraint firstItem="3yl-4W-mwl" firstAttribute="top" secondItem="tOy-S4-hL0" secondAttribute="top" id="dR9-KY-Nil"/>
+                            <constraint firstItem="vbY-gI-sS1" firstAttribute="top" secondItem="tOy-S4-hL0" secondAttribute="top" id="dws-7I-l1j"/>
                             <constraint firstAttribute="trailing" secondItem="3yl-4W-mwl" secondAttribute="trailing" id="qKa-NG-7Ln"/>
                         </constraints>
                     </view>
@@ -141,7 +178,7 @@
                 </viewController>
                 <customObject id="9uD-mB-xHs" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="64" y="129"/>
+            <point key="canvasLocation" x="64" y="128.5"/>
         </scene>
     </scenes>
 </document>

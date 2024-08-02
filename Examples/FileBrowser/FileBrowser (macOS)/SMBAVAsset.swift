@@ -18,6 +18,10 @@ class SMBAVAsset: AVURLAsset {
 
     resourceLoader.setDelegate(resourceLoaderDelegate, queue: .global())
   }
+
+  func close() {
+    resourceLoaderDelegate.close()
+  }
 }
 
 private class AssetResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate {
@@ -33,6 +37,12 @@ private class AssetResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelega
     fileReader = client.fileReader(path: path)
     self.path = path
     self.contentType = contentType
+  }
+
+  func close() {
+    Task {
+      try await fileReader.close()
+    }
   }
 
   func resourceLoader(
