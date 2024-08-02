@@ -14,16 +14,16 @@ class TransferQueue {
 
   func addFileTransfer(_ fileTransfer: FileTransfer) {
     let throttler = Throttler(interval: 0.5)
-    
-    let index = transfers.count
+
     let name = fileTransfer.displayName
 
-    transfers.append(TransferInfo(name: name, state: .queued))
+    let id = UUID()
+    transfers.append(TransferInfo(id: id, name: name, state: .queued))
 
     NotificationCenter.default.post(
       name: TransferQueue.didAddTransfer,
       object: self,
-      userInfo: [TransferQueueUserInfoKey.index: index]
+      userInfo: [TransferQueueUserInfoKey.index: transfers.count - 1]
     )
 
     Task {
@@ -31,9 +31,12 @@ class TransferQueue {
       fileTransfer.progressHandler = { (state) in
         Task {
           await throttler.throttle {
-            await MainActor.run {
-              self.transfers[index] = TransferInfo(name: name, state: state)
-              
+            await MainActor.run { [weak self] in
+              guard let self else { return }
+              guard let index = transfers.firstIndex(where: { $0.id == id }) else { return }
+
+              self.transfers[index] = TransferInfo(id: id, name: name, state: state)
+
               NotificationCenter.default.post(
                 name: TransferQueue.progressDidChange,
                 object: self,
@@ -46,6 +49,23 @@ class TransferQueue {
 
       await taskQueue.append(fileTransfer)
     }
+  }
+
+  func clearFinishedTransfers() -> [Int] {
+    var transfers = [TransferInfo]()
+    var deleted = [Int]()
+
+    for (index, transfer) in self.transfers.enumerated() {
+      switch transfer.state {
+      case .queued, .started, .failed:
+        transfers.append(transfer)
+      case .completed:
+        deleted.append(index)
+      }
+    }
+
+    self.transfers = transfers
+    return deleted
   }
 
   private actor TaskQueue {
@@ -77,9 +97,18 @@ class TransferQueue {
   }
 }
 
-struct TransferInfo {
+struct TransferInfo: Hashable {
+  let id: UUID
   let name: String
   let state: TransferState
+
+  static func == (lhs: TransferInfo, rhs: TransferInfo) -> Bool {
+    lhs.id == rhs.id
+  }
+
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(id)
+  }
 }
 
 struct TransferContext {

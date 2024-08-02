@@ -14,6 +14,7 @@ class MediaPlayerWindowController: NSWindowController, NSWindowDelegate {
 
   private let client: SMBClient
   private let path: String
+  private lazy var asset = SMBAVAsset(client: client, path: path)
 
   private var observation: NSKeyValueObservation?
   private var windowController: NSWindowController?
@@ -52,7 +53,6 @@ class MediaPlayerWindowController: NSWindowController, NSWindowDelegate {
 
     guard let videoPlayerViewController = contentViewController as? MediaPlayerViewController else { return }
 
-    let asset = SMBAVAsset(client: client, path: path)
     let playerItem = AVPlayerItem(asset: asset)
 
     let player = AVPlayer(playerItem: playerItem)
@@ -84,6 +84,7 @@ class MediaPlayerWindowController: NSWindowController, NSWindowDelegate {
   }
 
   func windowWillClose(_ notification: Notification) {
+    asset.close()
     windowController = nil
   }
 }
