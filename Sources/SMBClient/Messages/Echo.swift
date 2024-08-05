@@ -9,7 +9,6 @@ public enum Echo {
     public init(
       headerFlags: Header.Flags = [],
       messageId: UInt64,
-      treeId: UInt32,
       sessionId: UInt64
     ) {
       header = Header(
@@ -18,7 +17,7 @@ public enum Echo {
         creditRequest: 0,
         flags: headerFlags,
         messageId: messageId,
-        treeId: treeId,
+        treeId: 0,
         sessionId: sessionId
       )
 

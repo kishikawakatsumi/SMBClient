@@ -593,7 +593,6 @@ public class Session {
   public func echo() async throws -> Echo.Response {
     let request = Echo.Request(
       messageId: messageId.next(),
-      treeId: treeId,
       sessionId: sessionId
     )
 
