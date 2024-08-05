@@ -123,7 +123,6 @@ public class Session {
   public func logoff() async throws -> Logoff.Response {
     let request = Logoff.Request(
       messageId: messageId.next(),
-      treeId: treeId,
       sessionId: sessionId
     )
 

@@ -50,14 +50,3 @@ extension ByteReader {
     UUID(data: read(count: 16))
   }
 }
-
-extension Data {
-  init<T>(from value: T) {
-    var value = value
-    self = Swift.withUnsafeBytes(of: &value) { Data($0) }
-  }
-
-  func to<T>(type: T.Type) -> T {
-    return self.withUnsafeBytes { $0.load(as: T.self) }
-  }
-}
