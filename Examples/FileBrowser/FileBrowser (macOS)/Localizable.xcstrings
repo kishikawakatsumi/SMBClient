@@ -22,6 +22,9 @@
     "Connect" : {
 
     },
+    "New Folder" : {
+
+    },
     "Queued" : {
       "comment" : "(progressBytes) of (totalBytes)"
     },
