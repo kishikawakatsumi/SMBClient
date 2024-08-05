@@ -62,8 +62,9 @@ class NavigationController: NSViewController {
     current < history.count - 1
   }
 
-  func currentViewController() -> NSViewController {
-    history[current]
+  func currentViewController() -> NSViewController? {
+    guard !history.isEmpty else { return nil }
+    return history[current]
   }
 
   private func replace(_ viewController: NSViewController) {

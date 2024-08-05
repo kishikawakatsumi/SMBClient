@@ -67,6 +67,11 @@
                                                 <action selector="newDocument:" target="Ady-hI-5gd" id="4Si-XN-c54"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="New Folder" keyEquivalent="N" id="O6M-Jf-eUY">
+                                            <connections>
+                                                <action selector="newFolderAction:" target="Ady-hI-5gd" id="Rg2-z9-hIT"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="New Tab" keyEquivalent="t" id="08g-95-MgD">
                                             <connections>
                                                 <action selector="newWindowForTab:" target="Voe-Tx-rLC" id="tiD-UI-SVZ"/>

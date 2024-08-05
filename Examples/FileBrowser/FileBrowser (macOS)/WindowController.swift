@@ -68,7 +68,15 @@ class WindowController: NSWindowController {
     segmentedControl.setEnabled(navigationController.canGoBack(), forSegment: 0)
     segmentedControl.setEnabled(navigationController.canGoForward(), forSegment: 1)
 
-    window?.title = navigationController.currentViewController().title ?? ""
+    window?.title = navigationController.currentViewController()?.title ?? ""
+  }
+
+  @IBAction
+  private func newFolderAction(_ sender: NSToolbarItem) {
+    guard let navigationController = navigationController() else { return }
+    guard let filesViewController = navigationController.topViewController as? FilesViewController else { return }
+
+    filesViewController.createDirectory()
   }
 
   @objc
@@ -105,7 +113,7 @@ class WindowController: NSWindowController {
     guard let toolbarItems = window?.toolbar?.items else {
       return
     }
-    guard let toolbarItem = toolbarItems.first(where: { $0.itemIdentifier == .activitiesToolbarItemIdentifer }) else {
+    guard let toolbarItem = toolbarItems.first(where: { $0.itemIdentifier == .activitiesToolbarItemIdentifier }) else {
       return
     }
 
@@ -118,13 +126,24 @@ class WindowController: NSWindowController {
   }
 }
 
+extension WindowController: NSMenuItemValidation {
+  func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+    if menuItem.title == "New Folder" {
+      guard let navigationController = navigationController() else { return false }
+      return navigationController.topViewController is FilesViewController
+    }
+    return false
+  }
+}
+
 extension WindowController: NSToolbarDelegate {
   func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
     [
-      .navigationToolbarItemIdentifer,
-      .connectToServerToolbarItemIdentifer,
-      .activitiesToolbarItemIdentifer,
-      .searchToolbarItemIdentifer,
+      .navigationToolbarItemIdentifier,
+      .newFolderToolbarItemIdentifier,
+      .connectToServerToolbarItemIdentifier,
+      .activitiesToolbarItemIdentifier,
+      .searchToolbarItemIdentifier,
     ]
   }
 
@@ -134,13 +153,13 @@ extension WindowController: NSToolbarDelegate {
     willBeInsertedIntoToolbar flag: Bool
   ) -> NSToolbarItem? {
     switch itemIdentifier {
-    case .navigationToolbarItemIdentifer:
+    case .navigationToolbarItemIdentifier:
       let group = NSToolbarItemGroup(itemIdentifier: itemIdentifier)
 
-      let back = NSToolbarItem(itemIdentifier: .backToolbarItemIdentifer)
+      let back = NSToolbarItem(itemIdentifier: .backToolbarItemIdentifier)
       back.label = "Back"
 
-      let forward = NSToolbarItem(itemIdentifier: .forwardItemIdentifer)
+      let forward = NSToolbarItem(itemIdentifier: .forwardItemIdentifier)
       forward.label = "Forward"
 
       segmentedControl.segmentStyle = .separated
@@ -165,7 +184,16 @@ extension WindowController: NSToolbarDelegate {
       group.view = segmentedControl
 
       return group
-    case .connectToServerToolbarItemIdentifer:
+    case .newFolderToolbarItemIdentifier:
+      let toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
+
+      toolbarItem.isBordered = true
+      toolbarItem.image = NSImage(systemSymbolName: "folder.badge.plus", accessibilityDescription: nil)
+      toolbarItem.label = NSLocalizedString("New Folder", comment: "")
+      toolbarItem.action = #selector(newFolderAction(_:))
+
+      return toolbarItem
+    case .connectToServerToolbarItemIdentifier:
       let toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
 
       toolbarItem.isBordered = true
@@ -174,8 +202,7 @@ extension WindowController: NSToolbarDelegate {
       toolbarItem.action = #selector(connectToServerAction(_:))
 
       return toolbarItem
-
-    case .activitiesToolbarItemIdentifer:
+    case .activitiesToolbarItemIdentifier:
       let toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier)
 
       toolbarItem.isBordered = true
@@ -184,7 +211,7 @@ extension WindowController: NSToolbarDelegate {
       toolbarItem.action = #selector(activitiesAction(_:))
 
       return toolbarItem
-    case .searchToolbarItemIdentifer:
+    case .searchToolbarItemIdentifier:
       let toolbarItem = NSSearchToolbarItem(itemIdentifier: itemIdentifier)
       toolbarItem.searchField.delegate = self
       searchField = toolbarItem.searchField
@@ -192,6 +219,18 @@ extension WindowController: NSToolbarDelegate {
     default:
       return nil
     }
+  }
+}
+
+extension WindowController: NSToolbarItemValidation {
+  func validateToolbarItem(_ item: NSToolbarItem) -> Bool {
+    guard let navigationController = navigationController() else { return false }
+
+    if item.itemIdentifier == .newFolderToolbarItemIdentifier {
+      return navigationController.topViewController is FilesViewController
+    }
+
+    return true
   }
 }
 
@@ -222,11 +261,12 @@ extension WindowControllerUserInfoKey {
 }
 
 private extension NSToolbarItem.Identifier {
-  static let navigationToolbarItemIdentifer = NSToolbarItem.Identifier("NavigationToolbarItem")
-  static let backToolbarItemIdentifer = NSToolbarItem.Identifier("BackToolbarItem")
-  static let forwardItemIdentifer = NSToolbarItem.Identifier("ForwardToolbarItem")
+  static let navigationToolbarItemIdentifier = NSToolbarItem.Identifier("NavigationToolbarItem")
+  static let backToolbarItemIdentifier = NSToolbarItem.Identifier("BackToolbarItem")
+  static let forwardItemIdentifier = NSToolbarItem.Identifier("ForwardToolbarItem")
 
-  static let connectToServerToolbarItemIdentifer = NSToolbarItem.Identifier("ConnectToServerToolbarItem")
-  static let activitiesToolbarItemIdentifer = NSToolbarItem.Identifier("ActivitiesToolbbarItem")
-  static let searchToolbarItemIdentifer = NSToolbarItem.Identifier("SearchToolbarItem")
+  static let newFolderToolbarItemIdentifier = NSToolbarItem.Identifier("NewFolderToolbarItem")
+  static let connectToServerToolbarItemIdentifier = NSToolbarItem.Identifier("ConnectToServerToolbarItem")
+  static let activitiesToolbarItemIdentifier = NSToolbarItem.Identifier("ActivitiesToolbbarItem")
+  static let searchToolbarItemIdentifier = NSToolbarItem.Identifier("SearchToolbarItem")
 }
