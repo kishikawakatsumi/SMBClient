@@ -47,6 +47,6 @@ extension ByteReader {
   }
 
   func read() -> UUID {
-    UUID(data: read(count: 16))
+    read(count: 16).to(type: UUID.self)
   }
 }

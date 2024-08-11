@@ -9,7 +9,7 @@ extension QueryDirectory.Request: CustomDebugStringConvertible {
       Info Level: \(fileInformationClass)
       Find Flags: \(flags)
       File Index: \(String(format: "0x%08x", fileIndex))
-      GUID handle File: \(UUID(data: fileId))
+      GUID handle File: \(fileId.to(type: UUID.self))
       Blob Offset: \(fileNameOffset)
       Blob Length: \(fileNameLength)
       Output Buffer Length: \(outputBufferLength)

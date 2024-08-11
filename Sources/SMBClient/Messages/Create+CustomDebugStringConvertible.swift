@@ -42,7 +42,7 @@ extension Create.Response: CustomDebugStringConvertible {
       End Of File: \(endOfFile)
       File Attributes: \(fileAttributes)
       Reserved: \(String(format: "%04x", reserved2))
-      GUID handle File: \(UUID(data: fileId))
+      GUID handle File: \(fileId.to(type: UUID.self))
       Blob Offset: \(createContextsOffset)
       Blob Length: \(createContextsLength)
       ExtraInfo: \(buffer.hex)
