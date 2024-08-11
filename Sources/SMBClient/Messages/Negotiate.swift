@@ -52,7 +52,7 @@ public enum Negotiate {
       data += securityMode.rawValue
       data += reserved
       data += capabilities.rawValue
-      data += clientGuid.data
+      data += Data(from: clientGuid)
       data += clientStartTime
 
       for dialect in dialects {

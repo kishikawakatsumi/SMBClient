@@ -8,7 +8,7 @@ extension Close.Request: CustomDebugStringConvertible {
       StructureSize: \(structureSize)
       Close Flags: \(flags)
       Reserved: \(String(format: "%04x", reserved))
-      GUID handle File: \(UUID(data: fileId))
+      GUID handle File: \(fileId.to(type: UUID.self))
     """
   }
 }

@@ -12,7 +12,7 @@ extension SetInfo.Request: CustomDebugStringConvertible {
       Setinfo Offset: \(bufferOffset)
       Reserved: \(String(format: "%04x", reserved))
       Additional Info: \(String(format: "0x%08x", additionalInformation))
-      GUID handle: \(UUID(data: fileId))
+      GUID handle: \(fileId.to(type: UUID.self))
       Data: \(buffer.hex)
     """
   }

@@ -10,7 +10,7 @@ extension Read.Request: CustomDebugStringConvertible {
       Flags: \(String(format: "0x%02x", flags))
       Read Length: \(length)
       File Offset: \(offset)
-      GUID handle File: \(UUID(data: fileId))
+      GUID handle File: \(fileId.to(type: UUID.self))
       Min Count: \(minimumCount)
       Channel: \(channel)
       Remaining Bytes: \(remainingBytes)

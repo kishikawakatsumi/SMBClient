@@ -14,7 +14,7 @@ extension QueryInfo.Request: CustomDebugStringConvertible {
       Getinfo Input Size: \(inputBufferLength)
       Additional Info: \(String(format: "0x%08x", additionalInformation))
       Flags: \(flags)
-      GUID handle: \(UUID(data: fileId))
+      GUID handle: \(fileId.to(type: UUID.self))
     """
   }
 }
