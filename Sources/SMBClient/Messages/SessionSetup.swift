@@ -99,8 +99,8 @@ public enum SessionSetup {
       self.rawValue = rawValue
     }
 
-    public static let signingEnabled = SecurityMode(rawValue: 0x0001)
-    public static let signingRequired = SecurityMode(rawValue: 0x0002)
+    public static let signingEnabled = SecurityMode(rawValue: 0x01)
+    public static let signingRequired = SecurityMode(rawValue: 0x02)
   }
 
   public struct Capabilities: OptionSet, Sendable {

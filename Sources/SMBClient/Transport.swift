@@ -13,9 +13,9 @@ public struct DirectTCPPacket {
     protocolLength = length
 
     var data = Data(capacity: 3)
-    let byte1 = UInt8((length >> 16) & 0xFF)
-    let byte2 = UInt8((length >> 8) & 0xFF)
-    let byte3 = UInt8(length & 0xFF)
+    let byte1 = UInt8((length >> 16) & 0x000000FF)
+    let byte2 = UInt8((length >> 8) & 0x000000FF)
+    let byte3 = UInt8(length & 0x000000FF)
     data.append(byte1)
     data.append(byte2)
     data.append(byte3)
@@ -28,18 +28,18 @@ public struct DirectTCPPacket {
     let reader = ByteReader(response)
     zero = 0
 
-    let length: UInt32 = reader.read()
-    
+    let length = (reader.read() as UInt32).bigEndian
+
     var data = Data(capacity: 3)
-    let byte1 = UInt8((length >> 16) & 0xFF)
-    let byte2 = UInt8((length >> 8) & 0xFF)
-    let byte3 = UInt8(length & 0xFF)
+    let byte1 = UInt8((length >> 16) & 0x000000FF)
+    let byte2 = UInt8((length >> 8) & 0x000000FF)
+    let byte3 = UInt8(length & 0x000000FF)
     data.append(byte1)
     data.append(byte2)
     data.append(byte3)
 
     streamProtocolLength = data
-    protocolLength = length.bigEndian
+    protocolLength = length
 
     smb2Message = Data(reader.remaining())
   }
