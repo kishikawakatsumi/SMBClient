@@ -17,8 +17,6 @@ class FilesViewController: NSViewController {
 
   private lazy var dirTree = DirectoryStructure(server: serverNode.path, path: path, client: client)
 
-  private var nameFields = [NSTextField: String]()
-
   private var tabGroupObserving: NSKeyValueObservation?
   private var scrollViewObserving: NSKeyValueObservation?
 
@@ -639,41 +637,29 @@ extension FilesViewController: NSMenuItemValidation {
 }
 
 extension FilesViewController: NSTextFieldDelegate {
-  func control(_ control: NSControl, textShouldBeginEditing fieldEditor: NSText) -> Bool {
-    guard let textField = control as? NSTextField else {
-      return true
-    }
-    if let _ = nameFields[textField] {
-      return false
-    }
-    nameFields[textField] = textField.stringValue
-    return true
-  }
-
   func control(_ control: NSControl, textShouldEndEditing fieldEditor: NSText) -> Bool {
     guard let textField = control as? NSTextField else {
       return true
     }
-    guard let original = nameFields[textField] else {
-      nameFields[textField] = nil
+
+    let row = outlineView.row(for: control)
+    guard let node = outlineView.item(atRow: row) as? FileNode else {
       return true
     }
+
     guard !textField.stringValue.isEmpty else {
-      textField.stringValue = original
-      nameFields[textField] = nil
+      textField.stringValue = node.name
       return true
     }
-    guard textField.stringValue != original else {
-      nameFields[textField] = nil
+    guard textField.stringValue != node.name else {
       return true
     }
 
     Task { @MainActor in
       do {
-        try await client.rename(from: join(path, original), to: join(path, textField.stringValue))
-        nameFields[textField] = nil
+        try await client.rename(from: node.path, to: join(dirname(node.path), textField.stringValue))
       } catch {
-        textField.stringValue = original
+        textField.stringValue = node.name
         NSAlert(error: error).runModal()
       }
     }
