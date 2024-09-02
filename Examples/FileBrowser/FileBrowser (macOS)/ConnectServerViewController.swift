@@ -23,6 +23,11 @@ class ConnectServerViewController: NSViewController {
     usernameField.delegate = self
     passwordField.delegate = self
   }
+
+  override func viewWillAppear() {
+    super.viewWillAppear()
+    view.window?.makeFirstResponder(serverField)
+  }
 }
 
 extension ConnectServerViewController: NSTextFieldDelegate {
