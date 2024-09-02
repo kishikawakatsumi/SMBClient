@@ -174,7 +174,7 @@ public class Session {
     let request = TreeConnect.Request(
       messageId: messageId.next(),
       sessionId: sessionId,
-      path: path
+      path: #"\\\#(server)\\#(path)"#
     )
 
     let data = try await send(request.encoded())
