@@ -37,7 +37,7 @@ class SharesViewController: UIViewController, UITableViewDataSource, UITableView
     Task { @MainActor in
       do {
         let shares = try await self.client.listShares()
-          .filter { $0.type.contains(.diskTree) && !$0.type.contains(.ipc) }
+          .filter { $0.type.contains(.diskTree) && !$0.type.contains(.special) }
           .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         self.shares.append(contentsOf: shares)
 
