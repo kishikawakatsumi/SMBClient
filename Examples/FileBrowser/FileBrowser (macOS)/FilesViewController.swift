@@ -498,7 +498,7 @@ extension FilesViewController: NSOutlineViewDataSource {
 
         let basename = fileURL.lastPathComponent
         if let fileNode = item as? FileNode {
-          let destination = join(path, fileNode.path, basename)
+          let destination = join(fileNode.path, basename)
           queue.addFileTransfer(
             FileUpload(source: fileURL, destination: destination, client: client)
           )
