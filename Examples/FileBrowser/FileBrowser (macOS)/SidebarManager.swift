@@ -135,7 +135,7 @@ extension SidebarManager {
         
         do {
           let shares = try await session.client.listShares()
-            .filter { $0.type.contains(.diskTree) && !$0.type.contains(.ipc) }
+            .filter { $0.type.contains(.diskTree) && !$0.type.contains(.special) }
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
             .map { ShareNode(id: ID("\(serverRoot)/\($0.name)"), device: serverNode.name, name: $0.name, parent: serverNode.id) }
 
