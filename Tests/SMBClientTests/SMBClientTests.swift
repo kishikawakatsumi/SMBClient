@@ -544,6 +544,38 @@ final class SMBClientTests: XCTestCase {
     try await assertDirectoryDoesNotExist(at: remotePath, client: client)
   }
 
+  func testUploadInvalidCharacterPath() async throws {
+    let user = alice
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password)
+    try await client.connectShare(user.share)
+
+    let length = 1024
+    var data = Data(count: length)
+    for i in 0..<length {
+      data[i] = UInt8(arc4random_uniform(256))
+    }
+
+    let invalidCharacters = [#"""#, "*", "/", ":", "<", ">", "?", #"\"#, "|"]
+    for invalidCharacter in invalidCharacters {
+      let filename = invalidCharacter
+      do {
+        try await client.upload(content: data, path: filename)
+      } catch let error as ErrorResponse {
+        if ["/", #"\"#].contains(invalidCharacter) {
+          XCTAssert(NTStatus(error.header.status) == .objectNameCollision)
+        } else {
+          XCTAssert(NTStatus(error.header.status) == .objectNameInvalid)
+        }
+      } catch {
+        XCTFail()
+      }
+    }
+
+    try await client.treeDisconnect()
+    try await client.logoff()
+  }
+
   func testDeleteFile() async throws {
     let user = alice
 
