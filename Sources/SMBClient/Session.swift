@@ -285,7 +285,7 @@ public class Session {
     return Close.Response(data: data)
   }
 
-  public func queryDirectory(path: String, pattern: String) async throws -> [FileIdBothDirectoryInformation] {
+  public func queryDirectory(path: String, pattern: String) async throws -> [FileDirectoryInformation] {
     let createRequest = Create.Request(
       messageId: messageId.next(),
       treeId: treeId,
@@ -306,7 +306,7 @@ public class Session {
       messageId: messageId.next(count: UInt64(creditSize)),
       treeId: treeId,
       sessionId: sessionId,
-      fileInformationClass: .fileIdBothDirectoryInformation,
+      fileInformationClass: .fileDirectoryInformation,
       fileId: temporaryUUID,
       fileName: pattern,
       outputBufferLength: outputBufferLength
@@ -319,7 +319,7 @@ public class Session {
 
     let createResponse = Create.Response(data: data)
 
-    var files = [FileIdBothDirectoryInformation]()
+    var files = [FileDirectoryInformation]()
 
     let queryDirectoryResponse = QueryDirectory.Response(data: Data(data[createResponse.header.nextCommand...]))
     files.append(contentsOf: queryDirectoryResponse.files)
