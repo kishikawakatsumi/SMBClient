@@ -31,4 +31,8 @@ struct Icons {
 
     return NSImage(contentsOf: url)
   }
+
+  static func icon(for contentType: UTType) -> NSImage {
+    NSWorkspace.shared.icon(for: contentType)
+  }
 }

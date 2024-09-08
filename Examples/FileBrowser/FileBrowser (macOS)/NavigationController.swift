@@ -8,8 +8,16 @@ class NavigationController: NSViewController {
     return history[current]
   }
 
+  var backHistory: [NSViewController] {
+    Array(history.prefix(current).reversed())
+  }
+
+  var forwardHistory: [NSViewController] {
+    Array(history.suffix(from: current + 1))
+  }
+
   private var history = [NSViewController]()
-  
+
   private var current = -1 {
     didSet {
       NotificationCenter.default.post(name: Self.navigationDidFinished, object: self)
@@ -29,13 +37,13 @@ class NavigationController: NSViewController {
     if current < history.count - 1 {
       history.removeSubrange(current + 1..<history.count)
     }
-    
+
     replace(viewController)
 
     history.append(viewController)
     current += 1
   }
-  
+
   func back() {
     guard canGoBack() else { return }
 
@@ -45,6 +53,15 @@ class NavigationController: NSViewController {
     current -= 1
   }
 
+  func back(count: Int) {
+    guard current - count >= 0 else { return }
+
+    let viewController = history[current - count]
+    replace(viewController)
+
+    current -= count
+  }
+
   func forward() {
     guard canGoForward() else { return }
 
@@ -52,6 +69,15 @@ class NavigationController: NSViewController {
     replace(viewController)
 
     current += 1
+  }
+
+  func forward(count: Int) {
+    guard current + count < history.count else { return }
+
+    let viewController = history[current + count]
+    replace(viewController)
+
+    current += count
   }
 
   func canGoBack() -> Bool {

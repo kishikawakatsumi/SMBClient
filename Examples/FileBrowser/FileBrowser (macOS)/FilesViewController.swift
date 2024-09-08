@@ -534,15 +534,14 @@ extension FilesViewController: NSOutlineViewDelegate {
       let cellIdentifier = NSUserInterfaceItemIdentifier("NameCell")
       guard let cell = outlineView.makeView(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView else { return nil }
 
-      if fileNode.isDirectory {
+      if let type = UTType(tag: NSString(string: fileNode.name).pathExtension, tagClass: .filenameExtension, conformingTo: nil) {
+        cell.imageView?.image = Icons.icon(for: type)
+      } else if fileNode.isDirectory {
         cell.imageView?.image = Icons.folder
       } else {
-        if let type = UTType(tag: NSString(string: fileNode.name).pathExtension, tagClass: .filenameExtension, conformingTo: nil) {
-          cell.imageView?.image = NSWorkspace.shared.icon(for: type)
-        } else {
-          cell.imageView?.image = Icons.file
-        }
+        cell.imageView?.image = Icons.file
       }
+
       cell.textField?.stringValue = fileNode.name
 
       cell.textField?.delegate = self

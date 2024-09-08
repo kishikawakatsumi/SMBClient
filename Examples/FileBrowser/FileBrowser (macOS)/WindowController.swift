@@ -1,9 +1,12 @@
 import Cocoa
+import UniformTypeIdentifiers
 
 class WindowController: NSWindowController {
   static let searchTextDidChange = Notification.Name("WindowControllerSearchTextDidChange")
 
   private let segmentedControl = NSSegmentedControl()
+  private let backHistoryMenu = NSMenu()
+  private let forwardHistoryMenu = NSMenu()
 
   private let activitiesViewController = ActivitiesViewController.instantiate()
   private let popover = NSPopover()
@@ -42,9 +45,7 @@ class WindowController: NSWindowController {
 
   @objc
   private func navigationAction(_ sender: NSSegmentedControl) {
-    guard let navigationController = navigationController() else {
-      return
-    }
+    guard let navigationController = navigationController() else { return }
 
     switch sender.selectedSegment {
     case 0:
@@ -60,9 +61,63 @@ class WindowController: NSWindowController {
   }
 
   @objc
+  private func backHistoryAction(_ sender: NSMenuItem) {
+    guard let navigationController = navigationController() else { return }
+
+    if let index = backHistoryMenu.items.firstIndex(of: sender) {
+      navigationController.back(count: index + 1)
+    }
+  }
+
+  @objc
+  private func forwardHistoryAction(_ sender: NSMenuItem) {
+    guard let navigationController = navigationController() else { return }
+
+    if let index = forwardHistoryMenu.items.firstIndex(of: sender) {
+      navigationController.forward(count: index + 1)
+    }
+  }
+
+  @objc
   private func navigationDidFinished(_ notification: Notification) {
-    guard let navigationController = navigationController() else {
-      return
+    guard let navigationController = navigationController() else { return }
+
+    backHistoryMenu.removeAllItems()
+    for viewController in navigationController.backHistory {
+      let menuItem = NSMenuItem()
+      if let title = viewController.title {
+        menuItem.title = title
+      }
+      if let filesViewController = viewController as? FilesViewController,
+         let type = UTType(tag: NSString(string: filesViewController.path).pathExtension, tagClass: .filenameExtension, conformingTo: nil) {
+        menuItem.image = Icons.icon(for: type)
+      } else if let _ = viewController as? SharesViewController {
+        menuItem.image = Icons.server
+      } else {
+        menuItem.image = Icons.folder
+      }
+      menuItem.image?.size = NSSize(width: 16, height: 16)
+      menuItem.action = #selector(backHistoryAction(_:))
+      backHistoryMenu.addItem(menuItem)
+    }
+
+    forwardHistoryMenu.removeAllItems()
+    for viewController in navigationController.forwardHistory {
+      let menuItem = NSMenuItem()
+      if let title = viewController.title {
+        menuItem.title = title
+      }
+      if let filesViewController = viewController as? FilesViewController,
+         let type = UTType(tag: NSString(string: filesViewController.path).pathExtension, tagClass: .filenameExtension, conformingTo: nil) {
+        menuItem.image = Icons.icon(for: type)
+      } else if let _ = viewController as? SharesViewController {
+        menuItem.image = Icons.server
+      } else {
+        menuItem.image = Icons.folder
+      }
+      menuItem.image?.size = NSSize(width: 16, height: 16)
+      menuItem.action = #selector(forwardHistoryAction(_:))
+      forwardHistoryMenu.addItem(menuItem)
     }
 
     segmentedControl.setEnabled(navigationController.canGoBack(), forSegment: 0)
@@ -101,9 +156,7 @@ class WindowController: NSWindowController {
     if #available(macOS 14.0, *) {
       popover.show(relativeTo: sender)
     } else {
-      guard let itemViewer = sender.value(forKey: "_itemViewer") as? NSView else {
-        return
-      }
+      guard let itemViewer = sender.value(forKey: "_itemViewer") as? NSView else { return }
       popover.show(relativeTo: itemViewer.bounds, of: itemViewer, preferredEdge: .minY)
     }
   }
@@ -128,7 +181,15 @@ class WindowController: NSWindowController {
 
 extension WindowController: NSMenuItemValidation {
   func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-    if menuItem.title == "New Folder" {
+    if menuItem.action == #selector(backHistoryAction(_:)) {
+      guard let navigationController = navigationController() else { return false }
+      return navigationController.canGoBack()
+    }
+    if menuItem.action == #selector(forwardHistoryAction(_:)) {
+      guard let navigationController = navigationController() else { return false }
+      return navigationController.canGoForward()
+    }
+    if menuItem.action == #selector(newFolderAction(_:)) {
       guard let navigationController = navigationController() else { return false }
       return navigationController.topViewController is FilesViewController
     }
@@ -171,6 +232,9 @@ extension WindowController: NSToolbarDelegate {
 
       segmentedControl.setImage(NSImage(systemSymbolName: "chevron.right", accessibilityDescription: nil)!, forSegment: 1)
       segmentedControl.setWidth(32, forSegment: 1)
+
+      segmentedControl.setMenu(backHistoryMenu, forSegment: 0)
+      segmentedControl.setMenu(forwardHistoryMenu, forSegment: 1)
 
       segmentedControl.action = #selector(WindowController.navigationAction(_:))
 
