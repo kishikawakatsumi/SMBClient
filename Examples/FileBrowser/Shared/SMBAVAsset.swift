@@ -6,7 +6,7 @@ class SMBAVAsset: AVURLAsset {
   private let resourceLoaderDelegate: AssetResourceLoaderDelegate
 
   init(client: SMBClient, path: String) {
-    let url = URL(string: "smb://\(path)")!
+    let url = URL(string: "smb:///\(path)")!
 
     self.resourceLoaderDelegate = AssetResourceLoaderDelegate(
       client: client,
