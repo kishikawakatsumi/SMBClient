@@ -78,21 +78,3 @@ extension QueryDirectory.Flags: CustomDebugStringConvertible {
     }
   }
 }
-
-extension QueryDirectory.FileIdBothDirectoryInformation: CustomDebugStringConvertible {
-  public var debugDescription: String {
-    """
-    FileIdBothDirectoryInfo:
-      Next Offset: \(nextEntryOffset)
-      File Index: \(fileIndex)
-      Create: \(FileTime(creationTime))
-      Last Access: \(FileTime(lastAccessTime))
-      Last Write: \(FileTime(lastWriteTime))
-      Last Change: \(FileTime(changeTime))
-      End Of File: \(endOfFile)
-      Allocation Size: \(allocationSize)
-      File Attributes: \(fileAttributes)
-      File Name: \(fileName)
-    """
-  }
-}
