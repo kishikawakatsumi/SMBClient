@@ -496,7 +496,15 @@ extension FilesViewController: NSOutlineViewDataSource {
         guard let fileURL = fileURL as? URL else { return false }
         let queue = TransferQueue.shared
 
-        let basename = fileURL.lastPathComponent
+        func replaceUnavailableCharacters(_ s: String) -> String {
+          var s = s
+          let invalidCharacters = #""*/:<>?\|"#
+          for invalidCharacter in invalidCharacters {
+            s = s.replacingOccurrences(of: String(invalidCharacter), with: "")
+          }
+          return s
+        }
+        let basename = replaceUnavailableCharacters(fileURL.lastPathComponent)
         if let fileNode = item as? FileNode {
           let destination = join(fileNode.path, basename)
           queue.addFileTransfer(
