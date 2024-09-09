@@ -71,9 +71,11 @@ struct WStr {
 
   init(referentID: UInt32, byteReader: ByteReader) {
     self.referentID = referentID
+
     maxCount = byteReader.read()
     offset = byteReader.read()
     actualCount = byteReader.read()
+
     let valueCount = Int(actualCount) * 2
     valueData = byteReader.read(count: valueCount)
     if valueCount % 4 != 0 {
@@ -81,6 +83,7 @@ struct WStr {
     } else {
       terminator = 0
     }
+
     let valueData = Data(valueData)[0..<valueData.count - 2]
     value = String(data: valueData, encoding: .utf16LittleEndian) ?? valueData.hex
   }
@@ -89,6 +92,7 @@ struct WStr {
     var data = Data()
     data += referentID
     data += maxCount
+
     if valueData.isEmpty {
       data += offset
     } else {
@@ -167,7 +171,7 @@ struct NetShareEnumResponse {
           let commentRefferentID: UInt32 = byteReader.read()
           return (nameRefferentID, type, commentRefferentID)
         }
-        .map { nameRefferentID, type, commentRefferentID in
+        .map { (nameRefferentID, type, commentRefferentID) in
           let name = WStr(referentID: nameRefferentID, byteReader: byteReader)
           let comment = WStr(referentID: commentRefferentID, byteReader: byteReader)
           return ShareInfo1(name: name, type: type, comment: comment)
