@@ -63,6 +63,9 @@ class SharesViewController: NSViewController {
     super.viewDidAppear()
 
     if let window = view.window, let tabGroup = view.window?.tabGroup, let outlineView {
+      window.representedURL = URL(string: "smb:///\(serverNode.name))")
+      window.standardWindowButton(.documentIconButton)?.image = Icons.server
+
       let serverNode = self.serverNode
       var tree = self.tree
 

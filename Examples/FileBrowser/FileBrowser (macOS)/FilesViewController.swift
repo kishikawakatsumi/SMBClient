@@ -116,6 +116,13 @@ class FilesViewController: NSViewController {
     super.viewDidAppear()
 
     if let window = view.window, let tabGroup = view.window?.tabGroup, let outlineView {
+      window.representedURL = URL(string: "smb:///\(join(rootPath, path))")
+      if let type = UTType(tag: NSString(string: path).pathExtension, tagClass: .filenameExtension, conformingTo: nil) {
+        window.standardWindowButton(.documentIconButton)?.image = Icons.icon(for: type)
+      } else {
+        window.standardWindowButton(.documentIconButton)?.image = Icons.folder
+      }
+
       let dirTree = self.dirTree
 
       tabGroupObserving?.invalidate()
@@ -332,9 +339,7 @@ class FilesViewController: NSViewController {
       navigationController.push(filesViewController)
     } else {
       guard let shares = DataRepository.shared.nodes(serverNode.path) else { return }
-      let sharesViewController = SharesViewController.instantiate(
-        serverNode: serverNode, shares: Tree(nodes: shares)
-      )
+      let sharesViewController = SharesViewController.instantiate(serverNode: serverNode, shares: Tree(nodes: shares))
       navigationController.push(sharesViewController)
     }
   }

@@ -126,6 +126,50 @@ class WindowController: NSWindowController {
     window?.title = navigationController.currentViewController()?.title ?? ""
   }
 
+  @objc
+  private func documentProxyPathMenuAction(_ sender: NSMenuItem) {
+    guard let navigationController = navigationController() else { return }
+    guard let menuItems = sender.menu?.items else { return }
+    guard menuItems.first != sender else { return }
+
+    guard let topViewController = navigationController.topViewController as? FilesViewController else {
+      return
+    }
+
+    let client = topViewController.client
+    let serverNode = topViewController.serverNode
+    let share = topViewController.share
+    let rootPath = topViewController.rootPath
+
+    var path = ""
+    if menuItems.reversed().firstIndex(of: sender) == 1 {
+      guard let shares = DataRepository.shared.nodes(serverNode.path) else { return }
+      let sharesViewController = SharesViewController.instantiate(serverNode: serverNode, shares: Tree(nodes: shares))
+      navigationController.push(sharesViewController)
+      return
+    } else if menuItems.reversed().firstIndex(of: sender) == 2 {
+      path = ""
+    } else {
+      for menuItem in menuItems.reversed().dropFirst(3) {
+        guard !menuItem.title.isEmpty else { continue }
+
+        path += "\(menuItem.title)"
+        if menuItem == sender {
+          break
+        }
+        path += "/"
+      }
+    }
+
+    let filesViewController = FilesViewController.instantiate(
+      client: client, serverNode: serverNode, share: share, path: path, rootPath: rootPath
+    )
+    filesViewController.title = sender.title
+
+    navigationController.push(filesViewController)
+  }
+
+
   @IBAction
   private func newFolderAction(_ sender: NSToolbarItem) {
     guard let navigationController = navigationController() else { return }
@@ -179,8 +223,27 @@ class WindowController: NSWindowController {
   }
 }
 
+extension WindowController: NSWindowDelegate {
+  func window(_ window: NSWindow, shouldPopUpDocumentPathMenu menu: NSMenu) -> Bool {
+    for item in menu.items {
+      if let type = UTType(tag: NSString(string: item.title).pathExtension, tagClass: .filenameExtension, conformingTo: nil) {
+        item.image = Icons.icon(for: type)
+      } else {
+        item.image = Icons.folder
+      }
+      item.image?.size = NSSize(width: 16, height: 16)
+      item.target = self
+      item.action = #selector(documentProxyPathMenuAction(_:))
+    }
+    return true
+  }
+}
+
 extension WindowController: NSMenuItemValidation {
   func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+    if menuItem.action == #selector(documentProxyPathMenuAction(_:)) {
+      return true
+    }
     if menuItem.action == #selector(backHistoryAction(_:)) {
       guard let navigationController = navigationController() else { return false }
       return navigationController.canGoBack()
