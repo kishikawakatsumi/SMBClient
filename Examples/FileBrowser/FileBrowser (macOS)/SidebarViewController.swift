@@ -175,15 +175,14 @@ extension SidebarViewController: NSOutlineViewDelegate {
 
 extension SidebarViewController: NSMenuItemValidation {
   func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-    switch menuItem.menu?.title {
-    case "File":
+    guard menuItem.action == #selector(removeServerContextMenuAction(_:)) else {
       return false
-    default:
-      let clickedRow = sourceList.clickedRow
-      guard let serverNode = sourceList.item(atRow: clickedRow) as? ServerNode else { return false }
-
-      let servers = ServerManager.shared.servers
-      return servers.contains { $0.id == serverNode.id }
     }
+
+    let clickedRow = sourceList.clickedRow
+    guard let serverNode = sourceList.item(atRow: clickedRow) as? ServerNode else { return false }
+
+    let servers = ServerManager.shared.servers
+    return servers.contains { $0.id == serverNode.id }
   }
 }
