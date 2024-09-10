@@ -601,50 +601,42 @@ extension FilesViewController: NSOutlineViewDelegate {
 
 extension FilesViewController: NSMenuItemValidation {
   func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-    switch menuItem.menu?.title {
-    case "File":
-      let selectedRows = outlineView.selectedRowIndexes
+    let selectedRows = outlineView.selectedRowIndexes
+    let targetRows = outlineView.targetRows()
 
-      switch menuItem.title {
-      case "New Folder":
-        return true
-      case "Open":
-        guard selectedRows.count == 1 else { return false }
-        guard let selectedRow = selectedRows.first else { return false }
-        guard let _ = outlineView.item(atRow: selectedRow) as? FileNode else { return false }
-        return true
-      case "Delete":
-        guard selectedRows.count > 0 else { return false }
-        return selectedRows.allSatisfy { outlineView.item(atRow: $0) is FileNode }
-      case "Rename":
-        guard selectedRows.count == 1 else { return false }
-        guard let selectedRow = selectedRows.first else { return false }
-        guard let _ = outlineView.item(atRow: selectedRow) as? FileNode else { return false }
-        return true
-      default:
-        return false
-      }
+    switch menuItem.action {
+    case Selector({ "newFolderAction(_:)" }()):
+      return true
+    case #selector(openMenuAction(_:)):
+      guard selectedRows.count == 1 else { return false }
+      guard let selectedRow = selectedRows.first else { return false }
+      guard let _ = outlineView.item(atRow: selectedRow) as? FileNode else { return false }
+      return true
+    case #selector(deleteMenuAction(_:)):
+      guard selectedRows.count > 0 else { return false }
+      return selectedRows.allSatisfy { outlineView.item(atRow: $0) is FileNode }
+    case #selector(renameMenuAction(_:)):
+      guard selectedRows.count == 1 else { return false }
+      guard let selectedRow = selectedRows.first else { return false }
+      guard let _ = outlineView.item(atRow: selectedRow) as? FileNode else { return false }
+      return true
+    case #selector(openContextMenuAction(_:)):
+      guard targetRows.count == 1 else { return false }
+      guard let targetRow = targetRows.first else { return false }
+      guard let _ = outlineView.item(atRow: targetRow) as? FileNode else { return false }
+    case #selector(deleteFileContextMenuAction(_:)):
+      guard targetRows.count > 0 else { return false }
+      return targetRows.allSatisfy { outlineView.item(atRow: $0) is FileNode }
+    case #selector(renameContextMenuAction(_:)):
+      guard targetRows.count == 1 else { return false }
+      guard let targetRow = targetRows.first else { return false }
+      guard let _ = outlineView.item(atRow: targetRow) as? FileNode else { return false }
+      return true
     default:
-      let targetRows = outlineView.targetRows()
-
-      switch menuItem.title {
-      case "Open":
-        guard targetRows.count == 1 else { return false }
-        guard let targetRow = targetRows.first else { return false }
-        guard let _ = outlineView.item(atRow: targetRow) as? FileNode else { return false }
-        return true
-      case "Delete":
-        guard targetRows.count > 0 else { return false }
-        return targetRows.allSatisfy { outlineView.item(atRow: $0) is FileNode }
-      case "Rename":
-        guard targetRows.count == 1 else { return false }
-        guard let targetRow = targetRows.first else { return false }
-        guard let _ = outlineView.item(atRow: targetRow) as? FileNode else { return false }
-        return true
-      default:
-        return false
-      }
+      return false
     }
+
+    return false
   }
 }
 
