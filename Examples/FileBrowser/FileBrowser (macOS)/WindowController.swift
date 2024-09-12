@@ -16,6 +16,10 @@ class WindowController: NSWindowController {
   override func windowDidLoad() {
     super.windowDidLoad()
 
+    if let fieldEditor = window?.fieldEditor(true, for: nil) as? NSTextView {
+      _ = fieldEditor.layoutManager
+    }
+
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(navigationDidFinished(_:)),
