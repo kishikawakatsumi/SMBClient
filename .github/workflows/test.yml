@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: macos-13
+    runs-on: macos-14
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -17,8 +17,10 @@ jobs:
           set -ex
                 
           brew install docker docker-compose colima
-          colima start --runtime docker
+          LIMACTL_PATH=$(brew --prefix)/bin/limactl
+          sudo curl -L -o $LIMACTL_PATH https://github.com/mikekazakov/lima-nohvf/raw/master/limactl && sudo chmod +x $LIMACTL_PATH
+          colima start --network-address --arch arm64 --vm-type=qemu
 
-          docker compose up --detach
+          docker-compose up --detach
 
           swift test
