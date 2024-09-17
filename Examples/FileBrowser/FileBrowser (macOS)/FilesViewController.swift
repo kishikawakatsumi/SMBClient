@@ -128,7 +128,6 @@ class FilesViewController: NSViewController {
       tabGroupObserving = tabGroup.observe(\.selectedWindow) { (tabGroup, change) in
         if window == tabGroup.selectedWindow {
           dirTree.update(outlineView)
-          outlineView.reloadData()
         }
       }
     }

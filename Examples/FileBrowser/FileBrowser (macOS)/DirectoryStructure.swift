@@ -108,7 +108,10 @@ class DirectoryStructure {
     tree.nodes = rootNodes + childNodes
 
     viewTree = viewTree(tree)
+
+    useCache = true
     outlineView.reloadData()
+    useCache = false
   }
 
   func filter(_ text: String) {
