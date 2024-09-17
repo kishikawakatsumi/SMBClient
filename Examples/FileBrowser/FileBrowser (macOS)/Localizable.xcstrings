@@ -1,21 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "(completedFiles) files uploaded" : {
-
-    },
-    "(fileBeingTransferred.lastPathComponent) in (transfer.name)" : {
-
-    },
-    "(outlineView.numberOfRows) items" : {
-
-    },
-    "(progressBytes) of (totalBytes)" : {
-
-    },
-    "(tree.rootNodes().count) items" : {
-
-    },
     "Activities" : {
 
     },
@@ -27,12 +12,6 @@
     },
     "Queued" : {
       "comment" : "(progressBytes) of (totalBytes)"
-    },
-    "Servers" : {
-
-    },
-    "Services" : {
-
     },
     "untitled folder" : {
 

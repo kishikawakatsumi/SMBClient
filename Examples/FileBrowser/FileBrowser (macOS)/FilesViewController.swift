@@ -20,8 +20,6 @@ class FilesViewController: NSViewController {
   private var tabGroupObserving: NSKeyValueObservation?
   private var scrollViewObserving: NSKeyValueObservation?
 
-  private let semaphore = Semaphore(value: 1)
-
   private var dateFormatter: DateFormatter = {
     let dateFormatter = DateFormatter()
     dateFormatter.dateStyle = .medium
@@ -198,7 +196,7 @@ class FilesViewController: NSViewController {
     Task {
       let name = NSLocalizedString("untitled folder", comment: "")
       if let parent {
-        await dirTree.reload(directory: join(parent, name), outlineView)
+        await dirTree.reload(directory: parent, outlineView)
       } else {
         try await client.createDirectory(path: join(path, name))
         await dirTree.reload(directory: path, outlineView)
@@ -338,7 +336,7 @@ class FilesViewController: NSViewController {
 
       navigationController.push(filesViewController)
     } else {
-      guard let shares = DataRepository.shared.nodes(serverNode.path) else { return }
+      guard let shares: [ShareNode] = DataRepository.shared.nodes(serverNode.path) else { return }
       let sharesViewController = SharesViewController.instantiate(serverNode: serverNode, shares: Tree(nodes: shares))
       navigationController.push(sharesViewController)
     }
@@ -585,16 +583,26 @@ extension FilesViewController: NSOutlineViewDelegate {
     guard let fileNode = userInfo["NSObject"] as? FileNode else { return }
     guard fileNode.isDirectory else { return }
 
+    dirTree.useCache = true
+
     Task { @MainActor in
-      await semaphore.wait()
-      defer { Task { await semaphore.signal() } }
+      dirTree.useCache = false
 
       await dirTree.expand(fileNode, outlineView)
       updateItemCount()
     }
   }
 
+  func outlineViewItemDidExpand(_ notification: Notification) {
+    updateItemCount()
+  }
+
+  func outlineViewItemWillCollapse(_ notification: Notification) {
+    dirTree.useCache = true
+  }
+
   func outlineViewItemDidCollapse(_ notification: Notification) {
+    dirTree.useCache = false
     updateItemCount()
   }
 }

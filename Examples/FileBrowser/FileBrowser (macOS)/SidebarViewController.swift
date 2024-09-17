@@ -63,7 +63,9 @@ extension SidebarViewController: NSOutlineViewDataSource {
 
 extension SidebarViewController: NSOutlineViewDelegate {
   func outlineView(_ outlineView: NSOutlineView, viewFor tableColumn: NSTableColumn?, item: Any) -> NSView? {
-    switch item {
+    guard let node = item as? SidebarNode else { return nil }
+
+    switch node.content {
     case let headerNode as HeaderNode:
       let cellIdentifier = NSUserInterfaceItemIdentifier("HeaderCell")
       guard let cell = outlineView.makeView(withIdentifier: cellIdentifier, owner: nil) as? NSTableCellView else { return nil }
@@ -83,7 +85,7 @@ extension SidebarViewController: NSOutlineViewDelegate {
         cell.ejectButton.isEnabled = false
         
         Task { @MainActor in
-          await SidebarManager.shared.logoff(serverNode)
+          await SidebarManager.shared.logoff(node)
           cell.ejectButton.isEnabled = true
         }
       }
@@ -108,36 +110,39 @@ extension SidebarViewController: NSOutlineViewDelegate {
   }
 
   func outlineViewSelectionDidChange(_ notification: Notification) {
-    guard let item = sourceList.item(atRow: sourceList.selectedRow) as? Node else { return }
+    guard let item = sourceList.item(atRow: sourceList.selectedRow) as? SidebarNode else { return }
 
     let sidebarManager = SidebarManager.shared
     let sessionManager = SessionManager.shared
 
-    let node = sidebarManager.selectRow(item)
+    guard let node = sidebarManager.selectRow(item) else {
+      sourceList.deselectRow(sourceList.selectedRow)
+      return
+    }
 
-    switch node {
+    switch node.content {
     case let serverNode as ServerNode:
       guard let _ = sessionManager.session(for: serverNode.id) else { return }
 
       Task { @MainActor in
-        await sidebarManager.updateChildren(of: serverNode)
+        await sidebarManager.updateChildren(of: node)
 
-        sourceList.reloadItem(serverNode, reloadChildren: true)
-        sourceList.expandItem(serverNode)
+        sourceList.reloadItem(item, reloadChildren: true)
+        sourceList.expandItem(item)
 
-        let row = sourceList.row(forItem: serverNode)
+        let row = sourceList.row(forItem: item)
         if let rowView = sourceList.rowView(atRow: row, makeIfNecessary: false) {
           rowView.isSelected = true
         }
 
         guard let navigationController = navigationController() else { return }
 
-        guard let shares = DataRepository.shared.nodes(serverNode.path) else { return }
+        guard let shares: [ShareNode] = DataRepository.shared.nodes(serverNode.path) else { return }
         let sharesViewController = SharesViewController.instantiate(serverNode: serverNode, shares: Tree(nodes: shares))
         navigationController.push(sharesViewController)
       }
     case let shareNode as ShareNode:
-      guard let serverNode = sidebarManager.parent(of: shareNode) as? ServerNode else { return }
+      guard let serverNode = sidebarManager.parent(of: node)?.content as? ServerNode else { return }
       guard let session = sessionManager.session(for: serverNode.id) else { return }
 
       Task { @MainActor in
@@ -160,7 +165,7 @@ extension SidebarViewController: NSOutlineViewDelegate {
         }
       }
     default:
-      sourceList.deselectRow(sourceList.selectedRow)
+      break
     }
   }
 

@@ -8,12 +8,12 @@ class SharesViewController: NSViewController {
   @IBOutlet private var statusBarView: StatusBarView!
 
   private let serverNode: ServerNode
-  private var tree: Tree
+  private var tree: Tree<ShareNode>
 
   private var tabGroupObserving: NSKeyValueObservation?
   private var scrollViewObserving: NSKeyValueObservation?
 
-  static func instantiate(serverNode: ServerNode, shares: Tree) -> Self {
+  static func instantiate(serverNode: ServerNode, shares: Tree<ShareNode>) -> Self {
     let storyboard = NSStoryboard(name: storyboardID, bundle: nil)
     return storyboard.instantiateController(identifier: storyboardID) { (coder) in
       Self(coder: coder, serverNode: serverNode, shares: shares)
@@ -24,7 +24,7 @@ class SharesViewController: NSViewController {
     return nil
   }
 
-  required init?(coder: NSCoder, serverNode: ServerNode, shares: Tree) {
+  required init?(coder: NSCoder, serverNode: ServerNode, shares: Tree<ShareNode>) {
     self.serverNode = serverNode
     self.tree = shares
     super.init(coder: coder)
@@ -72,7 +72,7 @@ class SharesViewController: NSViewController {
       tabGroupObserving?.invalidate()
       tabGroupObserving = tabGroup.observe(\.selectedWindow) { (tabGroup, change) in
         if window == tabGroup.selectedWindow {
-          guard let shares = DataRepository.shared.nodes(serverNode.path) else { return }
+          guard let shares: [ShareNode] = DataRepository.shared.nodes(serverNode.path) else { return }
           tree.nodes.removeAll()
           tree.nodes.append(contentsOf: shares)
           outlineView.reloadData()

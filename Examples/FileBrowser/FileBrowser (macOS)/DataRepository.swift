@@ -6,11 +6,11 @@ class DataRepository {
 
   private init() {}
 
-  func set(_ path: String, nodes: [Node]) {
+  func set<Item: Node>(_ path: String, nodes: [Item]) {
     data[path] = nodes.map { $0.detach() }
   }
 
-  func nodes(_ path: String) -> [Node]? {
-    data[path]
+  func nodes<Item: Node>(_ path: String) -> [Item]? {
+    data[path] as? [Item]
   }
 }
