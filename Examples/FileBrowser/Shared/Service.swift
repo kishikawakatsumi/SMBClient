@@ -1,19 +1,16 @@
 import Foundation
-import Network
 
 struct Service {
   let id: ID
   let name: String
   let type: String
   let domain: String
-  let interface: NWInterface?
 
-  init(name: String, type: String, domain: String, interface: NWInterface?) {
-    id = ID("smb://\(name)._smb._tcp.local")
+  init(name: String, type: String, domain: String) {
+    id = ID("smb://\(name).\(type).\(domain)")
     self.name = name
     self.type = type
     self.domain = domain
-    self.interface = interface
   }
 }
 

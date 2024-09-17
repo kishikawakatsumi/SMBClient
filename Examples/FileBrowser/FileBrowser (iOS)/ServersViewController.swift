@@ -4,6 +4,8 @@ import SMBClient
 
 class ServersViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
   private let tableView = UITableView(frame: .zero, style: .insetGrouped)
+
+  private var services = [Service]()
   private var sessions = [String: SMBClient]()
 
   override func viewDidLoad() {
@@ -40,6 +42,7 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
 
   @objc
   private func serviceDidDiscover(_ notification: Notification) {
+    services = ServiceDiscovery.shared.services.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     tableView.reloadData()
   }
 
@@ -117,11 +120,9 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
 
     switch indexPath.section {
     case 0:
-      let services = ServiceDiscovery.shared.services
       let service = services[indexPath.row]
 
       cell.textLabel?.text = service.name
-
       if let _ = sessions[service.id.rawValue] {
         cell.accessoryType = .disclosureIndicator
       } else {
@@ -132,7 +133,6 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
       let server = servers[indexPath.row]
 
       cell.textLabel?.text = server.displayName
-
       if let _ = sessions[server.id.rawValue] {
         cell.accessoryType = .disclosureIndicator
       } else {
@@ -149,7 +149,6 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
     Task { @MainActor in
       switch indexPath.section {
       case 0:
-        let services = ServiceDiscovery.shared.services
         let service = services[indexPath.row]
 
         if let client = sessions[service.id.rawValue] {

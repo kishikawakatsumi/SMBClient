@@ -147,7 +147,7 @@ class WindowController: NSWindowController {
 
     var path = ""
     if menuItems.reversed().firstIndex(of: sender) == 1 {
-      guard let shares = DataRepository.shared.nodes(serverNode.path) else { return }
+      guard let shares: [ShareNode] = DataRepository.shared.nodes(serverNode.path) else { return }
       let sharesViewController = SharesViewController.instantiate(serverNode: serverNode, shares: Tree(nodes: shares))
       navigationController.push(sharesViewController)
       return

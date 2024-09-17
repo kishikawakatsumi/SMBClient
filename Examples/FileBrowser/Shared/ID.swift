@@ -1,10 +1,10 @@
 import Foundation
 
 struct ID: RawRepresentable, Codable {
-  var rawValue: String
+  let rawValue: String
 
   init(_ rawValue: String) {
-    self.rawValue = rawValue
+    self.init(rawValue: rawValue)
   }
 
   init(rawValue: String) {

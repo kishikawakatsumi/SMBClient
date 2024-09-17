@@ -18,6 +18,8 @@
 		141AF3DF2C4A94D30050C7A5 /* NSOutlineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141AF3DE2C4A94D30050C7A5 /* NSOutlineView.swift */; };
 		141AF3E22C4ABA550050C7A5 /* SMBClient in Frameworks */ = {isa = PBXBuildFile; productRef = 141AF3E12C4ABA550050C7A5 /* SMBClient */; };
 		141AF3E42C4ABCCA0050C7A5 /* URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141AF3E32C4ABCCA0050C7A5 /* URL.swift */; };
+		141B02612C996599007A2573 /* ServiceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141B02602C996599007A2573 /* ServiceDiscovery.swift */; };
+		141B02622C996599007A2573 /* ServiceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141B02602C996599007A2573 /* ServiceDiscovery.swift */; };
 		1446801B2C347E1F0029A1AB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1446801A2C347E1F0029A1AB /* AppDelegate.swift */; };
 		1446801F2C347E200029A1AB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1446801E2C347E200029A1AB /* Assets.xcassets */; };
 		144680222C347E200029A1AB /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 144680212C347E200029A1AB /* Base */; };
@@ -25,7 +27,6 @@
 		1446802C2C347FEB0029A1AB /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1446802B2C347FEB0029A1AB /* SplitViewController.swift */; };
 		1446802E2C34800B0029A1AB /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1446802D2C34800B0029A1AB /* SidebarViewController.swift */; };
 		144680302C3482620029A1AB /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1446802F2C3482620029A1AB /* NavigationController.swift */; };
-		144680322C3488770029A1AB /* ServiceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144680312C3488770029A1AB /* ServiceDiscovery.swift */; };
 		144680362C349C0C0029A1AB /* Tree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144680352C349C0C0029A1AB /* Tree.swift */; };
 		145299932C34D523003B035C /* SidebarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299922C34D523003B035C /* SidebarManager.swift */; };
 		145299962C34D95B003B035C /* SMBClient in Frameworks */ = {isa = PBXBuildFile; productRef = 145299952C34D95B003B035C /* SMBClient */; };
@@ -75,7 +76,6 @@
 		14C23CAB2C53966A00CEA8CF /* MediaPlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9D2C53966A00CEA8CF /* MediaPlayerViewController.swift */; };
 		14C23CAC2C53966A00CEA8CF /* DocumentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9E2C53966A00CEA8CF /* DocumentViewController.swift */; };
 		14C23CAD2C53966A00CEA8CF /* ServersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9F2C53966A00CEA8CF /* ServersViewController.swift */; };
-		14C23CAE2C53966A00CEA8CF /* ServiceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23CA02C53966A00CEA8CF /* ServiceDiscovery.swift */; };
 		14C23CAF2C53966A00CEA8CF /* ServerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23CA12C53966A00CEA8CF /* ServerManager.swift */; };
 		14C23CB22C5396C600CEA8CF /* FlyingFox in Frameworks */ = {isa = PBXBuildFile; productRef = 14C23CB12C5396C600CEA8CF /* FlyingFox */; };
 		14C23CB42C5396C600CEA8CF /* FlyingSocks in Frameworks */ = {isa = PBXBuildFile; productRef = 14C23CB32C5396C600CEA8CF /* FlyingSocks */; };
@@ -89,6 +89,7 @@
 		1414C4D42C630F29004E2E36 /* SMBAVAsset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMBAVAsset.swift; sourceTree = "<group>"; };
 		141AF3DE2C4A94D30050C7A5 /* NSOutlineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSOutlineView.swift; sourceTree = "<group>"; };
 		141AF3E32C4ABCCA0050C7A5 /* URL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URL.swift; sourceTree = "<group>"; };
+		141B02602C996599007A2573 /* ServiceDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDiscovery.swift; sourceTree = "<group>"; };
 		144680172C347E1F0029A1AB /* File Browser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "File Browser.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1446801A2C347E1F0029A1AB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1446801E2C347E200029A1AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -98,7 +99,6 @@
 		1446802B2C347FEB0029A1AB /* SplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
 		1446802D2C34800B0029A1AB /* SidebarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViewController.swift; sourceTree = "<group>"; };
 		1446802F2C3482620029A1AB /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
-		144680312C3488770029A1AB /* ServiceDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDiscovery.swift; sourceTree = "<group>"; };
 		144680352C349C0C0029A1AB /* Tree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tree.swift; sourceTree = "<group>"; };
 		145299922C34D523003B035C /* SidebarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarManager.swift; sourceTree = "<group>"; };
 		145299972C34E5FF003B035C /* ConnectService.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ConnectService.storyboard; sourceTree = "<group>"; };
@@ -148,7 +148,6 @@
 		14C23C9D2C53966A00CEA8CF /* MediaPlayerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaPlayerViewController.swift; sourceTree = "<group>"; };
 		14C23C9E2C53966A00CEA8CF /* DocumentViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentViewController.swift; sourceTree = "<group>"; };
 		14C23C9F2C53966A00CEA8CF /* ServersViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServersViewController.swift; sourceTree = "<group>"; };
-		14C23CA02C53966A00CEA8CF /* ServiceDiscovery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServiceDiscovery.swift; sourceTree = "<group>"; };
 		14C23CA12C53966A00CEA8CF /* ServerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -180,9 +179,10 @@
 		1414C4D52C630F29004E2E36 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				1414C4D12C630F29004E2E36 /* ID.swift */,
-				1414C4D22C630F29004E2E36 /* Server.swift */,
+				141B02602C996599007A2573 /* ServiceDiscovery.swift */,
 				1414C4D32C630F29004E2E36 /* Service.swift */,
+				1414C4D22C630F29004E2E36 /* Server.swift */,
+				1414C4D12C630F29004E2E36 /* ID.swift */,
 				1414C4D42C630F29004E2E36 /* SMBAVAsset.swift */,
 			);
 			path = Shared;
@@ -230,7 +230,6 @@
 				14529A3D2C3E8B5D003B035C /* SessionManager.swift */,
 				145299922C34D523003B035C /* SidebarManager.swift */,
 				144680352C349C0C0029A1AB /* Tree.swift */,
-				144680312C3488770029A1AB /* ServiceDiscovery.swift */,
 				147EC5B32C3FCF5B00C08ED3 /* ServerManager.swift */,
 				145299AB2C3612C6003B035C /* CredentialStore.swift */,
 				14529A392C3E23C6003B035C /* PathBarView.swift */,
@@ -273,7 +272,6 @@
 				14C23C9D2C53966A00CEA8CF /* MediaPlayerViewController.swift */,
 				14C23C9E2C53966A00CEA8CF /* DocumentViewController.swift */,
 				14C23CA12C53966A00CEA8CF /* ServerManager.swift */,
-				14C23CA02C53966A00CEA8CF /* ServiceDiscovery.swift */,
 				14C23C962C53966900CEA8CF /* CredentialStore.swift */,
 				14C23C882C53962F00CEA8CF /* Main.storyboard */,
 				14C23C8D2C53962F00CEA8CF /* LaunchScreen.storyboard */,
@@ -433,10 +431,10 @@
 				1414C4D82C630F2E004E2E36 /* Service.swift in Sources */,
 				1414C4D92C630F2E004E2E36 /* ID.swift in Sources */,
 				14529A3C2C3E7724003B035C /* SidebarCellView.swift in Sources */,
-				144680322C3488770029A1AB /* ServiceDiscovery.swift in Sources */,
 				144680302C3482620029A1AB /* NavigationController.swift in Sources */,
 				1452999A2C34F896003B035C /* ConnectServiceWindowController.swift in Sources */,
 				14529A3E2C3E8B5D003B035C /* SessionManager.swift in Sources */,
+				141B02622C996599007A2573 /* ServiceDiscovery.swift in Sources */,
 				147EC5C02C41590400C08ED3 /* FileTransfer.swift in Sources */,
 				145299E72C3AC3DD003B035C /* DocumentWindowController.swift in Sources */,
 				144680362C349C0C0029A1AB /* Tree.swift in Sources */,
@@ -467,8 +465,8 @@
 				14C23CA32C53966A00CEA8CF /* ConnectServiceView.swift in Sources */,
 				14C23C852C53962F00CEA8CF /* SceneDelegate.swift in Sources */,
 				14C23CAB2C53966A00CEA8CF /* MediaPlayerViewController.swift in Sources */,
+				141B02612C996599007A2573 /* ServiceDiscovery.swift in Sources */,
 				14C23CA62C53966A00CEA8CF /* ConnectServerView.swift in Sources */,
-				14C23CAE2C53966A00CEA8CF /* ServiceDiscovery.swift in Sources */,
 				1414C4DA2C630F2E004E2E36 /* Server.swift in Sources */,
 				1414C4DB2C630F2E004E2E36 /* SMBAVAsset.swift in Sources */,
 				1414C4DC2C630F2E004E2E36 /* Service.swift in Sources */,
