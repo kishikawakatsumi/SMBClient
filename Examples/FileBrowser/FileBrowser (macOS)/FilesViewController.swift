@@ -16,6 +16,7 @@ class FilesViewController: NSViewController {
   let rootPath: String
 
   private lazy var dirTree = DirectoryStructure(server: serverNode.path, path: path, client: client)
+  private let semaphore = Semaphore(value: 1)
 
   private var tabGroupObserving: NSKeyValueObservation?
   private var scrollViewObserving: NSKeyValueObservation?
@@ -587,6 +588,9 @@ extension FilesViewController: NSOutlineViewDelegate {
 
     Task { @MainActor in
       dirTree.useCache = false
+
+      await semaphore.wait()
+      defer { Task { await semaphore.signal() } }
 
       await dirTree.expand(fileNode, outlineView)
       updateItemCount()
