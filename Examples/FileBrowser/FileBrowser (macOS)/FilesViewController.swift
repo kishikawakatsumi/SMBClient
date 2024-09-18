@@ -673,6 +673,7 @@ extension FilesViewController: NSTextFieldDelegate {
     Task { @MainActor in
       do {
         try await client.rename(from: node.path, to: join(dirname(node.path), textField.stringValue))
+        await dirTree.reload(directory: dirname(node.path), outlineView)
       } catch {
         textField.stringValue = node.name
         NSAlert(error: error).runModal()
