@@ -315,6 +315,39 @@ final class SMBClientTests: XCTestCase {
     try await client.logoff()
   }
 
+  func testListDirectory08() async throws {
+    let user = alice
+
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password)
+    try await client.connectShare(user.share)
+
+    let directoryName: String = #function
+    try await client.createDirectory(path: directoryName)
+
+    var testFiles = [String]()
+    for i in 0...2000 {
+      let length = 1024
+      var data = Data(count: length)
+      for i in 0..<length {
+        data[i] = UInt8(arc4random_uniform(256))
+      }
+
+      let testFilename = "file-\(String(format: "%08d", i)).dat"
+      try await client.upload(content: data, path: "\(directoryName)/\(testFilename)")
+      testFiles.append(testFilename)
+    }
+
+    let files = try await client.listDirectory(path: directoryName)
+      .filter { $0.name != "." && $0.name != ".." }
+      .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+      .map { $0.name }
+    XCTAssertEqual(files, testFiles)
+
+    try await client.deleteDirectory(path: directoryName)
+    try await assertDirectoryDoesNotExist(at: directoryName, client: client)
+  }
+
   func testCreateDirectory() async throws {
     let user = alice
     let client = SMBClient(host: "localhost", port: 4445)
