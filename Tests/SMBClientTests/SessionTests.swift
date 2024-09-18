@@ -90,7 +90,7 @@ final class SessionTests: XCTestCase {
     try await session.treeConnect(path: "Alice Share")
 
     let response = try await session.echo()
-    print(response)
+    XCTAssertTrue(NTStatus(response.header.status) == .success)
 
     try await session.treeDisconnect()
     try await session.logoff()
