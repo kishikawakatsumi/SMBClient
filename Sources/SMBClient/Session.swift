@@ -300,13 +300,15 @@ public class Session {
 
     let outputBufferLength = min(1048576, maxTransactSize)
     let creditSize = creditSize(size: outputBufferLength)
+    let fileInformationClass = QueryDirectory.FileInformationClass.fileDirectoryInformation
+
     let queryDirectoryRequest = QueryDirectory.Request(
       creditCharge: creditSize,
       headerFlags: [.relatedOperations],
       messageId: messageId.next(count: UInt64(creditSize)),
       treeId: treeId,
       sessionId: sessionId,
-      fileInformationClass: .fileDirectoryInformation,
+      fileInformationClass: fileInformationClass,
       fileId: temporaryUUID,
       fileName: pattern,
       outputBufferLength: outputBufferLength
@@ -318,7 +320,6 @@ public class Session {
     )
 
     let createResponse = Create.Response(data: data)
-
     var files = [FileDirectoryInformation]()
 
     let queryDirectoryResponse = QueryDirectory.Response(data: Data(data[createResponse.header.nextCommand...]))
@@ -333,7 +334,7 @@ public class Session {
           messageId: messageId.next(count: UInt64(creditSize)),
           treeId: treeId,
           sessionId: sessionId,
-          fileInformationClass: .fileIdBothDirectoryInformation,
+          fileInformationClass: fileInformationClass,
           flags: [],
           fileId: fileId,
           fileName: pattern,
