@@ -58,9 +58,12 @@ class DirectoryStructure {
       await expand(fileNode, outlineView)
     } else {
       let nodes = await listDirectory(path: path, parent: nil)
-      let rootNodes = tree.rootNodes()
 
-      tree.nodes = Array(Set(rootNodes).union(nodes))
+      tree.nodes = Array(
+        Set(tree.nodes)
+          .subtracting(tree.rootNodes())
+          .union(nodes)
+      )
       viewTree = viewTree(tree)
 
       outlineView.reloadData()
