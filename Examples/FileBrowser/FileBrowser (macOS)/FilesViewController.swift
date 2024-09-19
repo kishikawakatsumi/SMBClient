@@ -646,7 +646,7 @@ extension FilesViewController: NSMenuItemValidation {
     case #selector(openContextMenuAction(_:)):
       guard targetRows.count == 1 else { return false }
       guard let targetRow = targetRows.first else { return false }
-      guard let _ = outlineView.item(atRow: targetRow) as? FileNode else { return false }
+      return outlineView.item(atRow: targetRow) is FileNode
     case #selector(deleteFileContextMenuAction(_:)):
       guard targetRows.count > 0 else { return false }
       return targetRows.allSatisfy { outlineView.item(atRow: $0) is FileNode }
@@ -658,8 +658,6 @@ extension FilesViewController: NSMenuItemValidation {
     default:
       return false
     }
-
-    return false
   }
 }
 
