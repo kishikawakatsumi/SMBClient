@@ -142,6 +142,10 @@ class DirectoryStructure {
     viewTree.nodes.count
   }
 
+  func rootNodes() -> [FileNode] {
+    viewTree.rootNodes()
+  }
+
   func parent(of node: FileNode) -> FileNode? {
     viewTree.parent(of: node)
   }

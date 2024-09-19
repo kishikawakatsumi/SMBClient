@@ -192,15 +192,29 @@ class FilesViewController: NSViewController {
     }
   }
 
-  func createDirectory(in parent: String? = nil) {
-    Task {
-      let name = NSLocalizedString("untitled folder", comment: "")
-      if let parent {
-        await dirTree.reload(directory: parent, outlineView)
+  func createNewFolder() {
+    let filenames = dirTree
+      .rootNodes()
+      .map { $0.name }
+
+    let filename = {
+      let baseName = NSLocalizedString("untitled folder", comment: "")
+      if !filenames.contains(baseName) {
+        return baseName
       } else {
-        try await client.createDirectory(path: join(path, name))
-        await dirTree.reload(directory: path, outlineView)
+        var i = 2
+        while true {
+          let name = "\(baseName) \(i)"
+          if !filenames.contains(name) {
+            return name
+          }
+          i += 1
+        }
       }
+    }()
+    Task {
+      try await client.createDirectory(path: join(path, filename))
+      await dirTree.reload(directory: path, outlineView)
     }
   }
 
@@ -616,8 +630,6 @@ extension FilesViewController: NSMenuItemValidation {
     let targetRows = outlineView.targetRows()
 
     switch menuItem.action {
-    case Selector({ "newFolderAction(_:)" }()):
-      return true
     case #selector(openMenuAction(_:)):
       guard selectedRows.count == 1 else { return false }
       guard let selectedRow = selectedRows.first else { return false }
