@@ -27,7 +27,7 @@ extension QueryDirectory.Response: CustomDebugStringConvertible {
       Blob Offset: \(outputBufferOffset)
       Blob Length: \(outputBufferLength)
       Info:
-    \(files.map { "\($0)".split(separator: "\n").map { "  \($0)" }.joined(separator: "\n") }.joined(separator: "\n"))
+    \(files().map { "\($0)".split(separator: "\n").map { "  \($0)" }.joined(separator: "\n") }.joined(separator: "\n"))
     """
   }
 }

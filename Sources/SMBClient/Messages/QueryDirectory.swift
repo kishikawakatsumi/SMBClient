@@ -73,7 +73,6 @@ public enum QueryDirectory {
     public let outputBufferOffset: UInt16
     public let outputBufferLength: UInt32
     public let buffer: Data
-    public let files: [FileDirectoryInformation]
 
     public init(data: Data) {
       let reader = ByteReader(data)
@@ -84,7 +83,9 @@ public enum QueryDirectory {
       outputBufferOffset = reader.read()
       outputBufferLength = reader.read()
       buffer = data[UInt32(outputBufferOffset)..<UInt32(outputBufferOffset) + outputBufferLength]
+    }
 
+    public func files() -> [FileDirectoryInformation] {
       var files = [FileDirectoryInformation]()
       if outputBufferLength > 0 {
         var data = Data(buffer)
@@ -95,7 +96,7 @@ public enum QueryDirectory {
         } while files.last!.nextEntryOffset != 0
       }
 
-      self.files = files
+      return files
     }
   }
 

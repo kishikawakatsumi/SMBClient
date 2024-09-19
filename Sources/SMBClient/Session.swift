@@ -320,10 +320,9 @@ public class Session {
     )
 
     let createResponse = Create.Response(data: data)
-    var files = [FileDirectoryInformation]()
-
     let queryDirectoryResponse = QueryDirectory.Response(data: Data(data[createResponse.header.nextCommand...]))
-    files.append(contentsOf: queryDirectoryResponse.files)
+
+    var files: [FileDirectoryInformation] = queryDirectoryResponse.files()
 
     if NTStatus(createResponse.header.status) != .noMoreFiles {
       repeat {
@@ -343,7 +342,7 @@ public class Session {
 
         let data = try await send(queryDirectoryRequest.encoded())
         let queryDirectoryResponse = QueryDirectory.Response(data: data)
-        files.append(contentsOf: queryDirectoryResponse.files)
+        files.append(contentsOf: queryDirectoryResponse.files())
 
         if NTStatus(queryDirectoryResponse.header.status) == .noMoreFiles {
           break
