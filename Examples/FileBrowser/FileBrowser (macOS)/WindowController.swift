@@ -179,7 +179,7 @@ class WindowController: NSWindowController {
     guard let navigationController = navigationController() else { return }
     guard let filesViewController = navigationController.topViewController as? FilesViewController else { return }
 
-    filesViewController.createDirectory()
+    filesViewController.createNewFolder()
   }
 
   @objc
