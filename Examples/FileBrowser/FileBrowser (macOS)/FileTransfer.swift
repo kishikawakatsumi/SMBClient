@@ -97,7 +97,10 @@ class FileUpload: FileTransfer {
         NotificationCenter.default.post(
           name: Self.didFinish,
           object: self,
-          userInfo: [FileUploadUserInfoKey.path: destination]
+          userInfo: [
+            FileUploadUserInfoKey.share: client.share ?? "",
+            FileUploadUserInfoKey.path: destination,
+          ]
         )
       }
     } catch {
@@ -116,5 +119,6 @@ struct FileUploadUserInfoKey: Hashable, Equatable, RawRepresentable {
 }
 
 extension FileUploadUserInfoKey {
+  static let share = FileUploadUserInfoKey(rawValue: "share")
   static let path = FileUploadUserInfoKey(rawValue: "path")
 }
