@@ -91,9 +91,21 @@ class MediaPlayerWindowController: NSWindowController, NSWindowDelegate {
 
 class MediaPlayerViewController: NSViewController {
   @IBOutlet var playerView: AVPlayerView!
+  private var observation: NSKeyValueObservation?
+
+  deinit {
+    observation?.invalidate()
+  }
 
   override func viewDidAppear() {
     super.viewDidAppear()
-    playerView.player?.play()
+
+    let player = playerView.player
+    observation = playerView.player?.currentItem?.observe(\.status) { (item, change) in
+      print(item.status.rawValue)
+      if item.status == .readyToPlay {
+        player?.play()
+      }
+    }
   }
 }
