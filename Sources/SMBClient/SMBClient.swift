@@ -170,6 +170,20 @@ public class SMBClient {
     FileWriter(session: session, path: Pathname.normalize(path))
   }
 
+  public func availableSpace() async throws -> UInt64 {
+    let response = try await session.queryInfo(path: "", infoType: .fileSystem, fileInfoClass: .fileFsSizeInformation)
+
+    let sizeInformation = FileFsSizeInformation(data: response.buffer)
+    let availableAllocationUnits = sizeInformation.availableAllocationUnits
+    let sectorsPerAllocationUnit = sizeInformation.sectorsPerAllocationUnit
+    let bytesPerSector = sizeInformation.bytesPerSector
+
+    let bytesPerAllocationUnit = UInt64(sectorsPerAllocationUnit * bytesPerSector)
+    let availableSpaceBytes = availableAllocationUnits * bytesPerAllocationUnit
+
+    return availableSpaceBytes
+  }
+
   public func keepAlive() async throws -> Echo.Response {
     try await session.echo()
   }
