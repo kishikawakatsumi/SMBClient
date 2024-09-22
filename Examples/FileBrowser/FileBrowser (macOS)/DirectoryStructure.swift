@@ -60,9 +60,10 @@ class DirectoryStructure {
       let nodes = await listDirectory(path: path, parent: nil)
 
       tree.nodes = Array(
-        Set(tree.nodes)
-          .subtracting(tree.rootNodes())
-          .union(nodes)
+        Set(nodes)
+          .union(
+            Set(tree.nodes).subtracting(tree.rootNodes())
+          )
       )
       viewTree = viewTree(tree)
 
@@ -78,9 +79,10 @@ class DirectoryStructure {
 
     let (deleted, inserted) = nodeDelta(oldNodes: children, newNodes: nodes)
     tree.nodes = Array(
-      Set(tree.nodes)
-        .subtracting(children)
-        .union(nodes)
+      Set(nodes)
+        .union(
+          Set(tree.nodes).subtracting(tree.rootNodes())
+        )
     )
 
     viewTree = viewTree(tree)
