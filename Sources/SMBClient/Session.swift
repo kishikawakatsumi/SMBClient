@@ -412,7 +412,7 @@ public class Session {
     }
   }
 
-  public func queryInfo(path: String, fileInfoClass: FileInfoClass = .fileAllInformation) async throws -> QueryInfo.Response {
+  public func queryInfo(path: String, infoType: InfoType = .file, fileInfoClass: FileInfoClass = .fileAllInformation) async throws -> QueryInfo.Response {
     let createRequest = Create.Request(
       messageId: messageId.next(),
       treeId: treeId,
@@ -429,7 +429,7 @@ public class Session {
       messageId: messageId.next(),
       treeId: treeId,
       sessionId: sessionId,
-      infoType: .file,
+      infoType: infoType,
       fileInfoClass: fileInfoClass,
       fileId: temporaryUUID
     )

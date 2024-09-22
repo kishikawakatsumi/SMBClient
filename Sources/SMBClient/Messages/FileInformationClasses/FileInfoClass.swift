@@ -48,6 +48,18 @@ public enum FileInfoClass: UInt8 {
   case fileStreamInformation = 0x16
   case fileTrackingInformation = 0x24
   case fileValidDataLengthInformation = 0x27
+
+  static let fileFsVolumeInformation = fileDirectoryInformation
+  static let fileFsLabelInformation = fileFullDirectoryInformation
+  static let fileFsSizeInformation = fileBothDirectoryInformation
+  static let fileFsDeviceInformation = fileBasicInformation
+  static let fileFsAttributeInformation = fileStandardInformation
+  static let fileFsControlInformation = fileInternalInformation
+  static let fileFsFullSizeInformation = fileEaInformation
+  static let fileFsObjectIdInformation = fileAccessInformation
+  static let fileFsDriverPathInformation = fileNameInformation
+  static let fileFsVolumeFlagsInformation = fileModeInformation
+  static let fileFsSectorSizeInformation: FileInfoClass = fileAlignmentInformation
 }
 
 extension FileInfoClass: CustomDebugStringConvertible {
