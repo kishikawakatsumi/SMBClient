@@ -125,9 +125,11 @@ class FilesViewController: NSViewController {
       let dirTree = self.dirTree
 
       tabGroupObserving?.invalidate()
-      tabGroupObserving = tabGroup.observe(\.selectedWindow) { (tabGroup, change) in
+      tabGroupObserving = tabGroup.observe(\.selectedWindow) { [weak self] (tabGroup, change) in
+        guard let self = self else { return }
         if window == tabGroup.selectedWindow {
           dirTree.update(outlineView)
+          self.updateItemCount()
         }
       }
     }
@@ -185,10 +187,24 @@ class FilesViewController: NSViewController {
     guard self == navigationController()?.topViewController else {
       return
     }
+    guard let share = userInfo[FileUploadUserInfoKey.share] as? String, share == self.share else {
+      return
+    }
 
     let dirname = dirname(effectPath)
-    Task {
+    if let node = dirTree.node(ID(dirname)) {
+      guard outlineView.isItemExpanded(node) else {
+        return
+      }
+    } else {
+      guard dirname == path else {
+        return
+      }
+    }
+
+    Task { @MainActor in
       await dirTree.reload(directory: dirname, outlineView)
+      updateItemCount()
     }
   }
 
