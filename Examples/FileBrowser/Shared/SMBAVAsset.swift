@@ -2,6 +2,8 @@ import Foundation
 import AVFoundation
 import SMBClient
 
+private let readSize = UInt32(1024 * 1024 * 4)
+
 class SMBAVAsset: AVURLAsset {
   private let resourceLoaderDelegate: AssetResourceLoaderDelegate
 
@@ -56,7 +58,9 @@ private class AssetResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelega
         contentRequest.contentType = self.contentType
         contentRequest.contentLength = Int64(truncatingIfNeeded: try await fileReader.fileSize)
         contentRequest.isByteRangeAccessSupported = true
+        loadingRequest.finishLoading()
       }
+      return true
     }
 
     if let dataRequest = loadingRequest.dataRequest {
@@ -64,12 +68,9 @@ private class AssetResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelega
         queue.dispatch { [weak self] in
           guard let self else { return }
 
-          let fileSize = try await fileReader.fileSize
-          let length = chunkSize(fileSize, dataRequest.requestedLength)
-
           let data = try await fileReader.read(
             offset: UInt64(dataRequest.requestedOffset),
-            length: UInt32(truncatingIfNeeded: length)
+            length: readSize
           )
 
           dataRequest.respond(with: data)
@@ -79,12 +80,9 @@ private class AssetResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelega
         queue.dispatch { [weak self] in
           guard let self else { return }
 
-          let fileSize = try await fileReader.fileSize
-          let length = chunkSize(fileSize, dataRequest.requestedLength)
-
           let data = try await fileReader.read(
             offset: UInt64(dataRequest.requestedOffset),
-            length: UInt32(truncatingIfNeeded: length)
+            length: readSize
           )
 
           dataRequest.respond(with: data)
@@ -95,31 +93,6 @@ private class AssetResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelega
 
     return true
   }
-}
-
-private func chunkSize(_ fileSize: UInt64, _ requestedLength: Int) -> UInt64 {
-  let length: UInt64
-  let requested = UInt64(requestedLength)
-  
-  if fileSize < 64 * 1024 * 1024 {
-    length = 512 * 1024
-  } else if fileSize < 128 * 1024 * 1024 {
-    length = 1 * 1024 * 1024
-  } else if fileSize < 512 * 1024 * 1024 {
-    length = 2 * 1024 * 1024
-  } else if fileSize < 1 * 1024 * 1024 * 1024 {
-    length = 3 * 1024 * 1024
-  } else if fileSize < 2 * 1024 * 1024 * 1024 {
-    length = 4 * 1024 * 1024
-  } else if fileSize < 4 * 1024 * 1024 * 1024 {
-    length = 8 * 1024 * 1024
-  } else if fileSize < 8 * 1024 * 1024 * 1024 {
-    length = 12 * 1024 * 1024
-  } else {
-    length = 16 * 1024 * 1024
-  }
-
-  return min(length, requested)
 }
 
 private class TaskQueue {
