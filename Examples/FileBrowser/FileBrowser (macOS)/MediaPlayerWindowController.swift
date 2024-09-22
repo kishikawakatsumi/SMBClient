@@ -102,7 +102,6 @@ class MediaPlayerViewController: NSViewController {
 
     let player = playerView.player
     observation = playerView.player?.currentItem?.observe(\.status) { (item, change) in
-      print(item.status.rawValue)
       if item.status == .readyToPlay {
         player?.play()
       }
