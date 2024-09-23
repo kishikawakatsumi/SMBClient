@@ -78,13 +78,13 @@ class DirectoryStructure {
     let children = children(of: fileNode)
 
     let (deleted, inserted) = nodeDelta(oldNodes: children, newNodes: nodes)
+
     tree.nodes = Array(
       Set(nodes)
         .union(
-          Set(tree.nodes).subtracting(tree.rootNodes())
+          Set(tree.nodes).subtracting(children)
         )
     )
-
     viewTree = viewTree(tree)
 
     outlineView.beginUpdates()
