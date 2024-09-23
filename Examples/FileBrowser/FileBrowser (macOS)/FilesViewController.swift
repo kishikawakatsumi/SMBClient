@@ -128,6 +128,9 @@ class FilesViewController: NSViewController {
       tabGroupObserving = tabGroup.observe(\.selectedWindow) { [weak self] (tabGroup, change) in
         guard let self = self else { return }
         if window == tabGroup.selectedWindow {
+          guard self == navigationController()?.topViewController else {
+            return
+          }
           dirTree.update(outlineView)
           self.updateItemCount()
         }
