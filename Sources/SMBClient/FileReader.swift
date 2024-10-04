@@ -42,7 +42,8 @@ public class FileReader {
     return buffer
   }
 
-  public func download() async throws -> Data {
+  public func download(progressHandler: (_ progress: Double) -> Void) async throws -> Data {
+    let totalBytes = try await fileSize
     let fileProxy = try await fileProxy()
 
     var offset: UInt64 = 0
@@ -57,8 +58,10 @@ public class FileReader {
 
       buffer.append(response.buffer)
       offset = UInt64(buffer.count)
+      progressHandler(Double(offset) / Double(totalBytes))
     } while NTStatus(response.header.status) != .endOfFile && buffer.count < fileProxy.size
 
+    progressHandler(1.0)
     return buffer
   }
 
