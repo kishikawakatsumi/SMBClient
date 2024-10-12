@@ -73,9 +73,14 @@ public class FileReader {
     let fileManger = FileManager.default
     let filePath = localFile.path
     let fileExists = fileManger.fileExists(atPath: filePath)
-    guard let fileHandle = FileHandle(forWritingAtPath: filePath) else {
-          throw URLError(.cannotWriteToFile)
+    // If file does not exist, create an empty file so we can create a FileHandle
+    if !fileExists {
+      try Data().write(to: localFile)
     }
+    guard let fileHandle = FileHandle(forWritingAtPath: filePath) else {
+      throw URLError(.cannotWriteToFile)
+    }
+    // If file did already exist and we are not overriding, throw an error
     if fileExists, !overwrite {
       throw CocoaError(.fileWriteFileExists)
     }

@@ -390,7 +390,7 @@ final class SMBClientTests: XCTestCase {
     var progressWasUpdated: Bool = false
     let fileManager = FileManager.default
     let tempFolder = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-    let destinationFile = tempFolder.appending(path: "downloadefile.jpg", directoryHint: .notDirectory)
+    let destinationFile = tempFolder.appending(path: "downloadedfile.jpg", directoryHint: .notDirectory)
     try await client.download(path: path, localPath: destinationFile, overwrite: true) { progress in
         progressWasUpdated = true
     }
