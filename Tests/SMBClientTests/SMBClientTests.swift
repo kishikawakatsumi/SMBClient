@@ -389,6 +389,7 @@ final class SMBClientTests: XCTestCase {
 
     let fileManager = FileManager()
     let tempFolder = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+
     let destinationFile = tempFolder.appending(path: "downloadedfile.jpg", directoryHint: .notDirectory)
 
     var progressWasUpdated = false
@@ -412,7 +413,10 @@ final class SMBClientTests: XCTestCase {
 
     let fileManager = FileManager()
     let tempFolder = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-    let destinationFile = tempFolder.appending(path: "downloadedfile.jpg", directoryHint: .notDirectory)
+    print(tempFolder)
+    let destinationFile = tempFolder.appending(path: "downloadedfile.mp4", directoryHint: .notDirectory)
+
+    try Data().write(to: destinationFile)
     let fileHandle = try FileHandle(forWritingTo: destinationFile)
 
     var progressWasUpdated = false
