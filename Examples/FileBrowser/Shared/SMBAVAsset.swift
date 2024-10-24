@@ -2,7 +2,7 @@ import Foundation
 import AVFoundation
 import SMBClient
 
-private let readSize = UInt32(1024 * 1024 * 4)
+private let readSize = UInt32(1024 * 1024 * 10)
 
 class SMBAVAsset: AVURLAsset {
   private let resourceLoaderDelegate: AssetResourceLoaderDelegate
