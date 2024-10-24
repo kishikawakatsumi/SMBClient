@@ -42,8 +42,7 @@ public class FileReader {
     return buffer
   }
 
-  public func download(progressHandler: (_ progress: Double) -> Void) async throws -> Data {
-    let totalBytes = try await fileSize
+  public func download(progressHandler: (_ progress: Double) -> Void = { _ in }) async throws -> Data {
     let fileProxy = try await fileProxy()
 
     var offset: UInt64 = 0
@@ -58,44 +57,70 @@ public class FileReader {
 
       buffer.append(response.buffer)
       offset = UInt64(buffer.count)
-      progressHandler(Double(offset) / Double(totalBytes))
+      progressHandler(Double(offset) / Double(fileProxy.size))
     } while NTStatus(response.header.status) != .endOfFile && buffer.count < fileProxy.size
 
     progressHandler(1.0)
     return buffer
   }
 
-  public func download(toLocalFile localFile: URL, overwrite: Bool, progressHandler: (_ progress: Double) -> Void) async throws {
+  public func download(fileHandle: FileHandle, progressHandler: (_ progress: Double) -> Void = { _ in }) async throws {
     let fileProxy = try await fileProxy()
 
     var offset: UInt64 = 0
-
-    let fileManger = FileManager.default
-    let filePath = localFile.path
-    let fileExists = fileManger.fileExists(atPath: filePath)
-    // If file does not exist, create an empty file so we can create a FileHandle
-    if !fileExists {
-      try Data().write(to: localFile)
-    }
-    guard let fileHandle = FileHandle(forWritingAtPath: filePath) else {
-      throw URLError(.cannotWriteToFile)
-    }
-    // If file did already exist and we are not overriding, throw an error
-    if fileExists, !overwrite {
-      throw CocoaError(.fileWriteFileExists)
-    }
-    defer {
-      fileHandle.closeFile()
-    }
     var response: Read.Response
     repeat {
       response = try await session.read(
         fileId: fileProxy.id,
         offset: offset
       )
+
       fileHandle.seekToEndOfFile()
       fileHandle.write(response.buffer)
       offset += UInt64(response.buffer.count)
+
+      let progress = Double(offset) / Double(fileProxy.size)
+      progressHandler(progress)
+    } while NTStatus(response.header.status) != .endOfFile && offset < fileProxy.size
+
+    progressHandler(1.0)
+  }
+
+  public func download(to localPath: URL, overwrite: Bool = false, progressHandler: (_ progress: Double) -> Void = { _ in }) async throws {
+    let fileProxy = try await fileProxy()
+
+    var offset: UInt64 = 0
+
+    let fileManger = FileManager()
+    let filePath = localPath.path
+    let fileExists = fileManger.fileExists(atPath: filePath)
+
+    if fileExists, !overwrite {
+      throw CocoaError(.fileWriteFileExists)
+    }
+
+    if !fileExists {
+      try Data().write(to: localPath)
+    }
+    guard let fileHandle = FileHandle(forWritingAtPath: filePath) else {
+      throw URLError(.cannotWriteToFile)
+    }
+
+    defer {
+      fileHandle.closeFile()
+    }
+    
+    var response: Read.Response
+    repeat {
+      response = try await session.read(
+        fileId: fileProxy.id,
+        offset: offset
+      )
+
+      fileHandle.seekToEndOfFile()
+      fileHandle.write(response.buffer)
+      offset += UInt64(response.buffer.count)
+
       let progress = Double(offset) / Double(fileProxy.size)
       progressHandler(progress)
     } while NTStatus(response.header.status) != .endOfFile && offset < fileProxy.size
