@@ -3,7 +3,7 @@ import Foundation
 public class Session {
   private var messageId = SequenceNumber<UInt64>()
   private var sessionId: UInt64 = 0
-  private var treeId: UInt32 = 0
+  private(set) var treeId: UInt32 = 0
 
   private var signingKey: Data?
 
@@ -22,14 +22,37 @@ public class Session {
 
   private let connection: Connection
 
-  public init(host: String) {
-    connection = Connection(host: host)
+  public convenience init(host: String) {
+    self.init(Connection(host: host))
+  }
+
+  public convenience init(host: String, port: Int) {
+    self.init(Connection(host: host, port: port))
+  }
+
+  private init(_ connection: Connection) {
+    self.connection = connection
     onDisconnected = { _ in }
   }
 
-  public init(host: String, port: Int) {
-    connection = Connection(host: host, port: port)
-    onDisconnected = { _ in }
+  func newSession() -> Session {
+    let session = Session(connection)
+
+    session.messageId = messageId
+    session.sessionId = sessionId
+    session.treeId = 0
+
+    session.signingKey = signingKey
+
+    session.maxTransactSize = maxTransactSize
+    session.maxReadSize = maxReadSize
+    session.maxWriteSize = maxWriteSize
+
+    return session
+  }
+
+  func treeAccessor(share: String) -> TreeAccessor {
+    TreeAccessor(session: self, share: share)
   }
 
   public func connect() async throws {
@@ -135,9 +158,10 @@ public class Session {
   }
 
   public func enumShareAll() async throws -> [Share] {
-    try await treeConnect(path: "IPC$")
+    let treeAccessor = treeAccessor(share: "IPC$")
+    let session = try await treeAccessor.session()
 
-    let createResponse = try await create(
+    let createResponse = try await session.create(
       desiredAccess: [.readData, .writeData, .appendData, .readAttributes],
       fileAttributes: [.normal],
       shareAccess: [.read, .write],
@@ -145,15 +169,16 @@ public class Session {
       createOptions: [.nonDirectoryFile],
       name: "srvsvc"
     )
-    try await bind(fileId: createResponse.fileId)
-    let ioCtlResponse = try await netShareEnum(fileId: createResponse.fileId)
+
+    try await session.bind(fileId: createResponse.fileId)
+    let ioCtlResponse = try await session.netShareEnum(fileId: createResponse.fileId)
 
     let rpcResponse = DCERPC.Response(data: ioCtlResponse.buffer)
     let netShareEnumResponse = NetShareEnumResponse(data: rpcResponse.stub)
 
     let shares = netShareEnumResponse.shareInfo1.shareInfo
 
-    try await close(fileId: createResponse.fileId)
+    try await session.close(fileId: createResponse.fileId)
 
     return shares.compactMap {
       var type = Share.ShareType(rawValue: $0.type & 0x0FFFFFFF)
@@ -182,6 +207,7 @@ public class Session {
 
     treeId = response.header.treeId
     connectedTree = path
+
     return response
   }
 
