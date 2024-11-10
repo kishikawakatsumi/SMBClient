@@ -9,18 +9,19 @@ class FilesViewController: NSViewController {
   @IBOutlet private var pathBarView: PathBarView!
   @IBOutlet private var statusBarView: StatusBarView!
 
-  let client: SMBClient
+  let treeAccessor: TreeAccessor
   let serverNode: ServerNode
   let share: String
   let path: String
   let rootPath: String
 
-  private lazy var dirTree = DirectoryStructure(server: serverNode.path, path: path, client: client)
+  private lazy var dirTree = DirectoryStructure(server: serverNode.path, path: path, accessor: treeAccessor)
   private let semaphore = Semaphore(value: 1)
 
   private var tabGroupObserving: NSKeyValueObservation?
   private var scrollViewObserving: NSKeyValueObservation?
 
+  private var availableSpace: UInt64?
   private var dateFormatter: DateFormatter = {
     let dateFormatter = DateFormatter()
     dateFormatter.dateStyle = .medium
@@ -28,10 +29,10 @@ class FilesViewController: NSViewController {
     return dateFormatter
   }()
 
-  static func instantiate(client: SMBClient, serverNode: ServerNode, share: String, path: String, rootPath: String) -> Self {
+  static func instantiate(accessor: TreeAccessor, serverNode: ServerNode, share: String, path: String, rootPath: String) -> Self {
     let storyboard = NSStoryboard(name: "FilesViewController", bundle: nil)
     return storyboard.instantiateController(identifier: "FilesViewController") { (coder) in
-      Self(coder: coder, client: client, serverNode: serverNode, share: share, path: path, rootPath: rootPath)
+      Self(coder: coder, accessor: accessor, serverNode: serverNode, share: share, path: path, rootPath: rootPath)
     }
   }
 
@@ -39,8 +40,8 @@ class FilesViewController: NSViewController {
     return nil
   }
 
-  required init?(coder: NSCoder, client: SMBClient, serverNode: ServerNode, share: String, path: String, rootPath: String) {
-    self.client = client
+  required init?(coder: NSCoder, accessor: TreeAccessor, serverNode: ServerNode, share: String, path: String, rootPath: String) {
+    self.treeAccessor = accessor
     self.serverNode = serverNode
     self.share = share
     self.path = path
@@ -81,16 +82,10 @@ class FilesViewController: NSViewController {
 
     Task { @MainActor in
       do {
-        if client.share != share {
-          if let _ = client.share {
-            try await client.disconnectShare()
-          }
-          try await client.connectShare(share)
-        }
-
-        await dirTree.reload()
+        try await dirTree.reload()
         outlineView.reloadData()
 
+        availableSpace = try await dirTree.availableSpace()
         updateItemCount()
       } catch {
         NSAlert(error: error).runModal()
@@ -152,7 +147,11 @@ class FilesViewController: NSViewController {
   }
 
   private func updateItemCount() {
-    statusBarView.label.stringValue = NSLocalizedString("\(outlineView.numberOfRows) items", comment: "")
+    if let availableSpace {
+      statusBarView.label.stringValue = NSLocalizedString("\(outlineView.numberOfRows) items, \(ByteCountFormatter.string(fromByteCount: Int64(availableSpace), countStyle: .file)) available", comment: "")
+    } else {
+      statusBarView.label.stringValue = NSLocalizedString("\(outlineView.numberOfRows) items", comment: "")
+    }
   }
 
   @objc
@@ -206,8 +205,12 @@ class FilesViewController: NSViewController {
     }
 
     Task { @MainActor in
-      await dirTree.reload(directory: dirname, outlineView)
-      updateItemCount()
+      do {
+        try await dirTree.reload(directory: dirname, outlineView)
+        updateItemCount()
+      } catch {
+        NSAlert(error: error).runModal()
+      }
     }
   }
 
@@ -232,8 +235,13 @@ class FilesViewController: NSViewController {
       }
     }()
     Task {
-      try await client.createDirectory(path: join(path, filename))
-      await dirTree.reload(directory: path, outlineView)
+      do {
+        try await treeAccessor.createDirectory(share: share, path: join(path, filename))
+        try await dirTree.reload(directory: path, outlineView)
+        updateItemCount()
+      } catch {
+        NSAlert(error: error).runModal()
+      }
     }
   }
 
@@ -261,28 +269,28 @@ class FilesViewController: NSViewController {
     if fileNode.isDirectory {
       guard let navigationController = navigationController() else { return }
 
-      let client = self.client
+      let treeAccessor = self.treeAccessor
       let path = dirTree.resolvePath(fileNode)
       let rootPath = self.rootPath
 
       let filesViewController = FilesViewController.instantiate(
-        client: client, serverNode: serverNode, share: share, path: path, rootPath: rootPath
+        accessor: treeAccessor, serverNode: serverNode, share: share, path: path, rootPath: rootPath
       )
       filesViewController.title = fileNode.name
 
       navigationController.push(filesViewController)
     } else {
-      let client = self.client
+      let treeAccessor = self.treeAccessor
       let path = dirTree.resolvePath(fileNode)
 
       let windowController: NSWindowController
 
       let pathExtension = URL(fileURLWithPath: path).pathExtension
       if MediaPlayerWindowController.supportedExtensions.contains(pathExtension) {
-        windowController = MediaPlayerWindowController.instantiate(path: path, client: client)
+        windowController = MediaPlayerWindowController.instantiate(path: path, accessor: treeAccessor)
         windowController.showWindow(nil)
       } else {
-        windowController = DocumentWindowController.instantiate(path: path, client: client)
+        windowController = DocumentWindowController.instantiate(path: path, accessor: treeAccessor)
         windowController.showWindow(nil)
       }
     }
@@ -332,17 +340,18 @@ class FilesViewController: NSViewController {
         let path = fileNode.path
 
         if fileNode.isDirectory {
-          try await client.deleteDirectory(path: path)
+          try await treeAccessor.deleteDirectory(share: share, path: path)
         } else {
-          try await client.deleteFile(path: path)
+          try await treeAccessor.deleteFile(share: share, path: path)
         }
 
         reloadPaths.insert(dirname(path))
       }
 
       for reloadPath in reloadPaths {
-        await dirTree.reload(directory: reloadPath, outlineView)
+        try await dirTree.reload(directory: reloadPath, outlineView)
       }
+      updateItemCount()
     } catch {
       NSAlert(error: error).runModal()
     }
@@ -354,7 +363,7 @@ class FilesViewController: NSViewController {
     guard let navigationController = navigationController() else { return }
     guard let absolutePath = pathItem.url?.path else { return }
 
-    let client = self.client
+    let treeAccessor = self.treeAccessor
     let rootPath = self.rootPath
 
     if absolutePath.hasPrefix(rootPath) {
@@ -363,7 +372,7 @@ class FilesViewController: NSViewController {
       guard relativePath != path else { return }
 
       let filesViewController = FilesViewController.instantiate(
-        client: client, serverNode: serverNode, share: share, path: relativePath, rootPath: rootPath
+        accessor: treeAccessor, serverNode: serverNode, share: share, path: relativePath, rootPath: rootPath
       )
       filesViewController.title = pathItem.title
 
@@ -516,10 +525,12 @@ extension FilesViewController: NSOutlineViewDataSource {
 
         func moveFile(from: String, to: String) async {
           do {
-            try await client.move(from: from, to: to)
+            try await treeAccessor.move(share: share, from: from, to: to)
 
-            await dirTree.reload(directory: dirname(from), outlineView)
-            await dirTree.reload(directory: dirname(to), outlineView)
+            try await dirTree.reload(directory: dirname(from), outlineView)
+            try await dirTree.reload(directory: dirname(to), outlineView)
+
+            updateItemCount()
           } catch {
             NSAlert(error: error).runModal()
           }
@@ -544,12 +555,12 @@ extension FilesViewController: NSOutlineViewDataSource {
         if let fileNode = item as? FileNode {
           let destination = join(fileNode.path, basename)
           queue.addFileTransfer(
-            FileUpload(source: fileURL, destination: destination, client: client)
+            FileUpload(source: fileURL, destination: destination, accessor: treeAccessor)
           )
         } else {
           let destination = join(path, basename)
           queue.addFileTransfer(
-            FileUpload(source: fileURL, destination: destination, client: client)
+            FileUpload(source: fileURL, destination: destination, accessor: treeAccessor)
           )
         }
       }
@@ -624,8 +635,12 @@ extension FilesViewController: NSOutlineViewDelegate {
       await semaphore.wait()
       defer { Task { await semaphore.signal() } }
 
-      await dirTree.expand(fileNode, outlineView)
-      updateItemCount()
+      do {
+        try await dirTree.expand(fileNode, outlineView)
+        updateItemCount()
+      } catch {
+        NSAlert(error: error).runModal()
+      }
     }
   }
 
@@ -701,8 +716,8 @@ extension FilesViewController: NSTextFieldDelegate {
 
     Task { @MainActor in
       do {
-        try await client.rename(from: node.path, to: join(dirname(node.path), textField.stringValue))
-        await dirTree.reload(directory: dirname(node.path), outlineView)
+        try await treeAccessor.rename(share: share, from: node.path, to: join(dirname(node.path), textField.stringValue))
+        try await dirTree.reload(directory: dirname(node.path), outlineView)
       } catch {
         textField.stringValue = node.name
         NSAlert(error: error).runModal()

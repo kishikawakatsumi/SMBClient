@@ -784,7 +784,7 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kishikawakatsumi/SMBClient.git";
 			requirement = {
-				branch = main;
+				branch = switchtree;
 				kind = branch;
 			};
 		};

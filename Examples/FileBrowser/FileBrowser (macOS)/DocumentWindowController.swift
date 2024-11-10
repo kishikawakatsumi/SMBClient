@@ -9,7 +9,6 @@ private let storyboardID = "DocumentWindowController"
 
 class DocumentWindowController: NSWindowController, NSWindowDelegate {
   private let path: String
-  private let client: SMBClient
   private let fileReader: FileReader
 
   private let server: HTTPServer
@@ -17,17 +16,16 @@ class DocumentWindowController: NSWindowController, NSWindowDelegate {
   private var task: Task<(), any Error>?
   private let semaphore = Semaphore(value: 1)
 
-  static func instantiate(path: String, client: SMBClient) -> Self {
+  static func instantiate(path: String, accessor: TreeAccessor) -> Self {
     let storyboard = NSStoryboard(name: storyboardID, bundle: nil)
     return storyboard.instantiateController(identifier: storyboardID) { (coder) in
-      Self(coder: coder, path: path, client: client)
+      Self(coder: coder, path: path, accessor: accessor)
     }
   }
 
-  required init?(coder: NSCoder, path: String, client: SMBClient) {
+  required init?(coder: NSCoder, path: String, accessor: TreeAccessor) {
     self.path = path
-    self.client = client
-    fileReader = client.fileReader(path: path)
+    fileReader = accessor.fileReader(path: path)
 
     port = UInt16(42000 + NSApp.windows.count)
     server = HTTPServer(port: port, logger: .disabled)

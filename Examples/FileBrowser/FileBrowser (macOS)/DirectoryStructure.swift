@@ -5,14 +5,13 @@ import SMBClient
 class DirectoryStructure {
   private let server: String
   private let path: String
+  private let treeAccessor: TreeAccessor
 
   private var tree = Tree<FileNode>()
   private var viewTree = Tree<FileNode>()
 
   private var searchText = ""
   private var sortDescriptor = NSSortDescriptor(key: "NameColumn", ascending: true)
-
-  private let client: SMBClient
 
   var useCache = false {
     didSet {
@@ -23,10 +22,10 @@ class DirectoryStructure {
   }
   private var cache = [FileNode: [FileNode]]()
 
-  init(server: String, path: String, client: SMBClient) {
+  init(server: String, path: String, accessor: TreeAccessor) {
     self.server = server
     self.path = path
-    self.client = client
+    treeAccessor = accessor
   }
 
   func viewTree(_ tree: Tree<FileNode>) -> Tree<FileNode> {
@@ -46,18 +45,18 @@ class DirectoryStructure {
     return viewTree
   }
 
-  func reload() async {
-    let nodes = await listDirectory(path: path, parent: nil)
+  func reload() async throws {
+    let nodes = try await listDirectory(path: path, parent: nil)
     tree.nodes = nodes
 
     viewTree = viewTree(tree)
   }
 
-  func reload(directory path: String, _ outlineView: NSOutlineView) async {
+  func reload(directory path: String, _ outlineView: NSOutlineView) async throws {
     if let fileNode = node(ID(path)) {
-      await expand(fileNode, outlineView)
+      try await expand(fileNode, outlineView)
     } else {
-      let nodes = await listDirectory(path: path, parent: nil)
+      let nodes = try await listDirectory(path: path, parent: nil)
 
       tree.nodes = Array(
         Set(nodes)
@@ -71,10 +70,10 @@ class DirectoryStructure {
     }
   }
 
-  func expand(_ fileNode: FileNode, _ outlineView: NSOutlineView) async {
+  func expand(_ fileNode: FileNode, _ outlineView: NSOutlineView) async throws {
     let path = resolvePath(fileNode)
 
-    let nodes = await listDirectory(path: path, parent: fileNode)
+    let nodes = try await listDirectory(path: path, parent: fileNode)
     let children = children(of: fileNode)
 
     let (deleted, inserted) = nodeDelta(oldNodes: children, newNodes: nodes)
@@ -144,6 +143,10 @@ class DirectoryStructure {
     viewTree.nodes.count
   }
 
+  func availableSpace() async throws -> UInt64 {
+    return try await treeAccessor.availableSpace()
+  }
+
   func rootNodes() -> [FileNode] {
     viewTree.rootNodes()
   }
@@ -201,22 +204,16 @@ class DirectoryStructure {
     return false
   }
 
-  private func listDirectory(path: String, parent: FileNode?) async -> [FileNode] {
-    do {
-      let files = try await client.listDirectory(path: path)
-        .filter { $0.name != "." && $0.name != ".." && !$0.isHidden }
-        .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-      let nodes = files
-        .map { FileNode(path: join(path, $0.name), file: $0, parent: parent?.id) }
+  private func listDirectory(path: String, parent: FileNode?) async throws -> [FileNode] {
+    let files = try await treeAccessor.listDirectory(path: path)
+      .filter { $0.name != "." && $0.name != ".." && !$0.isHidden }
+      .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    let nodes = files
+      .map { FileNode(path: join(path, $0.name), file: $0, parent: parent?.id) }
 
-      DataRepository.shared.set(join(server, path), nodes: nodes)
+    DataRepository.shared.set(join(server, path), nodes: nodes)
 
-      return nodes
-    } catch {
-      NSAlert(error: error).runModal()
-    }
-
-    return DataRepository.shared.nodes(join(server, path)) ?? []
+    return nodes
   }
 
   private func nodeDelta(oldNodes: [FileNode], newNodes: [FileNode]) -> (deleted: [Int], inserted: [Int]) {

@@ -7,11 +7,11 @@ private let readSize = UInt32(1024 * 1024 * 10)
 class SMBAVAsset: AVURLAsset {
   private let resourceLoaderDelegate: AssetResourceLoaderDelegate
 
-  init(client: SMBClient, path: String) {
+  init(accessor: TreeAccessor, path: String) {
     let url = URL(string: "smb:///\(path)")!
 
     self.resourceLoaderDelegate = AssetResourceLoaderDelegate(
-      client: client,
+      accessor: accessor,
       path: path,
       contentType: url.pathExtension
     )
@@ -27,22 +27,21 @@ class SMBAVAsset: AVURLAsset {
 }
 
 private class AssetResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate {
-  private let client: SMBClient
   private let fileReader: FileReader
   private let path: String
   private let contentType: String?
 
   private let queue = TaskQueue()
 
-  init(client: SMBClient, path: String, contentType: String?) {
-    self.client = client
-    fileReader = client.fileReader(path: path)
+  init(accessor: TreeAccessor, path: String, contentType: String?) {
+    fileReader = accessor.fileReader(path: path)
     self.path = path
     self.contentType = contentType
   }
 
   func close() {
-    Task {
+    let fileReader = self.fileReader
+    queue.dispatch {
       try await fileReader.close()
     }
   }

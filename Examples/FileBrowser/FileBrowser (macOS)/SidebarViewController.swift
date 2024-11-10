@@ -146,23 +146,18 @@ extension SidebarViewController: NSOutlineViewDelegate {
       guard let session = sessionManager.session(for: serverNode.id) else { return }
 
       Task { @MainActor in
-        do {
-          let client = session.client
-          _ = try await client.treeConnect(path: shareNode.name)
+        let treeAccessor = session.client.treeAccessor(share: shareNode.name)
 
-          let filesViewController = FilesViewController.instantiate(
-            client: client,
-            serverNode: serverNode,
-            share: shareNode.name,
-            path: "",
-            rootPath: "/\(shareNode.device)/\(shareNode.name)"
-          )
-          filesViewController.title = shareNode.name
+        let filesViewController = FilesViewController.instantiate(
+          accessor: treeAccessor,
+          serverNode: serverNode,
+          share: shareNode.name,
+          path: "",
+          rootPath: "/\(shareNode.device)/\(shareNode.name)"
+        )
+        filesViewController.title = shareNode.name
 
-          navigationController()?.push(filesViewController)
-        } catch {
-          NSAlert(error: error).runModal()
-        }
+        navigationController()?.push(filesViewController)
       }
     default:
       break
