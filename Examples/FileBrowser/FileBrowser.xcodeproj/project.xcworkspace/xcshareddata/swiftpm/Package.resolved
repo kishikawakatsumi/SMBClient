@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kishikawakatsumi/SMBClient.git",
       "state" : {
-        "branch" : "switchtree",
-        "revision" : "3534f14f951bb2ffe6353e065dc8e9cd576fc017"
+        "branch" : "main",
+        "revision" : "fcdfa622401586a32b11a66817ac9c898b6ac3e7"
       }
     }
   ],
