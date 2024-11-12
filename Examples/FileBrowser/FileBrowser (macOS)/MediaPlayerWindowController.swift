@@ -12,23 +12,23 @@ class MediaPlayerWindowController: NSWindowController, NSWindowDelegate {
     return extensions
   }()
 
-  private let client: SMBClient
+  private let treeAccessor: TreeAccessor
   private let path: String
-  private lazy var asset = SMBAVAsset(client: client, path: path)
+  private lazy var asset = SMBAVAsset(accessor: treeAccessor, path: path)
 
   private var observation: NSKeyValueObservation?
   private var windowController: NSWindowController?
 
-  static func instantiate(path: String, client: SMBClient) -> Self {
+  static func instantiate(path: String, accessor: TreeAccessor) -> Self {
     let storyboard = NSStoryboard(name: storyboardID, bundle: nil)
     return storyboard.instantiateController(identifier: storyboardID) { (coder) in
-      Self(coder: coder, path: path, client: client)
+      Self(coder: coder, path: path, accessor: accessor)
     }
   }
 
-  required init?(coder: NSCoder, path: String, client: SMBClient) {
+  required init?(coder: NSCoder, path: String, accessor: TreeAccessor) {
     self.path = path
-    self.client = client
+    self.treeAccessor = accessor
 
     super.init(coder: coder)
   }

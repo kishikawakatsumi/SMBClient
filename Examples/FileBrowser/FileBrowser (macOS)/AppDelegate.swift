@@ -90,7 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       }
 
       let filesViewController = FilesViewController.instantiate(
-        client: foregroundViewController.client,
+        accessor: foregroundViewController.treeAccessor,
         serverNode: foregroundViewController.serverNode,
         share: foregroundViewController.share,
         path: foregroundViewController.path,

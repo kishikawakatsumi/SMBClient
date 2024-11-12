@@ -140,7 +140,7 @@ class WindowController: NSWindowController {
       return
     }
 
-    let client = topViewController.client
+    let treeAccessor = topViewController.treeAccessor
     let serverNode = topViewController.serverNode
     let share = topViewController.share
     let rootPath = topViewController.rootPath
@@ -166,7 +166,7 @@ class WindowController: NSWindowController {
     }
 
     let filesViewController = FilesViewController.instantiate(
-      client: client, serverNode: serverNode, share: share, path: path, rootPath: rootPath
+      accessor: treeAccessor, serverNode: serverNode, share: share, path: path, rootPath: rootPath
     )
     filesViewController.title = sender.title
 

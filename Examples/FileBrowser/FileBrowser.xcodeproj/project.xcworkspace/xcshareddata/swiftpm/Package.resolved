@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swhitty/FlyingFox.git",
       "state" : {
-        "revision" : "e7f38fe316d815053f0c5fdc973391b333754b11",
-        "version" : "0.17.0"
+        "revision" : "0482ba51ff2d6d91a7ea449c3dbdce2a78802b85",
+        "version" : "0.19.0"
       }
     },
     {
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kishikawakatsumi/SMBClient.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "1a2683c12ff2a050f500db293ce0378bdb056411"
+        "branch" : "switchtree",
+        "revision" : "3534f14f951bb2ffe6353e065dc8e9cd576fc017"
       }
     }
   ],

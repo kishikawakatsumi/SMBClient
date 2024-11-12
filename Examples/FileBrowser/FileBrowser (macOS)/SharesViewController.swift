@@ -104,19 +104,18 @@ class SharesViewController: NSViewController {
     guard let session = SessionManager.shared.session(for: serverNode.id) else { return }
 
     Task { @MainActor in
-      do {
-        let client = session.client
-        _ = try await client.treeConnect(path: shareNode.name)
+      let treeAccessor = session.client.treeAccessor(share: shareNode.name)
 
-        let filesViewController = FilesViewController.instantiate(
-          client: client, serverNode: serverNode, share: shareNode.name, path: "", rootPath: "/\(server)/\(shareNode.name)"
-        )
-        filesViewController.title = shareNode.name
+      let filesViewController = FilesViewController.instantiate(
+        accessor: treeAccessor,
+        serverNode: serverNode,
+        share: shareNode.name,
+        path: "",
+        rootPath: "/\(server)/\(shareNode.name)"
+      )
+      filesViewController.title = shareNode.name
 
-        navigationController.push(filesViewController)
-      } catch {
-        NSAlert(error: error).runModal()
-      }
+      navigationController.push(filesViewController)
     }
   }
 }

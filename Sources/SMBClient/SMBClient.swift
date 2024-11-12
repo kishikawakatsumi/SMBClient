@@ -181,6 +181,10 @@ public class SMBClient {
     FileWriter(session: session, path: Pathname.normalize(path))
   }
 
+  public func treeAccessor(share: String) -> TreeAccessor {
+    session.treeAccessor(share: share)
+  }
+
   public func availableSpace() async throws -> UInt64 {
     let response = try await session.queryInfo(path: "", infoType: .fileSystem, fileInfoClass: .fileFsSizeInformation)
 

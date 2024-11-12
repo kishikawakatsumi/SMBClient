@@ -32,13 +32,13 @@ class FileUpload: FileTransfer {
   let id: UUID
   private let source: URL
   private let destination: String
-  private let client: SMBClient
+  private let treeAccessor: TreeAccessor
 
-  init(source: URL, destination: String, client: SMBClient) {
+  init(source: URL, destination: String, accessor: TreeAccessor) {
     id = UUID()
     self.source = source
     self.destination = destination
-    self.client = client
+    treeAccessor = accessor
 
     displayName = source.lastPathComponent
     state = .queued
@@ -60,7 +60,7 @@ class FileUpload: FileTransfer {
         state = .started(transferProgress)
         progressHandler(state)
 
-        try await client.upload(localPath: source, remotePath: destination) { (completedFiles, fileBeingTransferred, bytesSent) in
+        try await treeAccessor.upload(localPath: source, remotePath: destination) { (completedFiles, fileBeingTransferred, bytesSent) in
           transferProgress = .directory(completedFiles: completedFiles, fileBeingTransferred: fileBeingTransferred, bytesSent: bytesSent)
           state = .started(transferProgress)
           progressHandler(state)
@@ -78,7 +78,7 @@ class FileUpload: FileTransfer {
         state = .started(transferProgress)
         progressHandler(state)
 
-        try await client.upload(fileHandle: fileHandle, path: destination) { (progress) in
+        try await treeAccessor.upload(fileHandle: fileHandle, path: destination) { (progress) in
           transferProgress = .file(progress: progress, numberOfBytes: numberOfBytes)
           state = .started(.file(progress: progress, numberOfBytes: numberOfBytes))
           progressHandler(state)
@@ -98,7 +98,7 @@ class FileUpload: FileTransfer {
           name: Self.didFinish,
           object: self,
           userInfo: [
-            FileUploadUserInfoKey.share: client.share ?? "",
+            FileUploadUserInfoKey.share: treeAccessor.share ?? "",
             FileUploadUserInfoKey.path: destination,
           ]
         )
