@@ -379,6 +379,58 @@ final class SMBClientTests: XCTestCase {
     XCTAssertEqual(data, try Data(contentsOf: fixtureURL.appending(component: "\(user.sharePath)/\(path)")))
   }
 
+  func testDownloadIntoFile01() async throws {
+    let user = bob
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password)
+    try await client.connectShare(user.share)
+
+    let path = "test_files/file_example_JPG_1MB.jpg"
+
+    let fileManager = FileManager()
+    let tempFolder = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+
+    let destinationFile = tempFolder.appending(path: "downloadedfile.jpg", directoryHint: .notDirectory)
+
+    var progressWasUpdated = false
+    try await client.download(path: path, localPath: destinationFile, overwrite: true) { (progress) in
+      progressWasUpdated = true
+    }
+
+    XCTAssertTrue(fileManager.fileExists(atPath: destinationFile.path))
+    let data = try Data(contentsOf: destinationFile)
+    XCTAssertEqual(data, try Data(contentsOf: fixtureURL.appending(component: "\(user.sharePath)/\(path)")))
+    XCTAssertTrue(progressWasUpdated)
+  }
+
+  func testDownloadIntoFile02() async throws {
+    let user = bob
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password)
+    try await client.connectShare(user.share)
+
+    let path = "test_files/file_example_MP4_1920_18MG.mp4"
+
+    let fileManager = FileManager()
+    let tempFolder = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+    print(tempFolder)
+    let destinationFile = tempFolder.appending(path: "downloadedfile.mp4", directoryHint: .notDirectory)
+
+    try Data().write(to: destinationFile)
+    let fileHandle = try FileHandle(forWritingTo: destinationFile)
+
+    var progressWasUpdated = false
+    let fileReader = client.fileReader(path: path)
+    try await fileReader.download(fileHandle: fileHandle) { (progress) in
+      progressWasUpdated = true
+    }
+
+    XCTAssertTrue(fileManager.fileExists(atPath: destinationFile.path))
+    let data = try Data(contentsOf: destinationFile)
+    XCTAssertEqual(data, try Data(contentsOf: fixtureURL.appending(component: "\(user.sharePath)/\(path)")))
+    XCTAssertTrue(progressWasUpdated)
+  }
+
   func testRandomRead01() async throws {
     let user = bob
     let client = SMBClient(host: "localhost", port: 4445)
