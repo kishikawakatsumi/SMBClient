@@ -10,14 +10,14 @@ class MediaPlayerViewController: UIViewController {
     return extensions
   }()
 
-  private let client: SMBClient
+  private let treeAccessor: TreeAccessor
   private let path: String
 
   private let playerViewController = AVPlayerViewController()
   private var observation: NSKeyValueObservation?
 
-  init(client: SMBClient, path: String) {
-    self.client = client
+  init(accessor: TreeAccessor, path: String) {
+    treeAccessor = accessor
     self.path = path
     super.init(nibName: nil, bundle: nil)
   }
@@ -47,7 +47,7 @@ class MediaPlayerViewController: UIViewController {
     playerViewController.didMove(toParent: self)
 
     Task { @MainActor in
-      let asset = SMBAVAsset(client: client, path: path)
+      let asset = SMBAVAsset(accessor: treeAccessor, path: path)
       let playerItem = AVPlayerItem(asset: asset)
 
       let player = AVPlayer(playerItem: playerItem)

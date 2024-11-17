@@ -7,7 +7,7 @@ import SMBClient
 
 class DocumentViewController: UIViewController {
   private let path: String
-  private let client: SMBClient
+  private let treeAccessor: TreeAccessor
   private let fileReader: FileReader
 
   private let server: HTTPServer
@@ -18,10 +18,10 @@ class DocumentViewController: UIViewController {
   private var webView = WKWebView()
   private var progressBar = UIProgressView(progressViewStyle: .bar)
 
-  init(client: SMBClient, path: String) {
-    self.client = client
+  init(accessor: TreeAccessor, path: String) {
+    treeAccessor = accessor
     self.path = path
-    fileReader = client.fileReader(path: path)
+    fileReader = accessor.fileReader(path: path)
 
     port = UInt16(42000)
     server = HTTPServer(port: port, logger: .disabled)
