@@ -107,7 +107,11 @@ dependencies: [
 - macOS 10.15 or later
 - iOS 13.0 or later
 
-## Supported SMB Messages
+## Supported Protocol Version
+
+SMB 2.0 (aka `SMB2`) is supported. See [Header](Sources/SMBClient/Messages/Header.swift) for protocol support, which follows [SMB2 Packet Header open specification](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-smb2/fb188936-5050-48d3-b350-dc43059638a4).
+
+### Supported SMB Messages
 
 - [x] NEGOTIATE
 - [x] SESSION_SETUP
@@ -135,6 +139,14 @@ dependencies: [
 To connect to macOS file sharing, you need to enable "Windows File Sharing" in the "Sharing" sytem settings in "File Sharing" section. This will enable NTLM v2 authentication on your macOS.
 
 <img width="600" src="https://github.com/user-attachments/assets/9d521df6-b899-4f10-ac8e-0dbbe371e5c2" alt="macOS File Sharing settings">
+
+### Compatibility with SMB1 and AFP
+
+This library does not support `SMB1` and will not support SMB 1.0 in the near future, this is due to SMB1 and SMB2 are not compatible, with completely different packet structures.
+
+Relatedly, connecting to macOS servers using pre-SMB, Apple Filing Protocol ([AFP](https://en.wikipedia.org/wiki/Apple_Filing_Protocol)) is not supported. 
+
+`OS X 10.9 Mavericks` and later supports SMB as the primary file sharing protocol.
 
 ## Supporters & Sponsors
 
