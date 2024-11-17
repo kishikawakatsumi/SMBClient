@@ -784,8 +784,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kishikawakatsumi/SMBClient.git";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.0;
 			};
 		};
 		145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */ = {
