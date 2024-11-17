@@ -3,7 +3,7 @@ import AVKit
 import SMBClient
 
 class FilesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-  private let client: SMBClient
+  private let treeAccessor: TreeAccessor
   private let path: String
   private var files = [File]()
 
@@ -16,8 +16,8 @@ class FilesViewController: UIViewController, UITableViewDataSource, UITableViewD
     return dateFormatter
   }()
 
-  init(client: SMBClient, path: String) {
-    self.client = client
+  init(accessor: TreeAccessor, path: String) {
+    treeAccessor = accessor
     self.path = path
     super.init(nibName: nil, bundle: nil)
   }
@@ -48,7 +48,7 @@ class FilesViewController: UIViewController, UITableViewDataSource, UITableViewD
 
     Task { @MainActor in
       do {
-        let files = try await self.client.listDirectory(path: path)
+        let files = try await treeAccessor.listDirectory(path: path)
           .filter { $0.name != "." && $0.name != ".." && !$0.isHidden }
           .sorted { $0.name < $1.name }
         self.files.append(contentsOf: files)
@@ -125,15 +125,15 @@ class FilesViewController: UIViewController, UITableViewDataSource, UITableViewD
       }
 
       if file.isDirectory {
-        let viewController = FilesViewController(client: client, path: subpath)
+        let viewController = FilesViewController(accessor: treeAccessor, path: subpath)
         navigationController?.pushViewController(viewController, animated: true)
       } else {
         let path = URL(fileURLWithPath: subpath)
         if MediaPlayerViewController.supportedExtensions.contains(path.pathExtension) {
-          let viewController = MediaPlayerViewController(client: client, path: subpath)
+          let viewController = MediaPlayerViewController(accessor: treeAccessor, path: subpath)
           navigationController?.pushViewController(viewController, animated: true)
         } else {
-          let viewController = DocumentViewController(client: client, path: subpath)
+          let viewController = DocumentViewController(accessor: treeAccessor, path: subpath)
           navigationController?.pushViewController(viewController, animated: true)
         }
       }

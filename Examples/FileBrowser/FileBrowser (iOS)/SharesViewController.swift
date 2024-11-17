@@ -82,13 +82,12 @@ class SharesViewController: UIViewController, UITableViewDataSource, UITableView
 
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     let share = shares[indexPath.row]
-    Task { @MainActor in
-      _ = try await client.treeConnect(path: share.name)
+    
+    let treeAccessor = client.treeAccessor(share: share.name)
 
-      let viewController = FilesViewController(client: client, path: "")
-      viewController.navigationItem.title = share.name
-      
-      navigationController?.pushViewController(viewController, animated: true)
-    }
+    let viewController = FilesViewController(accessor: treeAccessor, path: "")
+    viewController.navigationItem.title = share.name
+
+    navigationController?.pushViewController(viewController, animated: true)
   }
 }
