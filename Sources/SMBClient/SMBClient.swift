@@ -204,12 +204,12 @@ public class SMBClient {
   }
 }
 
-public struct Share {
+public struct Share: Hashable {
   public let name: String
   public let comment: String
   public let type: ShareType
 
-  public struct ShareType: OptionSet {
+  public struct ShareType: OptionSet, Hashable {
     public let rawValue: UInt32
 
     public init(rawValue: UInt32) {
@@ -268,7 +268,7 @@ extension Share.ShareType: CustomStringConvertible {
   }
 }
 
-public struct File {
+public struct File: Hashable {
   public let name: String
   public var size: UInt64 { fileStat.size }
   public var isDirectory: Bool { fileStat.isDirectory }
@@ -294,7 +294,7 @@ extension File: CustomStringConvertible {
   }
 }
 
-public struct FileStat {
+public struct FileStat: Hashable {
   public let size: UInt64
   public let isDirectory: Bool
   public let isHidden: Bool
@@ -334,10 +334,4 @@ extension FileStat: CustomStringConvertible {
   public var description: String {
     "{ size: \(size), isDirectory: \(isDirectory), isHidden: \(isHidden), isReadOnly: \(isReadOnly), isSystem: \(isSystem), isArchive: \(isArchive), creationTime: \(creationTime), lastAccessTime: \(lastAccessTime), lastWriteTime: \(lastWriteTime) }"
   }
-}
-
-public struct FileReadResponse {
-  public let dataRemaining: UInt32
-  public let buffer: Data
-  public let endOfFile: Bool
 }
