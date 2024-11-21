@@ -6,7 +6,7 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
   private let tableView = UITableView(frame: .zero, style: .insetGrouped)
 
   private var services = [Service]()
-  private var sessions = [String: SMBClient]()
+  private var sessions = [ID: SMBClient]()
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -123,7 +123,7 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
       let service = services[indexPath.row]
 
       cell.textLabel?.text = service.name
-      if let _ = sessions[service.id.rawValue] {
+      if let _ = sessions[service.id] {
         cell.accessoryType = .disclosureIndicator
       } else {
         cell.accessoryType = .none
@@ -133,7 +133,7 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
       let server = servers[indexPath.row]
 
       cell.textLabel?.text = server.displayName
-      if let _ = sessions[server.id.rawValue] {
+      if let _ = sessions[server.id] {
         cell.accessoryType = .disclosureIndicator
       } else {
         cell.accessoryType = .none
@@ -151,7 +151,7 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
       case 0:
         let service = services[indexPath.row]
 
-        if let client = sessions[service.id.rawValue] {
+        if let client = sessions[service.id] {
           let viewController = SharesViewController(client: client)
           navigationController?.pushViewController(viewController, animated: true)
           return
@@ -186,7 +186,7 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
         let servers = ServerManager.shared.servers
         let server = servers[indexPath.row]
 
-        if let client = sessions[server.id.rawValue] {
+        if let client = sessions[server.id] {
           let viewController = SharesViewController(client: client)
           navigationController?.pushViewController(viewController, animated: true)
           return
@@ -261,7 +261,7 @@ class ServersViewController: UIViewController, UITableViewDataSource, UITableVie
     let store = CredentialStore.shared
     store.save(server: server, securityDomain: securityDomain, username: username, password: password)
 
-    sessions[securityDomain] = client
+    sessions[ID(securityDomain)] = client
 
     tableView.reloadData()
 

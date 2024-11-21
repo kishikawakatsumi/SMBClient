@@ -1,5 +1,5 @@
 {
-  "originHash" : "5d4dde8d24dec84f2ef8157fa32beeb36cf583b42ba178f7dcea16c910656995",
+  "originHash" : "ab960b0baaa125aff3f804cd05035ee32644b1a7380c2d168aee07de14412f44",
   "pins" : [
     {
       "identity" : "flyingfox",
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kishikawakatsumi/SMBClient.git",
       "state" : {
-        "revision" : "65e0245c7647bafc6f9b430627f4dfb5a9e91314",
-        "version" : "0.2.0"
+        "revision" : "78ecf6cb8055c4f6d9e6af6022091e06c927004e",
+        "version" : "0.2.1"
       }
     }
   ],
