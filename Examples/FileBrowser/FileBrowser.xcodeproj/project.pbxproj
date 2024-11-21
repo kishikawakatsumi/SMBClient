@@ -3,23 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1414C4D62C630F2E004E2E36 /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1414C4D22C630F29004E2E36 /* Server.swift */; };
-		1414C4D72C630F2E004E2E36 /* SMBAVAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1414C4D42C630F29004E2E36 /* SMBAVAsset.swift */; };
-		1414C4D82C630F2E004E2E36 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1414C4D32C630F29004E2E36 /* Service.swift */; };
-		1414C4D92C630F2E004E2E36 /* ID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1414C4D12C630F29004E2E36 /* ID.swift */; };
-		1414C4DA2C630F2E004E2E36 /* Server.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1414C4D22C630F29004E2E36 /* Server.swift */; };
-		1414C4DB2C630F2E004E2E36 /* SMBAVAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1414C4D42C630F29004E2E36 /* SMBAVAsset.swift */; };
-		1414C4DC2C630F2E004E2E36 /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1414C4D32C630F29004E2E36 /* Service.swift */; };
-		1414C4DD2C630F2E004E2E36 /* ID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1414C4D12C630F29004E2E36 /* ID.swift */; };
 		141AF3DF2C4A94D30050C7A5 /* NSOutlineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141AF3DE2C4A94D30050C7A5 /* NSOutlineView.swift */; };
-		141AF3E22C4ABA550050C7A5 /* SMBClient in Frameworks */ = {isa = PBXBuildFile; productRef = 141AF3E12C4ABA550050C7A5 /* SMBClient */; };
 		141AF3E42C4ABCCA0050C7A5 /* URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141AF3E32C4ABCCA0050C7A5 /* URL.swift */; };
-		141B02612C996599007A2573 /* ServiceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141B02602C996599007A2573 /* ServiceDiscovery.swift */; };
-		141B02622C996599007A2573 /* ServiceDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141B02602C996599007A2573 /* ServiceDiscovery.swift */; };
 		1446801B2C347E1F0029A1AB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1446801A2C347E1F0029A1AB /* AppDelegate.swift */; };
 		1446801F2C347E200029A1AB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1446801E2C347E200029A1AB /* Assets.xcassets */; };
 		144680222C347E200029A1AB /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 144680212C347E200029A1AB /* Base */; };
@@ -29,7 +18,6 @@
 		144680302C3482620029A1AB /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1446802F2C3482620029A1AB /* NavigationController.swift */; };
 		144680362C349C0C0029A1AB /* Tree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144680352C349C0C0029A1AB /* Tree.swift */; };
 		145299932C34D523003B035C /* SidebarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299922C34D523003B035C /* SidebarManager.swift */; };
-		145299962C34D95B003B035C /* SMBClient in Frameworks */ = {isa = PBXBuildFile; productRef = 145299952C34D95B003B035C /* SMBClient */; };
 		145299982C34E5FF003B035C /* ConnectService.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 145299972C34E5FF003B035C /* ConnectService.storyboard */; };
 		1452999A2C34F896003B035C /* ConnectServiceWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299992C34F896003B035C /* ConnectServiceWindowController.swift */; };
 		1452999C2C3500C5003B035C /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 1452999B2C3500C5003B035C /* Localizable.xcstrings */; };
@@ -43,8 +31,6 @@
 		145299B22C3A5C42003B035C /* MediaPlayerWindowController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 145299B12C3A5C42003B035C /* MediaPlayerWindowController.storyboard */; };
 		145299E72C3AC3DD003B035C /* DocumentWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145299E62C3AC3DD003B035C /* DocumentWindowController.swift */; };
 		145299E92C3AC3EF003B035C /* DocumentWindowController.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 145299E82C3AC3EF003B035C /* DocumentWindowController.storyboard */; };
-		145299EC2C3AC745003B035C /* FlyingFox in Frameworks */ = {isa = PBXBuildFile; productRef = 145299EB2C3AC745003B035C /* FlyingFox */; };
-		145299EE2C3AC745003B035C /* FlyingSocks in Frameworks */ = {isa = PBXBuildFile; productRef = 145299ED2C3AC745003B035C /* FlyingSocks */; };
 		14529A1A2C3D201B003B035C /* ConnectServerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14529A192C3D201B003B035C /* ConnectServerWindowController.swift */; };
 		14529A1C2C3D26FE003B035C /* ConnectServerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14529A1B2C3D26FE003B035C /* ConnectServerViewController.swift */; };
 		14529A382C3E21E6003B035C /* StatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14529A372C3E21E6003B035C /* StatusBarView.swift */; };
@@ -77,19 +63,18 @@
 		14C23CAC2C53966A00CEA8CF /* DocumentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9E2C53966A00CEA8CF /* DocumentViewController.swift */; };
 		14C23CAD2C53966A00CEA8CF /* ServersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9F2C53966A00CEA8CF /* ServersViewController.swift */; };
 		14C23CAF2C53966A00CEA8CF /* ServerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23CA12C53966A00CEA8CF /* ServerManager.swift */; };
-		14C23CB22C5396C600CEA8CF /* FlyingFox in Frameworks */ = {isa = PBXBuildFile; productRef = 14C23CB12C5396C600CEA8CF /* FlyingFox */; };
-		14C23CB42C5396C600CEA8CF /* FlyingSocks in Frameworks */ = {isa = PBXBuildFile; productRef = 14C23CB32C5396C600CEA8CF /* FlyingSocks */; };
 		14C23CB62C5396C600CEA8CF /* SMBClient in Frameworks */ = {isa = PBXBuildFile; productRef = 14C23CB52C5396C600CEA8CF /* SMBClient */; };
+		14F80F892CEA935400C1869A /* SMBClient in Frameworks */ = {isa = PBXBuildFile; productRef = 14F80F882CEA935400C1869A /* SMBClient */; };
+		14F80FC72CEA971B00C1869A /* SMBClient in Frameworks */ = {isa = PBXBuildFile; productRef = 14F80FC62CEA971B00C1869A /* SMBClient */; };
+		14F80FD42CEA973800C1869A /* FlyingFox in Frameworks */ = {isa = PBXBuildFile; productRef = 14F80FD32CEA973800C1869A /* FlyingFox */; };
+		14F80FD62CEA973800C1869A /* FlyingSocks in Frameworks */ = {isa = PBXBuildFile; productRef = 14F80FD52CEA973800C1869A /* FlyingSocks */; };
+		14F80FD82CEA974200C1869A /* FlyingFox in Frameworks */ = {isa = PBXBuildFile; productRef = 14F80FD72CEA974200C1869A /* FlyingFox */; };
+		14F80FDA2CEA974200C1869A /* FlyingSocks in Frameworks */ = {isa = PBXBuildFile; productRef = 14F80FD92CEA974200C1869A /* FlyingSocks */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1414C4D12C630F29004E2E36 /* ID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ID.swift; sourceTree = "<group>"; };
-		1414C4D22C630F29004E2E36 /* Server.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Server.swift; sourceTree = "<group>"; };
-		1414C4D32C630F29004E2E36 /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
-		1414C4D42C630F29004E2E36 /* SMBAVAsset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMBAVAsset.swift; sourceTree = "<group>"; };
 		141AF3DE2C4A94D30050C7A5 /* NSOutlineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSOutlineView.swift; sourceTree = "<group>"; };
 		141AF3E32C4ABCCA0050C7A5 /* URL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URL.swift; sourceTree = "<group>"; };
-		141B02602C996599007A2573 /* ServiceDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDiscovery.swift; sourceTree = "<group>"; };
 		144680172C347E1F0029A1AB /* File Browser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "File Browser.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1446801A2C347E1F0029A1AB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1446801E2C347E200029A1AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -149,17 +134,33 @@
 		14C23C9E2C53966A00CEA8CF /* DocumentViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentViewController.swift; sourceTree = "<group>"; };
 		14C23C9F2C53966A00CEA8CF /* ServersViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServersViewController.swift; sourceTree = "<group>"; };
 		14C23CA12C53966A00CEA8CF /* ServerManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ServerManager.swift; sourceTree = "<group>"; };
+		14F80F742CEA933D00C1869A /* File Browser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "File Browser.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		14F80F772CEA933D00C1869A /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		14F80F842CEA933E00C1869A /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 14F80F732CEA933D00C1869A /* FileBrowser (visionOS) */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		14F80F752CEA933D00C1869A /* FileBrowser (visionOS) */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (14F80F842CEA933E00C1869A /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = "FileBrowser (visionOS)"; sourceTree = "<group>"; };
+		14F80FF02CEAF43D00C1869A /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Shared; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		144680142C347E1F0029A1AB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				145299962C34D95B003B035C /* SMBClient in Frameworks */,
-				145299EE2C3AC745003B035C /* FlyingSocks in Frameworks */,
-				141AF3E22C4ABA550050C7A5 /* SMBClient in Frameworks */,
-				145299EC2C3AC745003B035C /* FlyingFox in Frameworks */,
+				14F80FC72CEA971B00C1869A /* SMBClient in Frameworks */,
+				14F80FDA2CEA974200C1869A /* FlyingSocks in Frameworks */,
+				14F80FD82CEA974200C1869A /* FlyingFox in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -168,32 +169,30 @@
 			buildActionMask = 2147483647;
 			files = (
 				14C23CB62C5396C600CEA8CF /* SMBClient in Frameworks */,
-				14C23CB22C5396C600CEA8CF /* FlyingFox in Frameworks */,
-				14C23CB42C5396C600CEA8CF /* FlyingSocks in Frameworks */,
+				14F80FD62CEA973800C1869A /* FlyingSocks in Frameworks */,
+				14F80FD42CEA973800C1869A /* FlyingFox in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		14F80F712CEA933D00C1869A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				14F80F892CEA935400C1869A /* SMBClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1414C4D52C630F29004E2E36 /* Shared */ = {
-			isa = PBXGroup;
-			children = (
-				141B02602C996599007A2573 /* ServiceDiscovery.swift */,
-				1414C4D32C630F29004E2E36 /* Service.swift */,
-				1414C4D22C630F29004E2E36 /* Server.swift */,
-				1414C4D12C630F29004E2E36 /* ID.swift */,
-				1414C4D42C630F29004E2E36 /* SMBAVAsset.swift */,
-			);
-			path = Shared;
-			sourceTree = "<group>";
-		};
 		1446800E2C347E1F0029A1AB = {
 			isa = PBXGroup;
 			children = (
 				144680192C347E1F0029A1AB /* FileBrowser (macOS) */,
 				14C23C812C53962F00CEA8CF /* FileBrowser (iOS) */,
-				1414C4D52C630F29004E2E36 /* Shared */,
+				14F80FF02CEAF43D00C1869A /* Shared */,
+				14F80F752CEA933D00C1869A /* FileBrowser (visionOS) */,
+				14F80F762CEA933D00C1869A /* Packages */,
 				144680182C347E1F0029A1AB /* Products */,
 				14C23CB02C5396C600CEA8CF /* Frameworks */,
 			);
@@ -204,6 +203,7 @@
 			children = (
 				144680172C347E1F0029A1AB /* File Browser.app */,
 				14C23C802C53962F00CEA8CF /* File Browser.app */,
+				14F80F742CEA933D00C1869A /* File Browser.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -288,6 +288,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		14F80F762CEA933D00C1869A /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				14F80F772CEA933D00C1869A /* RealityKitContent */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -303,12 +311,14 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				14F80FF02CEAF43D00C1869A /* Shared */,
+			);
 			name = "FileBrowser (macOS)";
 			packageProductDependencies = (
-				145299952C34D95B003B035C /* SMBClient */,
-				145299EB2C3AC745003B035C /* FlyingFox */,
-				145299ED2C3AC745003B035C /* FlyingSocks */,
-				141AF3E12C4ABA550050C7A5 /* SMBClient */,
+				14F80FC62CEA971B00C1869A /* SMBClient */,
+				14F80FD72CEA974200C1869A /* FlyingFox */,
+				14F80FD92CEA974200C1869A /* FlyingSocks */,
 			);
 			productName = FileBrowser;
 			productReference = 144680172C347E1F0029A1AB /* File Browser.app */;
@@ -326,14 +336,41 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				14F80FF02CEAF43D00C1869A /* Shared */,
+			);
 			name = "FileBrowser (iOS)";
 			packageProductDependencies = (
-				14C23CB12C5396C600CEA8CF /* FlyingFox */,
-				14C23CB32C5396C600CEA8CF /* FlyingSocks */,
 				14C23CB52C5396C600CEA8CF /* SMBClient */,
+				14F80FD32CEA973800C1869A /* FlyingFox */,
+				14F80FD52CEA973800C1869A /* FlyingSocks */,
 			);
 			productName = "FileBrowser (iOS)";
 			productReference = 14C23C802C53962F00CEA8CF /* File Browser.app */;
+			productType = "com.apple.product-type.application";
+		};
+		14F80F732CEA933D00C1869A /* FileBrowser (visionOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 14F80F852CEA933E00C1869A /* Build configuration list for PBXNativeTarget "FileBrowser (visionOS)" */;
+			buildPhases = (
+				14F80F702CEA933D00C1869A /* Sources */,
+				14F80F712CEA933D00C1869A /* Frameworks */,
+				14F80F722CEA933D00C1869A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				14F80F752CEA933D00C1869A /* FileBrowser (visionOS) */,
+				14F80FF02CEAF43D00C1869A /* Shared */,
+			);
+			name = "FileBrowser (visionOS)";
+			packageProductDependencies = (
+				14F80F882CEA935400C1869A /* SMBClient */,
+			);
+			productName = "FileBrowser (visionOS)";
+			productReference = 14F80F742CEA933D00C1869A /* File Browser.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -343,7 +380,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1530;
+				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1530;
 				TargetAttributes = {
 					144680162C347E1F0029A1AB = {
@@ -351,6 +388,9 @@
 					};
 					14C23C7F2C53962F00CEA8CF = {
 						CreatedOnToolsVersion = 15.3;
+					};
+					14F80F732CEA933D00C1869A = {
+						CreatedOnToolsVersion = 16.0;
 					};
 				};
 			};
@@ -374,6 +414,7 @@
 			targets = (
 				144680162C347E1F0029A1AB /* FileBrowser (macOS) */,
 				14C23C7F2C53962F00CEA8CF /* FileBrowser (iOS) */,
+				14F80F732CEA933D00C1869A /* FileBrowser (visionOS) */,
 			);
 		};
 /* End PBXProject section */
@@ -406,6 +447,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		14F80F722CEA933D00C1869A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -426,15 +474,10 @@
 				145299B02C3A5C0B003B035C /* MediaPlayerWindowController.swift in Sources */,
 				1446802A2C347FA40029A1AB /* WindowController.swift in Sources */,
 				14529A1A2C3D201B003B035C /* ConnectServerWindowController.swift in Sources */,
-				1414C4D62C630F2E004E2E36 /* Server.swift in Sources */,
-				1414C4D72C630F2E004E2E36 /* SMBAVAsset.swift in Sources */,
-				1414C4D82C630F2E004E2E36 /* Service.swift in Sources */,
-				1414C4D92C630F2E004E2E36 /* ID.swift in Sources */,
 				14529A3C2C3E7724003B035C /* SidebarCellView.swift in Sources */,
 				144680302C3482620029A1AB /* NavigationController.swift in Sources */,
 				1452999A2C34F896003B035C /* ConnectServiceWindowController.swift in Sources */,
 				14529A3E2C3E8B5D003B035C /* SessionManager.swift in Sources */,
-				141B02622C996599007A2573 /* ServiceDiscovery.swift in Sources */,
 				147EC5C02C41590400C08ED3 /* FileTransfer.swift in Sources */,
 				145299E72C3AC3DD003B035C /* DocumentWindowController.swift in Sources */,
 				144680362C349C0C0029A1AB /* Tree.swift in Sources */,
@@ -465,14 +508,16 @@
 				14C23CA32C53966A00CEA8CF /* ConnectServiceView.swift in Sources */,
 				14C23C852C53962F00CEA8CF /* SceneDelegate.swift in Sources */,
 				14C23CAB2C53966A00CEA8CF /* MediaPlayerViewController.swift in Sources */,
-				141B02612C996599007A2573 /* ServiceDiscovery.swift in Sources */,
 				14C23CA62C53966A00CEA8CF /* ConnectServerView.swift in Sources */,
-				1414C4DA2C630F2E004E2E36 /* Server.swift in Sources */,
-				1414C4DB2C630F2E004E2E36 /* SMBAVAsset.swift in Sources */,
-				1414C4DC2C630F2E004E2E36 /* Service.swift in Sources */,
-				1414C4DD2C630F2E004E2E36 /* ID.swift in Sources */,
 				14C23CA92C53966A00CEA8CF /* File.swift in Sources */,
 				14C23CAC2C53966A00CEA8CF /* DocumentViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		14F80F702CEA933D00C1869A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -747,6 +792,65 @@
 			};
 			name = Release;
 		};
+		14F80F862CEA933E00C1869A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"FileBrowser (visionOS)/Preview Content\"";
+				DEVELOPMENT_TEAM = 27AEDK3C9F;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kishikawakatsumi.FileBrowser;
+				PRODUCT_MODULE_NAME = FileBrowser;
+				PRODUCT_NAME = "File Browser";
+				SDKROOT = xros;
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 7;
+				XROS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Debug;
+		};
+		14F80F872CEA933E00C1869A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"FileBrowser (visionOS)/Preview Content\"";
+				DEVELOPMENT_TEAM = 27AEDK3C9F;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kishikawakatsumi.FileBrowser;
+				PRODUCT_MODULE_NAME = FileBrowser;
+				PRODUCT_NAME = "File Browser";
+				SDKROOT = xros;
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 7;
+				VALIDATE_PRODUCT = YES;
+				XROS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -777,6 +881,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		14F80F852CEA933E00C1869A /* Build configuration list for PBXNativeTarget "FileBrowser (visionOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				14F80F862CEA933E00C1869A /* Debug */,
+				14F80F872CEA933E00C1869A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -785,7 +898,7 @@
 			repositoryURL = "https://github.com/kishikawakatsumi/SMBClient.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.2.0;
+				minimumVersion = 0.2.1;
 			};
 		};
 		145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */ = {
@@ -799,39 +912,40 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		141AF3E12C4ABA550050C7A5 /* SMBClient */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 141AF3E02C4ABA550050C7A5 /* XCRemoteSwiftPackageReference "SMBClient" */;
-			productName = SMBClient;
-		};
-		145299952C34D95B003B035C /* SMBClient */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = SMBClient;
-		};
-		145299EB2C3AC745003B035C /* FlyingFox */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */;
-			productName = FlyingFox;
-		};
-		145299ED2C3AC745003B035C /* FlyingSocks */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */;
-			productName = FlyingSocks;
-		};
-		14C23CB12C5396C600CEA8CF /* FlyingFox */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */;
-			productName = FlyingFox;
-		};
-		14C23CB32C5396C600CEA8CF /* FlyingSocks */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */;
-			productName = FlyingSocks;
-		};
 		14C23CB52C5396C600CEA8CF /* SMBClient */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 141AF3E02C4ABA550050C7A5 /* XCRemoteSwiftPackageReference "SMBClient" */;
 			productName = SMBClient;
+		};
+		14F80F882CEA935400C1869A /* SMBClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 141AF3E02C4ABA550050C7A5 /* XCRemoteSwiftPackageReference "SMBClient" */;
+			productName = SMBClient;
+		};
+		14F80FC62CEA971B00C1869A /* SMBClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 141AF3E02C4ABA550050C7A5 /* XCRemoteSwiftPackageReference "SMBClient" */;
+			productName = SMBClient;
+		};
+		14F80FD32CEA973800C1869A /* FlyingFox */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */;
+			productName = FlyingFox;
+		};
+		14F80FD52CEA973800C1869A /* FlyingSocks */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */;
+			productName = FlyingSocks;
+		};
+		14F80FD72CEA974200C1869A /* FlyingFox */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */;
+			productName = FlyingFox;
+		};
+		14F80FD92CEA974200C1869A /* FlyingSocks */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */;
+			productName = FlyingSocks;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

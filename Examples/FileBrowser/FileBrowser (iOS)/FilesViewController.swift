@@ -50,7 +50,7 @@ class FilesViewController: UIViewController, UITableViewDataSource, UITableViewD
       do {
         let files = try await treeAccessor.listDirectory(path: path)
           .filter { $0.name != "." && $0.name != ".." && !$0.isHidden }
-          .sorted { $0.name < $1.name }
+          .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         self.files.append(contentsOf: files)
         tableView.reloadData()
       } catch let error as LocalizedError {
