@@ -92,6 +92,10 @@ try await client.upload(data: data, path: "Documents/Presentations/Keynote.key")
 
 <img width="393" src="https://github.com/user-attachments/assets/34c2a682-ea46-4997-8652-fea8a51fc371" alt="iOS File Browser App"> <img width="393" src="https://github.com/user-attachments/assets/84bc9692-d200-40c7-bc4d-305a0603e8ba" alt="iOS File Browser App">
 
+### Network File Browser for visionOS
+
+<img width="1200" alt="visionOS File Browser App" src="https://github.com/user-attachments/assets/2b202a99-9bc5-494c-8dd1-7d1155990e3a">
+
 ## Installation
 
 Add the following line to the dependencies in your `Package.swift` file:
