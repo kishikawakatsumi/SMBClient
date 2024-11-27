@@ -8,18 +8,16 @@ on:
 
 jobs:
   test:
-    runs-on: macos-14
+    runs-on: macos-12
     steps:
       - uses: actions/checkout@v4
       - name: Test
         run: |
           set -ex
-                
+
+          brew install --HEAD colima
           brew install docker docker-compose qemu
-          brew install --head colima
-          LIMACTL_PATH=$(brew --prefix)/bin/limactl
-          sudo curl -L -o $LIMACTL_PATH https://github.com/mikekazakov/lima-nohvf/raw/master/limactl && sudo chmod +x $LIMACTL_PATH
-          colima start --network-address --arch arm64 --vm-type=qemu
+          colima start  --network-address --arch x86_64
 
           docker-compose up --detach
 
