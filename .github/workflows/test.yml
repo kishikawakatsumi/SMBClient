@@ -16,10 +16,8 @@ jobs:
           set -ex
                 
           brew install docker docker-compose qemu
-          brew uninstall colima
           brew install --HEAD colima
           LIMACTL_PATH=$(brew --prefix)/bin/limactl
-          sudo curl -L -o $LIMACTL_PATH https://github.com/mikekazakov/lima-nohvf/raw/master/limactl && sudo chmod +x $LIMACTL_PATH
           colima start --network-address --arch arm64 --vm-type=qemu
 
           docker-compose up --detach
