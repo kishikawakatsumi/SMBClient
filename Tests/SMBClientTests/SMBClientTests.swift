@@ -413,7 +413,6 @@ final class SMBClientTests: XCTestCase {
 
     let fileManager = FileManager()
     let tempFolder = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-    print(tempFolder)
     let destinationFile = tempFolder.appending(path: "downloadedfile.mp4", directoryHint: .notDirectory)
 
     try Data().write(to: destinationFile)
