@@ -21,46 +21,46 @@ public class TreeAccessor {
     return files.map { File(fileInfo: $0) }
   }
 
-  public func createDirectory(share: String? = nil, path: String) async throws {
+  public func createDirectory(path: String) async throws {
     try await session().createDirectory(path: Pathname.normalize(path.precomposedStringWithCanonicalMapping))
   }
 
-  public func rename(share: String? = nil, from: String, to: String) async throws {
-    try await move(share: share, from: Pathname.normalize(from), to: Pathname.normalize(to))
+  public func rename(from: String, to: String) async throws {
+    try await move(from: Pathname.normalize(from), to: Pathname.normalize(to))
   }
 
-  public func move(share: String? = nil, from: String, to: String) async throws {
+  public func move(from: String, to: String) async throws {
     try await session().move(from: Pathname.normalize(from), to: Pathname.normalize(to.precomposedStringWithCanonicalMapping))
   }
 
-  public func deleteDirectory(share: String? = nil, path: String) async throws {
+  public func deleteDirectory(path: String) async throws {
     try await session().deleteDirectory(path: Pathname.normalize(path))
   }
 
-  public func deleteFile(share: String? = nil, path: String) async throws {
+  public func deleteFile(path: String) async throws {
     try await session().deleteFile(path: Pathname.normalize(path))
   }
 
-  public func fileStat(share: String? = nil, path: String) async throws -> FileStat {
+  public func fileStat(path: String) async throws -> FileStat {
     let response = try await session().fileStat(path: Pathname.normalize(path))
     return FileStat(response)
   }
 
-  public func existFile(share: String? = nil, path: String) async throws -> Bool {
+  public func existFile(path: String) async throws -> Bool {
     try await session().existFile(path: Pathname.normalize(path))
   }
 
-  public func existDirectory(share: String? = nil, path: String) async throws -> Bool {
+  public func existDirectory(path: String) async throws -> Bool {
     try await session().existDirectory(path: Pathname.normalize(path))
   }
 
-  public func fileInfo(share: String? = nil, path: String) async throws -> FileAllInformation {
+  public func fileInfo(path: String) async throws -> FileAllInformation {
     let response = try await session().queryInfo(path: Pathname.normalize(path))
     return FileAllInformation(data: response.buffer)
   }
 
-  public func download(share: String? = nil, path: String) async throws -> Data {
-    let fileReader = fileReader(path: Pathname.normalize(path))
+  public func download(path: String) async throws -> Data {
+    let fileReader = try await fileReader(path: Pathname.normalize(path))
 
     let data = try await fileReader.download()
     try await fileReader.close()
@@ -68,50 +68,49 @@ public class TreeAccessor {
     return data
   }
 
-  public func upload(share: String? = nil, content: Data, path: String) async throws {
-    try await upload(share: share, content: content, path: Pathname.normalize(path), progressHandler: { _ in })
+  public func upload(content: Data, path: String) async throws {
+    try await upload(content: content, path: Pathname.normalize(path), progressHandler: { _ in })
   }
 
-  public func upload(share: String? = nil, content: Data, path: String, progressHandler: (_ progress: Double) -> Void) async throws {
-    let fileWriter = fileWriter(share: share, path: Pathname.normalize(path))
+  public func upload(content: Data, path: String, progressHandler: (_ progress: Double) -> Void) async throws {
+    let fileWriter = try await fileWriter(path: Pathname.normalize(path))
 
     try await fileWriter.upload(data: content, progressHandler: progressHandler)
     try await fileWriter.close()
   }
 
-  public func upload(share: String? = nil, fileHandle: FileHandle, path: String) async throws {
-    try await upload(share: share, fileHandle: fileHandle, path: path, progressHandler: { _ in })
+  public func upload(fileHandle: FileHandle, path: String) async throws {
+    try await upload(fileHandle: fileHandle, path: path, progressHandler: { _ in })
   }
 
-  public func upload(share: String? = nil, fileHandle: FileHandle, path: String, progressHandler: (_ progress: Double) -> Void) async throws {
-    let fileWriter = fileWriter(share: share, path: Pathname.normalize(path))
+  public func upload(fileHandle: FileHandle, path: String, progressHandler: (_ progress: Double) -> Void) async throws {
+    let fileWriter = try await fileWriter(path: Pathname.normalize(path))
 
     try await fileWriter.upload(fileHandle: fileHandle, progressHandler: progressHandler)
     try await fileWriter.close()
   }
 
-  public func upload(share: String? = nil, localPath: URL, remotePath path: String) async throws {
-    try await upload(share: share, localPath: localPath, remotePath: path, progressHandler: { _, _, _ in })
+  public func upload(localPath: URL, remotePath path: String) async throws {
+    try await upload(localPath: localPath, remotePath: path, progressHandler: { _, _, _ in })
   }
 
   public func upload(
-    share: String? = nil,
     localPath: URL,
     remotePath path: String,
     progressHandler: (_ completedFiles: Int, _ fileBeingTransferred: URL, _ bytesSent: Int64) -> Void
   ) async throws {
-    let fileWriter = fileWriter(share: share, path: Pathname.normalize(path))
+    let fileWriter = try await fileWriter(path: Pathname.normalize(path))
 
     try await fileWriter.upload(localPath: localPath, progressHandler: progressHandler)
     try await fileWriter.close()
   }
 
-  public func fileReader(share: String? = nil, path: String) -> FileReader {
-    FileReader(session: session, path: Pathname.normalize(path))
+  public func fileReader(path: String) async throws -> FileReader {
+    FileReader(session: try await session(), path: Pathname.normalize(path))
   }
 
-  public func fileWriter(share: String? = nil, path: String) -> FileWriter {
-    FileWriter(session: session, path: Pathname.normalize(path))
+  public func fileWriter(path: String) async throws -> FileWriter {
+    FileWriter(session: try await session(), path: Pathname.normalize(path))
   }
 
   public func availableSpace() async throws -> UInt64 {
