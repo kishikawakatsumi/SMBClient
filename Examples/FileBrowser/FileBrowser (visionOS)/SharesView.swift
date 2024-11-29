@@ -7,11 +7,12 @@ struct SharesView: View {
   @State private var isLoading = false
   @State private var errorMessage: String?
 
+  private let domain: String
   private let client: SMBClient
-  private var host: String
-  private let id = UUID()
+  private let host: String
 
-  init(client: SMBClient) {
+  init(domain: String, client: SMBClient) {
+    self.domain = domain
     self.client = client
     host = client.host
   }
@@ -31,7 +32,7 @@ struct SharesView: View {
             }
           }
           .navigationDestination(for: String.self) { (share) in
-            FilesView(accessor: client.treeAccessor(share: share), path: "")
+            FilesView(domain: domain, accessor: client.treeAccessor(share: share), path: "")
           }
         }
         .foregroundStyle(.primary)

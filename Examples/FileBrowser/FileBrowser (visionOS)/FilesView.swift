@@ -12,10 +12,14 @@ struct FilesView: View {
   @State private var isLoading = false
   @State private var errorMessage: String?
 
+  @Environment(\.openWindow) private var openWindow
+
+  private let domain: String
   private let treeAccessor: TreeAccessor
   private let path: String
 
-  init(accessor: TreeAccessor, path: String) {
+  init(domain: String, accessor: TreeAccessor, path: String) {
+    self.domain = domain
     treeAccessor = accessor
     self.path = path
   }
@@ -34,16 +38,22 @@ struct FilesView: View {
             Label(file.name, systemImage: file.isDirectory ? "folder" : "doc")
           }
         }
-        .navigationDestination(for: Route.self) { (route) in
-          if route.isDirectory {
-            FilesView(accessor: treeAccessor, path: route.path)
-          } else {
-            let path = URL(fileURLWithPath: route.path)
+        .onChange(of: selection, initial: false) { (oldValue, newValue) in
+          if let selection {
+            let subpath = path.isEmpty ? selection.name : "\(path)/\(selection.name)"
+            let path = URL(fileURLWithPath: subpath)
             if VideoPlayerView.supportedExtensions.contains(path.pathExtension) {
-              VideoPlayerView(accessor: treeAccessor, path: route.path)
+              openWindow(id: "videoPlayer", value: SessionContext(domain: domain, share: treeAccessor.share, path: subpath))
             } else {
 
             }
+          }
+        }
+        .navigationDestination(for: Route.self) { (route) in
+          if route.isDirectory {
+            FilesView(domain: domain, accessor: treeAccessor, path: route.path)
+          } else {
+
           }
         }
         .foregroundStyle(.primary)

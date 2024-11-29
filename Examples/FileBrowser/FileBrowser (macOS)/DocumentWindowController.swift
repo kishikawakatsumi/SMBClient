@@ -8,24 +8,25 @@ import SMBClient
 private let storyboardID = "DocumentWindowController"
 
 class DocumentWindowController: NSWindowController, NSWindowDelegate {
+  private let treeAccessor: TreeAccessor
   private let path: String
-  private let fileReader: FileReader
+  private var fileReader: FileReader?
 
   private let server: HTTPServer
   private let port: UInt16
   private var task: Task<(), any Error>?
   private let semaphore = Semaphore(value: 1)
 
-  static func instantiate(path: String, accessor: TreeAccessor) -> Self {
+  static func instantiate(accessor: TreeAccessor, path: String) -> Self {
     let storyboard = NSStoryboard(name: storyboardID, bundle: nil)
     return storyboard.instantiateController(identifier: storyboardID) { (coder) in
-      Self(coder: coder, path: path, accessor: accessor)
+      Self(coder: coder, accessor: accessor, path: path)
     }
   }
 
-  required init?(coder: NSCoder, path: String, accessor: TreeAccessor) {
+  required init?(coder: NSCoder, accessor: TreeAccessor, path: String) {
+    treeAccessor = accessor
     self.path = path
-    fileReader = accessor.fileReader(path: path)
 
     port = UInt16(42000 + NSApp.windows.count)
     server = HTTPServer(port: port, logger: .disabled)
@@ -43,12 +44,19 @@ class DocumentWindowController: NSWindowController, NSWindowDelegate {
     window?.delegate = self
 
     let semaphore = self.semaphore
-    let fileReader = self.fileReader
+    let treeAccessor = self.treeAccessor
+    let path = self.path
+    var fileReader = self.fileReader
 
     task = Task {
       await server.appendRoute("*") { (request) in
         await semaphore.wait()
         defer { Task { await semaphore.signal() } }
+
+        if fileReader == nil {
+          fileReader = try await treeAccessor.fileReader(path: path)
+        }
+        guard let fileReader else { return HTTPResponse(statusCode: .internalServerError) }
 
         let bufferedResponse = BufferedResponse(fileReader: fileReader)
         let mimeType = mimeTypeForPath(path: request.path)
@@ -99,7 +107,7 @@ class DocumentWindowController: NSWindowController, NSWindowDelegate {
         )
       }
 
-      try await server.start()
+      try await server.run()
     }
 
     Task { @MainActor in
@@ -111,8 +119,10 @@ class DocumentWindowController: NSWindowController, NSWindowDelegate {
   }
 
   func windowWillClose(_ notification: Notification) {
-    Task {
-      try await fileReader.close()
+    if let fileReader {
+      Task {
+        try await fileReader.close()
+      }
     }
     task?.cancel()
   }

@@ -236,7 +236,7 @@ class FilesViewController: NSViewController {
     }()
     Task {
       do {
-        try await treeAccessor.createDirectory(share: share, path: join(path, filename))
+        try await treeAccessor.createDirectory(path: join(path, filename))
         try await dirTree.reload(directory: path, outlineView)
         updateItemCount()
       } catch {
@@ -290,7 +290,7 @@ class FilesViewController: NSViewController {
         windowController = MediaPlayerWindowController.instantiate(path: path, accessor: treeAccessor)
         windowController.showWindow(nil)
       } else {
-        windowController = DocumentWindowController.instantiate(path: path, accessor: treeAccessor)
+        windowController = DocumentWindowController.instantiate(accessor: treeAccessor, path: path)
         windowController.showWindow(nil)
       }
     }
@@ -340,9 +340,9 @@ class FilesViewController: NSViewController {
         let path = fileNode.path
 
         if fileNode.isDirectory {
-          try await treeAccessor.deleteDirectory(share: share, path: path)
+          try await treeAccessor.deleteDirectory(path: path)
         } else {
-          try await treeAccessor.deleteFile(share: share, path: path)
+          try await treeAccessor.deleteFile(path: path)
         }
 
         reloadPaths.insert(dirname(path))
@@ -525,7 +525,7 @@ extension FilesViewController: NSOutlineViewDataSource {
 
         func moveFile(from: String, to: String) async {
           do {
-            try await treeAccessor.move(share: share, from: from, to: to)
+            try await treeAccessor.move(from: from, to: to)
 
             try await dirTree.reload(directory: dirname(from), outlineView)
             try await dirTree.reload(directory: dirname(to), outlineView)
@@ -716,7 +716,7 @@ extension FilesViewController: NSTextFieldDelegate {
 
     Task { @MainActor in
       do {
-        try await treeAccessor.rename(share: share, from: node.path, to: join(dirname(node.path), textField.stringValue))
+        try await treeAccessor.rename(from: node.path, to: join(dirname(node.path), textField.stringValue))
         try await dirTree.reload(directory: dirname(node.path), outlineView)
       } catch {
         textField.stringValue = node.name

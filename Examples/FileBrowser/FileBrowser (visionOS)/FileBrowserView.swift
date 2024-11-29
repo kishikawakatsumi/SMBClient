@@ -6,10 +6,12 @@ struct FileBrowserView: View {
   private var services = [Service]()
   @State
   private var selection: Service?
-  @State
-  private var sessions = [ID: SMBClient]()
+//  @State
+//  private var sessions = [ID: SMBClient]()
   @State
   private var showingLoginSheet: Bool = false
+
+  @Environment(\.sessionManager) var sessionManager: SessionManager
 
   let publisher = NotificationCenter.default.publisher(for: ServiceDiscovery.serviceDidDiscover)
 
@@ -22,7 +24,7 @@ struct FileBrowserView: View {
         }
       }
       .onChange(of: selection, initial: false) { (oldValue, newValue) in
-        if let selection, sessions[selection.id] == nil {
+        if let selection, sessionManager.sessions[selection.id] == nil {
           showingLoginSheet = true
         }
       }
@@ -32,8 +34,8 @@ struct FileBrowserView: View {
       .navigationTitle("Services")
     } detail: {
       if let selection {
-        if let client = sessions[selection.id] {
-          SharesView(client: client)
+        if let client = sessionManager.sessions[selection.id] {
+          SharesView(domain: selection.id.rawValue, client: client)
             .id(selection)
         }
       }
@@ -71,7 +73,7 @@ struct FileBrowserView: View {
     let store = CredentialStore.shared
     store.save(server: server, securityDomain: securityDomain, username: username, password: password)
 
-    sessions[ID(securityDomain)] = client
+    sessionManager.sessions[ID(securityDomain)] = client
   }
 }
 
