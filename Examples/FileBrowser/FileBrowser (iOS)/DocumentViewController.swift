@@ -8,7 +8,7 @@ import SMBClient
 class DocumentViewController: UIViewController {
   private let path: String
   private let treeAccessor: TreeAccessor
-  private let fileReader: FileReader
+  private var fileReader: FileReader?
 
   private let server: HTTPServer
   private let port: UInt16
@@ -21,7 +21,6 @@ class DocumentViewController: UIViewController {
   init(accessor: TreeAccessor, path: String) {
     treeAccessor = accessor
     self.path = path
-    fileReader = accessor.fileReader(path: path)
 
     port = UInt16(42000)
     server = HTTPServer(port: port, logger: .disabled)
@@ -74,12 +73,19 @@ class DocumentViewController: UIViewController {
     ])
 
     let semaphore = self.semaphore
-    let fileReader = self.fileReader
+    let treeAccessor = self.treeAccessor
+    let path = self.path
+    var fileReader = self.fileReader
 
     task = Task {
       await server.appendRoute("*") { (request) in
         await semaphore.wait()
         defer { Task { await semaphore.signal() } }
+
+        if fileReader == nil {
+          fileReader = try await treeAccessor.fileReader(path: path)
+        }
+        guard let fileReader else { return HTTPResponse(statusCode: .internalServerError) }
 
         let bufferedResponse = BufferedResponse(fileReader: fileReader)
         let mimeType = mimeTypeForPath(path: request.path)
@@ -142,8 +148,10 @@ class DocumentViewController: UIViewController {
   override func viewDidDisappear(_ animated: Bool) {
     super.viewDidDisappear(animated)
 
-    Task {
-      try await fileReader.close()
+    if let fileReader {
+      Task {
+        try await fileReader.close()
+      }
     }
     task?.cancel()
   }

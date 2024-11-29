@@ -27,22 +27,24 @@ class SMBAVAsset: AVURLAsset {
 }
 
 private class AssetResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate {
-  private let fileReader: FileReader
+  private let treeAccessor: TreeAccessor
+  private var fileReader: FileReader?
   private let path: String
   private let contentType: String?
 
   private let queue = TaskQueue()
 
   init(accessor: TreeAccessor, path: String, contentType: String?) {
-    fileReader = accessor.fileReader(path: path)
+    treeAccessor = accessor
     self.path = path
     self.contentType = contentType
   }
 
   func close() {
-    let fileReader = self.fileReader
-    queue.dispatch {
-      try await fileReader.close()
+    if let fileReader = self.fileReader {
+      queue.dispatch {
+        try await fileReader.close()
+      }
     }
   }
 
@@ -53,6 +55,11 @@ private class AssetResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelega
     if let contentRequest = loadingRequest.contentInformationRequest {
       queue.dispatch { [weak self] in
         guard let self else { return }
+
+        if fileReader == nil {
+          fileReader = try await treeAccessor.fileReader(path: path)
+        }
+        guard let fileReader else { return }
 
         contentRequest.contentType = self.contentType
         contentRequest.contentLength = Int64(truncatingIfNeeded: try await fileReader.fileSize)
@@ -67,6 +74,11 @@ private class AssetResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelega
         queue.dispatch { [weak self] in
           guard let self else { return }
 
+          if fileReader == nil {
+            fileReader = try await treeAccessor.fileReader(path: path)
+          }
+          guard let fileReader else { return }
+
           let data = try await fileReader.read(
             offset: UInt64(dataRequest.requestedOffset),
             length: readSize
@@ -78,6 +90,11 @@ private class AssetResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelega
       } else {
         queue.dispatch { [weak self] in
           guard let self else { return }
+
+          if fileReader == nil {
+            fileReader = try await treeAccessor.fileReader(path: path)
+          }
+          guard let fileReader else { return }
 
           let data = try await fileReader.read(
             offset: UInt64(dataRequest.requestedOffset),
