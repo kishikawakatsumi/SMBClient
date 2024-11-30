@@ -46,12 +46,13 @@ class DocumentWindowController: NSWindowController, NSWindowDelegate {
     let semaphore = self.semaphore
     let treeAccessor = self.treeAccessor
     let path = self.path
-    var fileReader = self.fileReader
 
     task = Task {
-      await server.appendRoute("*") { (request) in
+      await server.appendRoute("*") { [weak self] (request) in
         await semaphore.wait()
         defer { Task { await semaphore.signal() } }
+
+        guard let self else { return HTTPResponse(statusCode: .internalServerError) }
 
         if fileReader == nil {
           fileReader = try await treeAccessor.fileReader(path: path)
