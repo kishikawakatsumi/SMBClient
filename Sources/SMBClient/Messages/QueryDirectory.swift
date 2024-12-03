@@ -1,7 +1,9 @@
 import Foundation
 
 public enum QueryDirectory {
-  public struct Request {
+  public struct Request: Message.Request {
+    public typealias Response = QueryDirectory.Response
+
     public let header: Header
     public let structureSize: UInt16
     public let fileInformationClass: FileInformationClass
@@ -67,7 +69,7 @@ public enum QueryDirectory {
     }
   }
 
-  public struct Response {
+  public struct Response: Message.Response {
     public let header: Header
     public let structureSize: UInt16
     public let outputBufferOffset: UInt16
@@ -82,7 +84,7 @@ public enum QueryDirectory {
       structureSize = reader.read()
       outputBufferOffset = reader.read()
       outputBufferLength = reader.read()
-      buffer = data[UInt32(outputBufferOffset)..<UInt32(outputBufferOffset) + outputBufferLength]
+      buffer = reader.read(from: Int(outputBufferOffset), count: Int(outputBufferLength))
     }
 
     public func files() -> [FileDirectoryInformation] {

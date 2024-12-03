@@ -1,7 +1,9 @@
 import Foundation
 
 public enum QueryInfo {
-  public struct Request {
+  public struct Request: Message.Request {
+    public typealias Response = QueryInfo.Response
+
     public let header: Header
     public let structureSize: UInt16
     public let infoType: InfoType
@@ -69,7 +71,7 @@ public enum QueryInfo {
     }
   }
 
-  public struct Response {
+  public struct Response: Message.Response {
     public let header: Header
     public let structureSize: UInt16
     public let outputBufferOffset: UInt16

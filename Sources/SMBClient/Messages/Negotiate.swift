@@ -1,7 +1,9 @@
 import Foundation
 
 public enum Negotiate {
-  public struct Request {
+  public struct Request: Message.Request {
+    public typealias Response = Negotiate.Response
+
     public let header: Header
     public let structureSize: UInt16
     public let dialectCount: UInt16
@@ -65,7 +67,7 @@ public enum Negotiate {
     }
   }
 
-  public struct Response {
+  public struct Response: Message.Response {
     public let header: Header
     public let structureSize: UInt16
     public let securityMode: SecurityMode

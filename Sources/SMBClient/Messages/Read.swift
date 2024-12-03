@@ -1,7 +1,9 @@
 import Foundation
 
 public enum Read {
-  public struct Request {
+  public struct Request: Message.Request {
+    public typealias Response = Read.Response
+
     public let header: Header
     public let structureSize: UInt16
     public let padding: UInt8
@@ -72,7 +74,7 @@ public enum Read {
     }
   }
 
-  public struct Response {
+  public struct Response: Message.Response {
     public let header: Header
     public let structureSize: UInt16
     public let dataOffset: UInt8

@@ -93,7 +93,7 @@ class DirectoryStructure {
   }
 
   func update(_ outlineView: NSOutlineView) {
-    guard let rootNodes: [FileNode] = DataRepository.shared.nodes(join(server, path)) else {
+    guard let rootNodes: [FileNode] = DataRepository.shared.nodes(join(server, treeAccessor.share, path)) else {
       return
     }
 
@@ -102,7 +102,7 @@ class DirectoryStructure {
         return $0.isDirectory && outlineView.isItemExpanded($0)
       }
       .reduce(into: [FileNode]()) {
-        guard let nodes: [FileNode] = DataRepository.shared.nodes(join(server, $1.path)) else {
+        guard let nodes: [FileNode] = DataRepository.shared.nodes(join(server, treeAccessor.share, $1.path)) else {
           return
         }
         let parent = $1.id
@@ -211,7 +211,7 @@ class DirectoryStructure {
     let nodes = files
       .map { FileNode(path: join(path, $0.name), file: $0, parent: parent?.id) }
 
-    DataRepository.shared.set(join(server, path), nodes: nodes)
+    DataRepository.shared.set(join(server, treeAccessor.share, path), nodes: nodes)
 
     return nodes
   }

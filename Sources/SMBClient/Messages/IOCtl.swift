@@ -1,7 +1,9 @@
 import Foundation
 
 public enum IOCtl {
-  public struct Request {
+  public struct Request: Message.Request {
+    public typealias Response = IOCtl.Response
+
     public let header: Header
     public let structureSize: UInt16
     public let reserved: UInt16
@@ -75,7 +77,7 @@ public enum IOCtl {
     }
   }
 
-  public struct Response {
+  public struct Response: Message.Response {
     public let header: Header
     public let structureSize: UInt16
     public let reserved: UInt16
