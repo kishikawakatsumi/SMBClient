@@ -647,38 +647,57 @@ public class Session {
     return response
   }
 
-  private func send<R1: Message.Request, R2: Message.Request>(_ m1: R1, _ m2: R2) async throws -> (R1.Response, R2.Response) {
-    let data = try await send(m1.encoded(), m2.encoded())
-    let r1 = R1.Response(data: data)
-    let r2 = R2.Response(data: Data(data[r1.header.nextCommand...]))
-    return (r1, r2)
-  }
+  private func send<each Request: Message.Request>(_ messages: repeat each Request) async throws -> (repeat (each Request).Response) {
+    var count = 0
+    for _ in repeat each messages {
+      count += 1
+    }
 
-  private func send<R1: Message.Request, R2: Message.Request, R3: Message.Request>(_ m1: R1, _ m2: R2, _ m3: R3) async throws -> (R1.Response, R2.Response, R3.Response) {
-    let data = try await send(m1.encoded(), m2.encoded(), m3.encoded())
-    let r1 = R1.Response(data: data)
-    let r2 = R2.Response(data: Data(data[r1.header.nextCommand...]))
-    let r3 = R3.Response(data: Data(data[r2.header.nextCommand...]))
-    return (r1, r2, r3)
-  }
+    var packet = Data()
+    var index = 0
+    for message in repeat each messages {
+      let data = message.encoded()
+      let alignment = Data(count: 8 - data.count % 8)
+      if index < count - 1 {
+        let body = data + alignment
+        var header = Header(data: body[..<64])
+        let payload = data[64...]
 
-  private func send(_ packets: Data...) async throws -> Data {
-    return try await connection.send(
-      packets.enumerated().reduce(into: Data()) {
-        let alignment = Data(count: 8 - $1.element.count % 8)
-        if $1.offset < packets.count - 1 {
-          let packet = $1.element + alignment
-          var header = Header(data: packet[..<64])
-          let payload = $1.element[64...]
+        header.nextCommand = UInt32(body.count)
 
-          header.nextCommand = UInt32(packet.count)
-
-          $0 += sign(header.encoded() + payload + alignment)
-        } else {
-          $0 += sign($1.element + alignment)
-        }
+        packet += sign(header.encoded() + payload + alignment)
+      } else {
+        packet += sign(data + alignment)
       }
-    )
+
+      index += 1
+    }
+
+    let responseData = try await connection.send(packet)
+    let reader = ByteReader(responseData)
+
+    var responses = [Data]()
+
+    var header: Header
+    var offset = 0
+
+    repeat {
+      responses.append(Data(responseData[offset...]))
+
+      header = reader.read()
+
+      offset += Int(header.nextCommand)
+      reader.seek(to: offset)
+    } while header.nextCommand != 0
+
+    var iterator = 0
+    func respond<R: Message.Request>(requestType: R.Type) -> R.Response {
+      let response = R.Response(data: responses[iterator])
+      iterator += 1
+      return response
+    }
+
+    return (repeat respond(requestType: (each Request).self))
   }
 
   private func sign(_ packet: Data) -> Data {
