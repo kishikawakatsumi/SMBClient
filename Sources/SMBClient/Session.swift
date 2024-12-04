@@ -701,6 +701,60 @@ public class Session {
     return response
   }
 
+#if compiler(>=5.9)
+  private func send<each Request: Message.Request>(_ messages: repeat each Request) async throws -> (repeat (each Request).Response) {
+    var count = 0
+    for _ in repeat each messages {
+      count += 1
+    }
+
+    var packet = Data()
+    var index = 0
+    for message in repeat each messages {
+      let data = message.encoded()
+      let alignment = Data(count: 8 - data.count % 8)
+      if index < count - 1 {
+        let body = data + alignment
+        var header = Header(data: body[..<64])
+        let payload = data[64...]
+
+        header.nextCommand = UInt32(body.count)
+
+        packet += sign(header.encoded() + payload + alignment)
+      } else {
+        packet += sign(data + alignment)
+      }
+
+      index += 1
+    }
+
+    let responseData = try await connection.send(packet)
+    let reader = ByteReader(responseData)
+
+    var responses = [Data]()
+
+    var header: Header
+    var offset = 0
+
+    repeat {
+      responses.append(Data(responseData[offset...]))
+
+      header = reader.read()
+
+      offset += Int(header.nextCommand)
+      reader.seek(to: offset)
+    } while header.nextCommand != 0
+
+    var iterator = 0
+    func respond<R: Message.Request>(requestType: R.Type) -> R.Response {
+      let response = R.Response(data: responses[iterator])
+      iterator += 1
+      return response
+    }
+
+    return (repeat respond(requestType: (each Request).self))
+  }
+#else
   private func send<R1: Message.Request, R2: Message.Request>(_ m1: R1, _ m2: R2) async throws -> (R1.Response, R2.Response) {
     let data = try await send(m1.encoded(), m2.encoded())
     let r1 = R1.Response(data: data)
@@ -734,6 +788,7 @@ public class Session {
       }
     )
   }
+#endif
 
   private func sign(_ packet: Data) -> Data {
     if let signingKey, signingRequired, !isAnonymous {
