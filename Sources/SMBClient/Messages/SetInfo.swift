@@ -1,7 +1,9 @@
 import Foundation
 
 enum SetInfo {
-  public struct Request {
+  public struct Request: Message.Request {
+    public typealias Response = SetInfo.Response
+
     public let header: Header
     public let structureSize: UInt16
     public let infoType: InfoType
@@ -69,7 +71,7 @@ enum SetInfo {
     }
   }
 
-  public struct Response {
+  public struct Response: Message.Response {
     public let header: Header
     public let structureSize: UInt16
 

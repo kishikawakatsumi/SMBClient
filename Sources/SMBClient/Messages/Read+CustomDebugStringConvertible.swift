@@ -32,7 +32,7 @@ extension Read.Response: CustomDebugStringConvertible {
       Blob Length: \(dataLength)
       Data Rmaining: \(dataRemaining)
       Reserved2: \(String(format: "%08x", reserved2))
-      Data: \(buffer.hex)
+      Data: \(buffer)
     """
   }
 }

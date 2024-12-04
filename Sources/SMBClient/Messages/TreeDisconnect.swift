@@ -1,7 +1,9 @@
 import Foundation
 
 public enum TreeDisconnect {
-  public struct Request {
+  public struct Request: Message.Request {
+    public typealias Response = TreeDisconnect.Response
+
     public let header: Header
     public let structureSize: UInt16
     public let reserved: UInt16
@@ -37,7 +39,7 @@ public enum TreeDisconnect {
     }
   }
 
-  public struct Response {
+  public struct Response: Message.Response {
     public let header: Header
     public let structureSize: UInt16
     public let reserved: UInt16

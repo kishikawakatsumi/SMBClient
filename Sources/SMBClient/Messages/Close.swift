@@ -1,7 +1,9 @@
 import Foundation
 
 public enum Close {
-  public struct Request {
+  public struct Request: Message.Request {
+    public typealias Response = Close.Response
+    
     public let header: Header
     public let structureSize: UInt16
     public let flags: UInt16
@@ -44,7 +46,7 @@ public enum Close {
     }
   }
 
-  public struct Response {
+  public struct Response: Message.Response {
     public let header: Header
     public let structureSize: UInt16
     public let flags: UInt16
