@@ -1,7 +1,9 @@
 import Foundation
 
 public enum Create {
-  public struct Request {
+  public struct Request: Message.Request {
+    public typealias Response = Create.Response
+
     public private(set) var header: Header
     public let structureSize: UInt16
     public let securityFlags: UInt8
@@ -93,7 +95,7 @@ public enum Create {
     }
   }
 
-  public struct Response {
+  public struct Response: Message.Response {
     public let header: Header
     public let structureSize: UInt16
     public let oplockLevel: UInt8

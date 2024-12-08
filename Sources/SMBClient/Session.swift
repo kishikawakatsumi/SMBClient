@@ -77,8 +77,7 @@ public class Session {
       dialects: dialects
     )
 
-    let data = try await send(request.encoded())
-    let response = Negotiate.Response(data: data)
+    let response = try await send(request)
 
     signingRequired = response.securityMode.contains(.signingRequired)
 
@@ -110,7 +109,7 @@ public class Session {
       previousSessionId: 0,
       securityBuffer: securityBuffer
     )
-    let response = SessionSetup.Response(data: try await send(request.encoded()))
+    let response = try await send(request)
 
     if NTStatus(response.header.status) == .moreProcessingRequired {
       let challengeMessage = NTLM.ChallengeMessage(data: response.buffer)
@@ -134,8 +133,7 @@ public class Session {
         securityBuffer: authenticateMessage.encoded()
       )
 
-      let data = try await send(request.encoded())
-      let response = SessionSetup.Response(data: data)
+      let response = try await send(request)
 
       sessionId = response.header.sessionId
 
@@ -156,8 +154,7 @@ public class Session {
       sessionId: sessionId
     )
 
-    let data = try await send(request.encoded())
-    let response = Logoff.Response(data: data)
+    let response = try await send(request)
 
     sessionId = 0
 
@@ -209,8 +206,7 @@ public class Session {
       path: #"\\\#(server)\\#(path)"#
     )
 
-    let data = try await send(request.encoded())
-    let response = TreeConnect.Response(data: data)
+    let response = try await send(request)
 
     treeId = response.header.treeId
     connectedTree = path
@@ -226,8 +222,7 @@ public class Session {
       sessionId: sessionId
     )
 
-    let data = try await send(request.encoded())
-    let response = TreeDisconnect.Response(data: data)
+    let response = try await send(request)
 
     treeId = 0
     connectedTree = nil
@@ -255,8 +250,7 @@ public class Session {
       name: name
     )
 
-    let data = try await send(request.encoded())
-    return Create.Response(data: data)
+    return try await send(request)
   }
 
   public func read(fileId: Data, offset: UInt64) async throws -> Read.Response {
@@ -277,8 +271,7 @@ public class Session {
       length: readSize
     )
 
-    let response = Read.Response(data: try await send(request.encoded()))
-    return response
+    return try await send(request)
   }
 
   @discardableResult
@@ -301,8 +294,7 @@ public class Session {
       data: data
     )
 
-    let response = Write.Response(data: try await send(request.encoded()))
-    return response
+    return try await send(request)
   }
 
   @discardableResult
@@ -314,8 +306,7 @@ public class Session {
       fileId: fileId
     )
 
-    let data = try await send(request.encoded())
-    return Close.Response(data: data)
+    return try await send(request)
   }
 
   public func queryDirectory(path: String, pattern: String) async throws -> [FileDirectoryInformation] {
@@ -347,13 +338,7 @@ public class Session {
       outputBufferLength: outputBufferLength
     )
 
-    let data = try await send(
-      createRequest.encoded(),
-      queryDirectoryRequest.encoded()
-    )
-
-    let createResponse = Create.Response(data: data)
-    let queryDirectoryResponse = QueryDirectory.Response(data: Data(data[createResponse.header.nextCommand...]))
+    let (createResponse, queryDirectoryResponse) = try await send(createRequest, queryDirectoryRequest)
 
     var files: [FileDirectoryInformation] = queryDirectoryResponse.files()
 
@@ -373,8 +358,7 @@ public class Session {
           outputBufferLength: outputBufferLength
         )
 
-        let data = try await send(queryDirectoryRequest.encoded())
-        let queryDirectoryResponse = QueryDirectory.Response(data: data)
+        let queryDirectoryResponse = try await send(queryDirectoryRequest)
         files.append(contentsOf: queryDirectoryResponse.files())
 
         if NTStatus(queryDirectoryResponse.header.status) == .noMoreFiles {
@@ -408,13 +392,8 @@ public class Session {
       fileId: temporaryUUID
     )
 
-    let data = try await send(
-      createRequest.encoded(),
-      closeRequest.encoded()
-    )
-
-    let createResponse = Create.Response(data: data)
-    return createResponse
+    let (response, _) = try await send(createRequest, closeRequest)
+    return response
   }
 
   public func existFile(path: String) async throws -> Bool {
@@ -474,15 +453,8 @@ public class Session {
       fileId: temporaryUUID
     )
 
-    let data = try await send(
-      createRequest.encoded(),
-      queryInfoRequest.encoded(),
-      closeRequest.encoded()
-    )
-
-    let createResponse = Create.Response(data: data)
-    let queryInfoResponse = QueryInfo.Response(data: Data(data[createResponse.header.nextCommand...]))
-    return queryInfoResponse
+    let (_, response, _) = try await send(createRequest, queryInfoRequest, closeRequest)
+    return response
   }
 
   @discardableResult
@@ -542,11 +514,7 @@ public class Session {
       fileId: temporaryUUID
     )
 
-    _ = try await send(
-      createRequest.encoded(),
-      setInfoRequest.encoded(),
-      closeRequest.encoded()
-    )
+    _ = try await send(createRequest, setInfoRequest, closeRequest)
   }
 
   public func deleteFile(path: String) async throws {
@@ -578,11 +546,7 @@ public class Session {
       fileId: temporaryUUID
     )
 
-    _ = try await send(
-      createRequest.encoded(),
-      setInfoRequest.encoded(),
-      closeRequest.encoded()
-    )
+    _ = try await send(createRequest, setInfoRequest, closeRequest)
   }
 
   public func move(from: String, to: String) async throws {
@@ -614,11 +578,7 @@ public class Session {
       fileId: temporaryUUID
     )
 
-    _ = try await send(
-      createRequest.encoded(),
-      setInfoRequest.encoded(),
-      closeRequest.encoded()
-    )
+    _ = try await send(createRequest, setInfoRequest, closeRequest)
   }
 
   @discardableResult
@@ -628,8 +588,7 @@ public class Session {
       sessionId: sessionId
     )
 
-    let data = try await send(request.encoded())
-    return Echo.Response(data: data)
+    return try await send(request)
   }
 
   @discardableResult
@@ -661,8 +620,7 @@ public class Session {
       output: Data()
     )
 
-    let data = try await send(request.encoded())
-    return IOCtl.Response(data: data)
+    return try await send(request)
   }
 
   func netShareEnum(fileId: Data) async throws -> IOCtl.Response {
@@ -686,12 +644,29 @@ public class Session {
       output: Data()
     )
 
-    let data = try await send(request.encoded())
-    return IOCtl.Response(data: data)
+    return try await send(request)
   }
 
-  private func send(_ packet: Data) async throws -> Data {
-    try await connection.send(sign(packet))
+  private func send<Request: Message.Request>(_ message: Request) async throws -> Request.Response {
+    let packet = message.encoded()
+    let data = try await connection.send(sign(packet))
+    let response = Request.Response(data: data)
+    return response
+  }
+
+  private func send<R1: Message.Request, R2: Message.Request>(_ m1: R1, _ m2: R2) async throws -> (R1.Response, R2.Response) {
+    let data = try await send(m1.encoded(), m2.encoded())
+    let r1 = R1.Response(data: data)
+    let r2 = R2.Response(data: Data(data[r1.header.nextCommand...]))
+    return (r1, r2)
+  }
+
+  private func send<R1: Message.Request, R2: Message.Request, R3: Message.Request>(_ m1: R1, _ m2: R2, _ m3: R3) async throws -> (R1.Response, R2.Response, R3.Response) {
+    let data = try await send(m1.encoded(), m2.encoded(), m3.encoded())
+    let r1 = R1.Response(data: data)
+    let r2 = R2.Response(data: Data(data[r1.header.nextCommand...]))
+    let r3 = R3.Response(data: Data(data[r2.header.nextCommand...]))
+    return (r1, r2, r3)
   }
 
   private func send(_ packets: Data...) async throws -> Data {

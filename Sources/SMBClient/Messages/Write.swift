@@ -1,7 +1,9 @@
 import Foundation
 
 public enum Write {
-  public struct Request {
+  public struct Request: Message.Request {
+    public typealias Response = Write.Response
+
     public let header: Header
     public let structureSize: UInt16
     public let dataOffset: UInt16
@@ -69,7 +71,7 @@ public enum Write {
     }
   }
 
-  public struct Response {
+  public struct Response: Message.Response {
     public let header: Header
     public let structureSize: UInt16
     public let reserved: UInt16

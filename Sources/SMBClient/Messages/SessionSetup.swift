@@ -1,7 +1,9 @@
 import Foundation
 
 public enum SessionSetup {
-  public struct Request {
+  public struct Request: Message.Request {
+    public typealias Response = SessionSetup.Response
+
     public let header: Header
     public let structureSize: UInt16
     public let flags: Flags
@@ -60,7 +62,7 @@ public enum SessionSetup {
     }
   }
 
-  public struct Response {
+  public struct Response: Message.Response {
     public let header: Header
 
     public let structureSize: UInt16
