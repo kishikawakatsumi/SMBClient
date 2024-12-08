@@ -5,6 +5,8 @@ public class Session {
   private var sessionId: UInt64 = 0
   private(set) var treeId: UInt32 = 0
 
+  private var isAnonymous = false
+  private var signingRequired = false
   private var signingKey: Data?
 
   public private(set) var maxTransactSize: UInt32 = 0
@@ -42,6 +44,7 @@ public class Session {
     session.sessionId = sessionId
     session.treeId = 0
 
+    session.signingRequired = signingRequired
     session.signingKey = signingKey
 
     session.maxTransactSize = maxTransactSize
@@ -76,6 +79,8 @@ public class Session {
 
     let data = try await send(request.encoded())
     let response = Negotiate.Response(data: data)
+
+    signingRequired = response.securityMode.contains(.signingRequired)
 
     maxTransactSize = response.maxTransactSize
     maxReadSize = response.maxReadSize
@@ -133,6 +138,8 @@ public class Session {
       let response = SessionSetup.Response(data: data)
 
       sessionId = response.header.sessionId
+
+      isAnonymous = (username ?? "").isEmpty && (password ?? "").isEmpty
       self.signingKey = signingKey
 
       return response
@@ -707,7 +714,7 @@ public class Session {
   }
 
   private func sign(_ packet: Data) -> Data {
-    if let signingKey {
+    if let signingKey, signingRequired, !isAnonymous {
       var header = Header(data: packet[..<64])
       let payload = packet[64...]
 
