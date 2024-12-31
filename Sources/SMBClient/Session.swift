@@ -642,16 +642,13 @@ public class Session {
 
   private func send<Request: Message.Request>(_ message: Request) async throws -> Request.Response {
     let packet = message.encoded()
-    let data = try await connection.send(sign(packet))
-    let response = Request.Response(data: data)
-    return response
+    let data = try await connection.send(sign(message))
+    return Request.Response(data: data)
   }
 
   private func send<each Request: Message.Request>(_ messages: repeat each Request) async throws -> (repeat (each Request).Response) {
-    var count = 0
-    for _ in repeat each messages {
-      count += 1
-    }
+    let compoundedRequest = CompoundedRequest(requests: repeat each messages)
+    let count = compoundedRequest.count
 
     var packet = Data()
     var index = 0
@@ -700,20 +697,18 @@ public class Session {
     return (repeat respond(requestType: (each Request).self))
   }
 
+  private func sign<Request: Message.Request>(_ request: Request) -> Data {
+    if let signingKey {
+      return request.sign(key: signingKey)
+    }
+    return request.encoded()
+  }
+
   private func sign(_ packet: Data) -> Data {
     if let signingKey {
-      var header = Header(data: packet[..<64])
-      let payload = packet[64...]
-
-      header.flags = header.flags.union(.signed)
-
-      let signature = Crypto.hmacSHA256(key: signingKey, data: header.encoded() + payload)[..<16]
-      header.signature = signature
-
-      return header.encoded() + payload
-    } else {
-      return packet
+      return Message.sign(key: signingKey, packet: packet)
     }
+    return packet
   }
 }
 

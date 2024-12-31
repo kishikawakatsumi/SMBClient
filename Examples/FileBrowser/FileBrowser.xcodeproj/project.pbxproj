@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -70,6 +70,7 @@
 		147EC5BC2C40F97100C08ED3 /* ActivitiesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147EC5BB2C40F97100C08ED3 /* ActivitiesViewController.swift */; };
 		147EC5BE2C41019400C08ED3 /* ActivityCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147EC5BD2C41019400C08ED3 /* ActivityCell.swift */; };
 		147EC5C02C41590400C08ED3 /* FileTransfer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 147EC5BF2C41590400C08ED3 /* FileTransfer.swift */; };
+		14C0D2BE2CFF6C2200617AA7 /* SMBClient in Frameworks */ = {isa = PBXBuildFile; productRef = 14C0D2BD2CFF6C2200617AA7 /* SMBClient */; };
 		14C15E982C49827600F2F9A9 /* DirectoryStructure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C15E972C49827600F2F9A9 /* DirectoryStructure.swift */; };
 		14C15E9A2C49F90C00F2F9A9 /* DataRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C15E992C49F90C00F2F9A9 /* DataRepository.swift */; };
 		14C23C832C53962F00CEA8CF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C822C53962F00CEA8CF /* AppDelegate.swift */; };
@@ -87,9 +88,6 @@
 		14C23CAC2C53966A00CEA8CF /* DocumentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9E2C53966A00CEA8CF /* DocumentViewController.swift */; };
 		14C23CAD2C53966A00CEA8CF /* ServersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23C9F2C53966A00CEA8CF /* ServersViewController.swift */; };
 		14C23CAF2C53966A00CEA8CF /* ServerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14C23CA12C53966A00CEA8CF /* ServerManager.swift */; };
-		14C23CB62C5396C600CEA8CF /* SMBClient in Frameworks */ = {isa = PBXBuildFile; productRef = 14C23CB52C5396C600CEA8CF /* SMBClient */; };
-		14F80F892CEA935400C1869A /* SMBClient in Frameworks */ = {isa = PBXBuildFile; productRef = 14F80F882CEA935400C1869A /* SMBClient */; };
-		14F80FC72CEA971B00C1869A /* SMBClient in Frameworks */ = {isa = PBXBuildFile; productRef = 14F80FC62CEA971B00C1869A /* SMBClient */; };
 		14F80FD42CEA973800C1869A /* FlyingFox in Frameworks */ = {isa = PBXBuildFile; productRef = 14F80FD32CEA973800C1869A /* FlyingFox */; };
 		14F80FD62CEA973800C1869A /* FlyingSocks in Frameworks */ = {isa = PBXBuildFile; productRef = 14F80FD52CEA973800C1869A /* FlyingSocks */; };
 		14F80FD82CEA974200C1869A /* FlyingFox in Frameworks */ = {isa = PBXBuildFile; productRef = 14F80FD72CEA974200C1869A /* FlyingFox */; };
@@ -181,7 +179,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				14F80FC72CEA971B00C1869A /* SMBClient in Frameworks */,
+				14C0D2BE2CFF6C2200617AA7 /* SMBClient in Frameworks */,
 				14F80FDA2CEA974200C1869A /* FlyingSocks in Frameworks */,
 				14F80FD82CEA974200C1869A /* FlyingFox in Frameworks */,
 			);
@@ -191,7 +189,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				14C23CB62C5396C600CEA8CF /* SMBClient in Frameworks */,
 				14F80FD62CEA973800C1869A /* FlyingSocks in Frameworks */,
 				14F80FD42CEA973800C1869A /* FlyingFox in Frameworks */,
 			);
@@ -201,7 +198,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				14F80F892CEA935400C1869A /* SMBClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -364,9 +360,9 @@
 			);
 			name = "FileBrowser (macOS)";
 			packageProductDependencies = (
-				14F80FC62CEA971B00C1869A /* SMBClient */,
 				14F80FD72CEA974200C1869A /* FlyingFox */,
 				14F80FD92CEA974200C1869A /* FlyingSocks */,
+				14C0D2BD2CFF6C2200617AA7 /* SMBClient */,
 			);
 			productName = FileBrowser;
 			productReference = 144680172C347E1F0029A1AB /* File Browser.app */;
@@ -386,7 +382,6 @@
 			);
 			name = "FileBrowser (iOS)";
 			packageProductDependencies = (
-				14C23CB52C5396C600CEA8CF /* SMBClient */,
 				14F80FD32CEA973800C1869A /* FlyingFox */,
 				14F80FD52CEA973800C1869A /* FlyingSocks */,
 			);
@@ -408,7 +403,6 @@
 			);
 			name = "FileBrowser (visionOS)";
 			packageProductDependencies = (
-				14F80F882CEA935400C1869A /* SMBClient */,
 			);
 			productName = "FileBrowser (visionOS)";
 			productReference = 14F80F742CEA933D00C1869A /* File Browser.app */;
@@ -447,7 +441,7 @@
 			mainGroup = 1446800E2C347E1F0029A1AB;
 			packageReferences = (
 				145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */,
-				141AF3E02C4ABA550050C7A5 /* XCRemoteSwiftPackageReference "SMBClient" */,
+				14C0D2BC2CFF6BDA00617AA7 /* XCLocalSwiftPackageReference "../../../SMBClient" */,
 			);
 			productRefGroup = 144680182C347E1F0029A1AB /* Products */;
 			projectDirPath = "";
@@ -755,6 +749,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kishikawakatsumi.FileBrowser;
 				PRODUCT_MODULE_NAME = FileBrowser;
@@ -785,6 +780,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kishikawakatsumi.FileBrowser;
 				PRODUCT_MODULE_NAME = FileBrowser;
@@ -957,15 +953,14 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		141AF3E02C4ABA550050C7A5 /* XCRemoteSwiftPackageReference "SMBClient" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/kishikawakatsumi/SMBClient.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.3.0;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		14C0D2BC2CFF6BDA00617AA7 /* XCLocalSwiftPackageReference "../../../SMBClient" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../../SMBClient;
 		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
 		145299EA2C3AC745003B035C /* XCRemoteSwiftPackageReference "FlyingFox" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/swhitty/FlyingFox.git";
@@ -977,19 +972,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		14C23CB52C5396C600CEA8CF /* SMBClient */ = {
+		14C0D2BD2CFF6C2200617AA7 /* SMBClient */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 141AF3E02C4ABA550050C7A5 /* XCRemoteSwiftPackageReference "SMBClient" */;
-			productName = SMBClient;
-		};
-		14F80F882CEA935400C1869A /* SMBClient */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 141AF3E02C4ABA550050C7A5 /* XCRemoteSwiftPackageReference "SMBClient" */;
-			productName = SMBClient;
-		};
-		14F80FC62CEA971B00C1869A /* SMBClient */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 141AF3E02C4ABA550050C7A5 /* XCRemoteSwiftPackageReference "SMBClient" */;
+			package = 14C0D2BC2CFF6BDA00617AA7 /* XCLocalSwiftPackageReference "../../../SMBClient" */;
 			productName = SMBClient;
 		};
 		14F80FD32CEA973800C1869A /* FlyingFox */ = {

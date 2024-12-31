@@ -250,3 +250,38 @@ public enum ConnectionError: Error {
   case cancelled
   case unknown
 }
+
+private class TaskQueue {
+  private let queue = Queue()
+
+  func dispatch(_ block: @escaping () async throws -> Void) {
+    Task {
+      await queue.append(block)
+    }
+  }
+}
+
+private actor Queue {
+  private var blocks : [() async throws -> Void] = []
+  private var currentTask: Task<Void, Swift.Error>? = nil
+
+  func append(_ block: @escaping () async throws -> Void) {
+    blocks.append(block)
+    next()
+  }
+
+  func next() {
+    if let _ = currentTask {
+      return
+    }
+    guard !blocks.isEmpty else {
+      return
+    }
+    let block = blocks.removeFirst()
+    currentTask = Task {
+      try await block()
+      currentTask = nil
+      next()
+    }
+  }
+}

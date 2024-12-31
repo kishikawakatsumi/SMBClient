@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
   name: "SMBClient",
   platforms: [
-    .macOS(.v10_15),
+    .macOS(.v14),
     .iOS(.v13),
     .visionOS(.v1)
   ],
