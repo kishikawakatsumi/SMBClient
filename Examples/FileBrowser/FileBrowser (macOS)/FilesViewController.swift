@@ -104,6 +104,21 @@ class FilesViewController: NSViewController {
       name: FileUpload.didFinish,
       object: nil
     )
+
+    let keepAliveTimer = Timer(timeInterval: 300, repeats: true) { [weak self, treeAccessor, path] (timer) in
+      guard let _ = self else {
+        timer.invalidate()
+        return
+      }
+      Task {
+        do {
+          _ = try await treeAccessor.fileInfo(path: path)
+        } catch {
+          timer.invalidate()
+        }
+      }
+    }
+    RunLoop.main.add(keepAliveTimer, forMode: .common)
   }
 
   override func viewDidAppear() {
