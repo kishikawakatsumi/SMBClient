@@ -98,7 +98,7 @@ class FileUpload: FileTransfer {
           name: Self.didFinish,
           object: self,
           userInfo: [
-            FileUploadUserInfoKey.share: treeAccessor.share ?? "",
+            FileUploadUserInfoKey.share: treeAccessor.share,
             FileUploadUserInfoKey.path: destination,
           ]
         )

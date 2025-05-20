@@ -54,6 +54,8 @@ public class FileWriter {
 
       progressHandler(Double(offset) / Double(fileSize))
     }
+
+    progressHandler(1.0)
   }
 
   public func upload(localPath: URL) async throws {
@@ -64,40 +66,55 @@ public class FileWriter {
     localPath: URL,
     progressHandler: (_ completedFiles: Int, _ fileBeingTransferred: URL, _ bytesSent: Int64) -> Void
   ) async throws {
+    enum Action {
+      case enterDirectory(URL, String)
+      case exitDirectory(URL, String)
+      case file(URL, String)
+    }
+
     let fileManager = FileManager()
 
     var isDirectory: ObjCBool = false
     let fileExists = fileManager.fileExists(atPath: localPath.path, isDirectory: &isDirectory)
     guard fileExists else { throw URLError(.fileDoesNotExist) }
 
+    var paths: [Action] = isDirectory.boolValue ? [.enterDirectory(localPath, path)] : [.file(localPath, path)]
+
     var completedFiles = 0
     var bytesSent: Int64 = 0
 
-    var paths: [(URL, String)] = [(localPath, path)]
-
-    while !paths.isEmpty {
-      let (current, destination) = paths.removeFirst()
-      var isDirectory: ObjCBool = false
-      let fileExists = fileManager.fileExists(atPath: current.path, isDirectory: &isDirectory)
-      guard fileExists else { throw URLError(.fileDoesNotExist) }
-
-      if isDirectory.boolValue {
+    while let job = paths.popLast() {
+      switch job {
+      case let .enterDirectory(source, destination):
         try await session.createDirectory(path: destination)
 
-        let contents = try fileManager.contentsOfDirectory(at: current, includingPropertiesForKeys: nil)
-        paths.append(contentsOf: contents.map { ($0, "\(destination)/\($0.lastPathComponent)") })
-      } else {
-        progressHandler(completedFiles, current, bytesSent)
+        paths.append(.exitDirectory(source, destination))
 
-        let fileHandle = try FileHandle(forReadingFrom: current)
+        let children = try fileManager.contentsOfDirectory(at: source, includingPropertiesForKeys: nil)
+        paths.append(
+          contentsOf: children.reversed().map { (child) in
+            var isDirectory: ObjCBool = false
+            fileManager.fileExists(atPath: child.path, isDirectory: &isDirectory)
 
-        let fileWriter = FileWriter(session: session, path: destination)
-        try await fileWriter.upload(fileHandle: fileHandle)
-        try await fileWriter.close()
+            let destination = "\(destination)/\(child.lastPathComponent)"
+            return isDirectory.boolValue ? .enterDirectory(child, destination) : .file(child, destination)
+          }
+        )
+      case let .exitDirectory(source, destination):
+        await restoreFileAttributes(source, destination)
+      case let .file(source, destination):
+        progressHandler(completedFiles, source, bytesSent)
+
+        let fileHandle = try FileHandle(forReadingFrom: source)
+        let writer = FileWriter(session: session, path: destination)
+        try await writer.upload(fileHandle: fileHandle)
+        try await writer.close()
+
+        await restoreFileAttributes(source, destination)
 
         completedFiles += 1
         bytesSent += Int64(try fileHandle.offsetInFile())
-        progressHandler(completedFiles, current, bytesSent)
+        progressHandler(completedFiles, source, bytesSent)
       }
     }
   }
@@ -107,6 +124,25 @@ public class FileWriter {
       try await session.close(fileId: createResponse.fileId)
     }
     createResponse = nil
+  }
+
+  private func restoreFileAttributes(_ current: URL, _ destination: String) async {
+    let attributes = try? FileManager().attributesOfItem(atPath: current.path)
+
+    let now = Date()
+    let creationDate  = attributes?[.creationDate] as? Date ?? now
+    let modificationDate = attributes?[.modificationDate] as? Date ?? now
+
+    _ = try? await session.setInfo(
+      path: destination,
+      FileBasicInformation(
+        creationTime: FileTime(creationDate).raw,
+        lastAccessTime: FileTime(now).raw,
+        lastWriteTime: FileTime(modificationDate).raw,
+        changeTime: 0,
+        fileAttributes: [.archive]
+      )
+    )
   }
 
   private func fileProxy() async throws -> FileProxy {
