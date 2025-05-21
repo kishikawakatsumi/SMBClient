@@ -1,6 +1,6 @@
 import Foundation
 
-enum SetInfo {
+public enum SetInfo {
   public struct Request: Message.Request {
     public typealias Response = SetInfo.Response
 
@@ -17,6 +17,10 @@ enum SetInfo {
 
     public struct Flags: OptionSet {
       public let rawValue: UInt32
+
+      public init(rawValue: UInt32) {
+        self.rawValue = rawValue
+      }
 
       public static let replaceIfExists = Flags(rawValue: 0x00000001)
       public static let advanceOnly = Flags(rawValue: 0x00000002)

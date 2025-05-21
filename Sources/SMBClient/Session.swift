@@ -582,6 +582,40 @@ public class Session {
   }
 
   @discardableResult
+  public func setInfo(path: String, _ info: FileInformationClass) async throws -> SetInfo.Response {
+    let createRequest = Create.Request(
+      messageId: messageId.next(),
+      treeId: treeId,
+      sessionId: sessionId,
+      desiredAccess: [.readAttributes, .writeAttributes, .synchronize],
+      fileAttributes: [],
+      shareAccess: [.read, .write, .delete],
+      createDisposition: .open,
+      createOptions: [],
+      name: path
+    )
+    let setInfoRequest = SetInfo.Request(
+      headerFlags: [.relatedOperations],
+      messageId: messageId.next(),
+      treeId: treeId,
+      sessionId: sessionId,
+      fileId: temporaryUUID,
+      infoType: .file,
+      fileInformation: info
+    )
+    let closeRequest = Close.Request(
+      headerFlags: [.relatedOperations],
+      messageId: messageId.next(),
+      treeId: treeId,
+      sessionId: sessionId,
+      fileId: temporaryUUID
+    )
+
+    let (_, response, _) = try await send(createRequest, setInfoRequest, closeRequest)
+    return response
+  }
+
+  @discardableResult
   public func echo() async throws -> Echo.Response {
     let request = Echo.Request(
       messageId: messageId.next(),
