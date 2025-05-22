@@ -126,19 +126,44 @@ public class FileWriter {
     createResponse = nil
   }
 
+  func restoreFileAttributes(_ fileHandle: FileHandle, _ destination: String) async {
+    var stat = stat()
+
+    if fstat(fileHandle.fileDescriptor, &stat) == 0 {
+      let now = Date()
+
+      let creationDate = Date(timeIntervalSince1970: TimeInterval(stat.st_birthtimespec.tv_sec))
+      let lastAccessDate = now
+      let modificationDate = Date(timeIntervalSince1970: TimeInterval(stat.st_mtimespec.tv_sec))
+
+      try? await restoreFileAttributes(
+        path: destination,
+        attributes: (creationTime: creationDate, lastAccessTime: lastAccessDate, lastWriteTime: modificationDate)
+      )
+    }
+  }
+
   private func restoreFileAttributes(_ current: URL, _ destination: String) async {
+    let now = Date()
     let attributes = try? FileManager().attributesOfItem(atPath: current.path)
 
-    let now = Date()
     let creationDate  = attributes?[.creationDate] as? Date ?? now
+    let lastAccessDate = now
     let modificationDate = attributes?[.modificationDate] as? Date ?? now
 
-    _ = try? await session.setInfo(
+    try? await restoreFileAttributes(
       path: destination,
+      attributes: (creationTime: creationDate, lastAccessTime: lastAccessDate, lastWriteTime: modificationDate)
+    )
+  }
+
+  private func restoreFileAttributes(path: String, attributes: (creationTime: Date, lastAccessTime: Date, lastWriteTime: Date)) async throws {
+    try await session.setInfo(
+      path: path,
       FileBasicInformation(
-        creationTime: FileTime(creationDate).raw,
-        lastAccessTime: FileTime(now).raw,
-        lastWriteTime: FileTime(modificationDate).raw,
+        creationTime: FileTime(attributes.creationTime).raw,
+        lastAccessTime: FileTime(attributes.lastAccessTime).raw,
+        lastWriteTime: FileTime(attributes.lastWriteTime).raw,
         changeTime: 0,
         fileAttributes: [.archive]
       )

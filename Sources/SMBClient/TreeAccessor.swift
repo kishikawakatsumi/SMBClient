@@ -88,6 +88,8 @@ public class TreeAccessor {
 
     try await fileWriter.upload(fileHandle: fileHandle, progressHandler: progressHandler)
     try await fileWriter.close()
+
+    await fileWriter.restoreFileAttributes(fileHandle, path)
   }
 
   public func upload(localPath: URL, remotePath path: String) async throws {
