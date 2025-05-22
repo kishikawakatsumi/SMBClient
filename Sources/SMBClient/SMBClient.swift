@@ -152,10 +152,13 @@ public class SMBClient {
   }
 
   public func upload(fileHandle: FileHandle, path: String, progressHandler: (_ progress: Double) -> Void) async throws {
-    let fileWriter = fileWriter(path: Pathname.normalize(path))
+    let path = Pathname.normalize(path)
+    let fileWriter = fileWriter(path: path)
 
     try await fileWriter.upload(fileHandle: fileHandle, progressHandler: progressHandler)
     try await fileWriter.close()
+
+    await restoreFileAttributes(fileHandle, path)
   }
 
   public func upload(localPath: URL, remotePath path: String) async throws {
@@ -201,6 +204,29 @@ public class SMBClient {
 
   public func keepAlive() async throws -> Echo.Response {
     try await session.echo()
+  }
+
+  private func restoreFileAttributes(_ fileHandle: FileHandle, _ destination: String) async {
+    var stat = stat()
+
+    if fstat(fileHandle.fileDescriptor, &stat) == 0 {
+      let now = Date()
+
+      let creationDate = Date(timeIntervalSince1970: TimeInterval(stat.st_birthtimespec.tv_sec))
+      let lastAccessDate = now
+      let modificationDate = Date(timeIntervalSince1970: TimeInterval(stat.st_mtimespec.tv_sec))
+
+      _ = try? await session.setInfo(
+        path: destination,
+        FileBasicInformation(
+          creationTime: FileTime(creationDate).raw,
+          lastAccessTime: FileTime(lastAccessDate).raw,
+          lastWriteTime: FileTime(modificationDate).raw,
+          changeTime: 0,
+          fileAttributes: [.archive]
+        )
+      )
+    }
   }
 }
 
