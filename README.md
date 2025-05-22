@@ -124,7 +124,7 @@ SMB 2.0 (aka `SMB2`) is supported. See [Header](Sources/SMBClient/Messages/Heade
 - [x] TREE_DISCONNECT
 - [x] CREATE
 - [x] CLOSE
-- [ ] FLUSH
+- [x] FLUSH
 - [x] READ
 - [x] WRITE
 - [ ] LOCK
