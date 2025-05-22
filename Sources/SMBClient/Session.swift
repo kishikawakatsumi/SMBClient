@@ -616,6 +616,18 @@ public class Session {
   }
 
   @discardableResult
+  public func flush(fileId: Data) async throws -> Flush.Response {
+    let request = Flush.Request(
+      messageId: messageId.next(),
+      treeId: treeId,
+      sessionId: sessionId,
+      fileId: fileId
+    )
+
+    return try await send(request)
+  }
+
+  @discardableResult
   public func echo() async throws -> Echo.Response {
     let request = Echo.Request(
       messageId: messageId.next(),
