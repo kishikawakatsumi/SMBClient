@@ -159,7 +159,7 @@ public class FileWriter {
 
   private func restoreFileAttributes(path: String, attributes: (creationTime: Date, lastAccessTime: Date, lastWriteTime: Date)) async throws {
     try await session.setInfo(
-      path: path,
+      path: Pathname.normalize(path),
       FileBasicInformation(
         creationTime: FileTime(attributes.creationTime).raw,
         lastAccessTime: FileTime(attributes.lastAccessTime).raw,
