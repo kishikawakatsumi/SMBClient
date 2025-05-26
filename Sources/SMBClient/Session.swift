@@ -79,7 +79,7 @@ public class Session {
 
     let response = try await send(request)
 
-    signingRequired = response.securityMode.contains(.signingRequired)
+    signingRequired = response.securityMode.contains(.signingRequired) || (securityMode.contains(.signingRequired) && response.securityMode.contains(.signingEnabled))
 
     maxTransactSize = response.maxTransactSize
     maxReadSize = response.maxReadSize
@@ -93,7 +93,8 @@ public class Session {
     username: String?,
     password: String?,
     domain: String? = nil,
-    workstation: String? = nil
+    workstation: String? = nil,
+    requireSigning: Bool = false
   ) async throws -> SessionSetup.Response {
     let negotiateMessage = NTLM.NegotiateMessage(
       domainName: domain,
@@ -104,7 +105,7 @@ public class Session {
     let request = SessionSetup.Request(
       messageId: messageId.next(),
       sessionId: 0,
-      securityMode: [.signingEnabled],
+      securityMode: [requireSigning ? .signingRequired : .signingEnabled],
       capabilities: [],
       previousSessionId: 0,
       securityBuffer: securityBuffer
