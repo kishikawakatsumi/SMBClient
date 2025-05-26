@@ -815,6 +815,85 @@ final class SMBClientTests: XCTestCase {
     let response = try await client.keepAlive()
     XCTAssert(NTStatus(response.header.status) == .success)
   }
+
+  func testRequireSigning01() async throws {
+    let users = [alice, bob]
+
+    let expectedShares: [String: [Share]] = [
+      "Alice": [
+        Share(name: "Public", comment: "", type: .diskTree),
+        Share(name: "Alice Share", comment: "", type: .diskTree),
+        Share(name: "IPC$", comment: "IPC Service (Samba Server)", type: [.ipc, .special]),
+      ],
+      "Bob": [
+        Share(name: "Public", comment: "", type: .diskTree),
+        Share(name: "Bob Share", comment: "", type: .diskTree),
+        Share(name: "IPC$", comment: "IPC Service (Samba Server)", type: [.ipc, .special]),
+      ],
+    ]
+
+    for user in users {
+      let client = SMBClient(host: "localhost", port: 4445)
+      try await client.login(username: user.username, password: user.password, requireSigning: true)
+      let shares = try await client.listShares()
+
+      for (expectedShare, actualShare) in zip(expectedShares[user.username]!, shares) {
+        XCTAssertEqual(expectedShare.name, actualShare.name)
+        XCTAssertEqual(expectedShare.comment, actualShare.comment)
+        XCTAssertEqual(expectedShare.type, actualShare.type)
+      }
+
+      try await client.logoff()
+    }
+  }
+
+  func testRequireSigning02() async throws {
+    let user = alice
+
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password, requireSigning: true)
+    try await client.connectShare(user.share)
+
+    let files = try await client.listDirectory(path: "")
+      .filter { $0.name != "." && $0.name != ".." }
+      .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+
+    let fileManager = FileManager()
+    let root = fixtureURL.appending(component: user.sharePath)
+    let testFiles = try fileManager.contentsOfDirectory(atPath: root.path(percentEncoded: false))
+      .filter { $0 != ".DS_Store" }
+      .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+
+    for (actualFile, expectedFile) in zip(files, testFiles) {
+      XCTAssertEqual(actualFile.name, expectedFile)
+
+      var isDirectory: ObjCBool = false
+      fileManager.fileExists(atPath: root.appending(component: expectedFile).path(percentEncoded: false), isDirectory: &isDirectory)
+      XCTAssertEqual(actualFile.isDirectory, isDirectory.boolValue)
+    }
+
+    try await client.treeDisconnect()
+    try await client.logoff()
+  }
+
+  func testRequireSigning03() async throws {
+    let user = alice
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password, requireSigning: true)
+    try await client.connectShare(user.share)
+
+    let directoryName = #function
+    try await client.createDirectory(path: directoryName)
+
+    try await assertDirectoryExists(at: directoryName, client: client)
+
+    try await client.deleteDirectory(path: directoryName)
+
+    try await assertDirectoryDoesNotExist(at: directoryName, client: client)
+
+    try await client.treeDisconnect()
+    try await client.logoff()
+  }
 }
 
 func assertFileExists(
