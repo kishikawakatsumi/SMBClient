@@ -16,8 +16,8 @@ let client = SMBClient(host: "198.51.100.50")
 try await client.login(username: "alice", password: "secret")
 try await client.connectShare("Public")
 
-let files = try await client.listDirectory("")
-print(files.map { $0.fileName })
+let files = try await client.listDirectory(path: "")
+print(files.map { $0.name })
 
 try await client.disconnectShare()
 try await client.logoff()
