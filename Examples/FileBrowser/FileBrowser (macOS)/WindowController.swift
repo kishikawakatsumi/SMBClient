@@ -211,7 +211,11 @@ class WindowController: NSWindowController {
 
   @objc
   private func didStartActivities(_ notification: Notification) {
-    guard let toolbarItems = window?.toolbar?.items else {
+    guard  let window = window, window == window.tabGroup?.selectedWindow else {
+      return
+    }
+
+    guard let toolbarItems = window.toolbar?.items else {
       return
     }
     guard let toolbarItem = toolbarItems.first(where: { $0.itemIdentifier == .activitiesToolbarItemIdentifier }) else {
