@@ -35,6 +35,6 @@ jobs:
           sudo chmod +x "$LIMACTL_PATH"
 
           colima start --network-address --arch arm64 --vm-type=qemu
-          docker-compose up --detach
+          DOCKER_BUILDKIT=1 docker-compose up --detach
 
           swift test
