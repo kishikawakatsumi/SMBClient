@@ -20,6 +20,11 @@ jobs:
 
           brew update
           brew install docker docker-buildx docker-compose qemu
+
+          mkdir -p ~/.docker/cli-plugins
+          ln -sfn /opt/homebrew/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
+          ln -sfn /opt/homebrew/opt/docker-buildx/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx
+
           curl -L "https://raw.githubusercontent.com/Homebrew/homebrew-core/5d01145b5a83d32e5ebee11677884ee429a6be4e/Formula/l/lima.rb" \
             -o lima.rb
           curl -L "https://raw.githubusercontent.com/Homebrew/homebrew-core/b8276941690ad4235558c4848b747eb21656f178/Formula/c/colima.rb" \
