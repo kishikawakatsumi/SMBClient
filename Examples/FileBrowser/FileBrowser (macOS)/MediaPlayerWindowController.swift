@@ -53,29 +53,42 @@ class MediaPlayerWindowController: NSWindowController, NSWindowDelegate {
 
     guard let videoPlayerViewController = contentViewController as? MediaPlayerViewController else { return }
 
-    let playerItem = AVPlayerItem(asset: asset)
+    Task { @MainActor in
+      do {
+        let fileReader = try await treeAccessor.fileReader(path: path)
+        _ = try await fileReader.read(offset: 0, length: 1)
 
-    let player = AVPlayer(playerItem: playerItem)
-    videoPlayerViewController.playerView.player = player
+        let playerItem = AVPlayerItem(asset: asset)
 
-    asset.loadTracks(withMediaType: .video) { (tracks, error) in
-      guard let track = tracks?.first else { return }
-      Task {
-        let naturalSize = try await track.load(.naturalSize)
+        let player = AVPlayer(playerItem: playerItem)
+        videoPlayerViewController.playerView.player = player
 
-        await MainActor.run {
-          guard let currentScreen = NSScreen.screens.first(where: { $0 == window.screen }) else {
-            return
+        asset.loadTracks(withMediaType: .video) { (tracks, error) in
+          guard let track = tracks?.first else { return }
+          Task {
+            let naturalSize = try await track.load(.naturalSize)
+
+            await MainActor.run {
+              guard let currentScreen = NSScreen.screens.first(where: { $0 == window.screen }) else {
+                return
+              }
+
+              let rect = AVMakeRect(
+                aspectRatio: CGSize(width: naturalSize.width, height: naturalSize.height),
+                insideRect: currentScreen.visibleFrame
+              )
+              let contentSize = NSSize(width: min(rect.width, naturalSize.width), height: min(rect.height, naturalSize.height))
+
+              window.setContentSize(contentSize)
+              window.center()
+
+              player.play()
+            }
           }
-
-          let rect = AVMakeRect(
-            aspectRatio: CGSize(width: naturalSize.width, height: naturalSize.height),
-            insideRect: currentScreen.visibleFrame
-          )
-          let contentSize = NSSize(width: min(rect.width, naturalSize.width), height: min(rect.height, naturalSize.height))
-
-          window.setContentSize(contentSize)
-          window.center()
+        }
+      } catch {
+        _ = await MainActor.run {
+          NSAlert(error: error).runModal()
         }
       }
     }
@@ -91,20 +104,4 @@ class MediaPlayerWindowController: NSWindowController, NSWindowDelegate {
 
 class MediaPlayerViewController: NSViewController {
   @IBOutlet var playerView: AVPlayerView!
-  private var observation: NSKeyValueObservation?
-
-  deinit {
-    observation?.invalidate()
-  }
-
-  override func viewDidAppear() {
-    super.viewDidAppear()
-
-    let player = playerView.player
-    observation = playerView.player?.currentItem?.observe(\.status) { (item, change) in
-      if item.status == .readyToPlay {
-        player?.play()
-      }
-    }
-  }
 }
