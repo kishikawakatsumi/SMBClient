@@ -57,6 +57,7 @@ class MediaPlayerWindowController: NSWindowController, NSWindowDelegate {
       do {
         let fileReader = try await treeAccessor.fileReader(path: path)
         _ = try await fileReader.read(offset: 0, length: 1)
+        try await fileReader.close()
 
         let playerItem = AVPlayerItem(asset: asset)
 
