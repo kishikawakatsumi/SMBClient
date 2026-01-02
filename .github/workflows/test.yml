@@ -19,7 +19,7 @@ jobs:
           set -ex
 
           brew update
-          brew install docker docker-compose qemu
+          brew install docker docker-buildx docker-compose qemu
           curl -L "https://raw.githubusercontent.com/Homebrew/homebrew-core/5d01145b5a83d32e5ebee11677884ee429a6be4e/Formula/l/lima.rb" \
             -o lima.rb
           curl -L "https://raw.githubusercontent.com/Homebrew/homebrew-core/b8276941690ad4235558c4848b747eb21656f178/Formula/c/colima.rb" \
