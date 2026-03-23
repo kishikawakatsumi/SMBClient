@@ -2,7 +2,7 @@
 
 [![Test](https://github.com/kishikawakatsumi/SMBClient/actions/workflows/test.yml/badge.svg)](https://github.com/kishikawakatsumi/SMBClient/actions/workflows/test.yml)
 
-Swift SMB client library and iOS/macOS file browser applications. This library provides a high-level interface to the SMB protocol and allows you to access files on remote SMB servers. Written in pure Swift, with no dependencies on external libraries.
+A Swift SMB client library and iOS/macOS file browser application. This library provides a high-level interface to the SMB protocol and allows you to access files on remote SMB servers. Written in pure Swift, with no dependencies on external libraries.
 
 ## Usage
 
