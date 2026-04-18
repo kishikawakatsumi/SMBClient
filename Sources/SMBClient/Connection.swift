@@ -78,6 +78,7 @@ public class Connection {
 
   public func disconnect() {
     connection.cancel()
+    connection.stateUpdateHandler = nil
   }
 
   public func send(_ data: Data) async throws -> Data {
