@@ -259,7 +259,6 @@ public class Connection {
 }
 
 public enum ConnectionError: Error {
-  case noData
   case disconnected
   case cancelled
   case unknown
