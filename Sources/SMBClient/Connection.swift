@@ -169,7 +169,7 @@ public class Connection {
               .endOfFile:
               response += data
             case .pending:
-              if self.buffer.count > 0 {
+              if self.buffer.count >= 4 {
                 let transportPacket = DirectTCPPacket(response: self.buffer)
                 let length = Int(transportPacket.protocolLength)
 
