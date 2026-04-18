@@ -14,6 +14,9 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
       - name: Test
         run: |
           set -ex
@@ -36,7 +39,9 @@ jobs:
           LIMA_VERSION="$(brew list --versions lima | awk '{print $2}')"
           LIMACTL_PATH="$LIMA_CELLAR/$LIMA_VERSION/bin/limactl"
 
-          sudo curl -L -o "$LIMACTL_PATH" https://github.com/mikekazakov/lima-nohvf/raw/master/limactl
+          GIT_LFS_SKIP_SMUDGE=1 git clone --depth=1 https://github.com/mikekazakov/lima-nohvf.git /tmp/lima-nohvf
+          cd /tmp/lima-nohvf && go build -ldflags "-X github.com/lima-vm/lima/pkg/version.Version=v${LIMA_VERSION}" -o /tmp/limactl-nohvf ./cmd/limactl && cd -
+          sudo cp /tmp/limactl-nohvf "$LIMACTL_PATH"
           sudo chmod +x "$LIMACTL_PATH"
 
           colima start --network-address --arch arm64 --vm-type=qemu
