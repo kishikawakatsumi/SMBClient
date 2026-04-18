@@ -6,6 +6,7 @@ public class Connection {
   var onDisconnected: (Error) -> Void
 
   private let connection: NWConnection
+  private let queue: DispatchQueue
   private var buffer = Data()
 
   private let semaphore = Semaphore(value: 1)
@@ -21,6 +22,7 @@ public class Connection {
       port: NWEndpoint.Port(integerLiteral: 445)
     )
     connection = NWConnection(to: endpoint, using: .tcp)
+    queue = DispatchQueue(label: "com.kishikawakatsumi.smbclient.connection.\(host)", qos: .userInitiated)
     onDisconnected = { _ in }
   }
 
@@ -31,6 +33,7 @@ public class Connection {
       port: NWEndpoint.Port(rawValue: UInt16(port))!
     )
     connection = NWConnection(to: endpoint, using: .tcp)
+    queue = DispatchQueue(label: "com.kishikawakatsumi.smbclient.connection.\(host)", qos: .userInitiated)
     onDisconnected = { _ in }
   }
 
@@ -57,7 +60,7 @@ public class Connection {
         }
       }
 
-      connection.start(queue: .global(qos: .userInitiated))
+      connection.start(queue: queue)
     }
 
     @Sendable
