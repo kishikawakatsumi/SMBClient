@@ -40,7 +40,7 @@ jobs:
           LIMACTL_PATH="$LIMA_CELLAR/$LIMA_VERSION/bin/limactl"
 
           GIT_LFS_SKIP_SMUDGE=1 git clone --depth=1 https://github.com/mikekazakov/lima-nohvf.git /tmp/lima-nohvf
-          cd /tmp/lima-nohvf && go build -o /tmp/limactl-nohvf ./cmd/limactl && cd -
+          cd /tmp/lima-nohvf && go build -ldflags "-X github.com/lima-vm/lima/pkg/version.Version=v${LIMA_VERSION}" -o /tmp/limactl-nohvf ./cmd/limactl && cd -
           sudo cp /tmp/limactl-nohvf "$LIMACTL_PATH"
           sudo chmod +x "$LIMACTL_PATH"
 
