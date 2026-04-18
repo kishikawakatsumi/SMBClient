@@ -14,39 +14,116 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.21'
-      - name: Test
+
+      - name: Install Samba
+        run: brew install samba
+
+      - name: Configure and start Samba
         run: |
           set -ex
 
-          brew update
-          brew install docker docker-buildx docker-compose qemu
+          SAMBA_PREFIX="$(brew --prefix samba)"
+          SAMBA_DIR=/tmp/samba
+          SMB_CONF=/tmp/smb.conf
 
-          mkdir -p ~/.docker/cli-plugins
-          ln -sfn /opt/homebrew/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
-          ln -sfn /opt/homebrew/opt/docker-buildx/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx
+          # Create Samba working directories and share directories
+          sudo mkdir -p \
+            "$SAMBA_DIR/private" \
+            "$SAMBA_DIR/lock" \
+            "$SAMBA_DIR/pid" \
+            "$SAMBA_DIR/state" \
+            "$SAMBA_DIR/cache" \
+            "$SAMBA_DIR/log" \
+            "$SAMBA_DIR/shares/alice" \
+            "$SAMBA_DIR/shares/bob" \
+            "$SAMBA_DIR/shares/public"
 
-          curl -L "https://raw.githubusercontent.com/Homebrew/homebrew-core/5d01145b5a83d32e5ebee11677884ee429a6be4e/Formula/l/lima.rb" \
-            -o lima.rb
-          curl -L "https://raw.githubusercontent.com/Homebrew/homebrew-core/b8276941690ad4235558c4848b747eb21656f178/Formula/c/colima.rb" \
-            -o colima.rb
-          HOMEBREW_DEVELOPER=1 brew install --formula ./lima.rb ./colima.rb
-          brew info lima
+          # Copy fixture files into the share directories
+          sudo cp -r Tests/SMBClientTests/Fixtures/shares/alice/. "$SAMBA_DIR/shares/alice/"
+          sudo cp -r Tests/SMBClientTests/Fixtures/shares/bob/.   "$SAMBA_DIR/shares/bob/"
 
-          LIMA_CELLAR="$(brew --cellar lima)"
-          LIMA_VERSION="$(brew list --versions lima | awk '{print $2}')"
-          LIMACTL_PATH="$LIMA_CELLAR/$LIMA_VERSION/bin/limactl"
+          # Create local OS users alice and bob (GID 20 = staff on macOS)
+          sudo dscl . -create /Users/alice
+          sudo dscl . -create /Users/alice UserShell /bin/bash
+          sudo dscl . -create /Users/alice RealName "Alice"
+          sudo dscl . -create /Users/alice UniqueID "1000"
+          sudo dscl . -create /Users/alice PrimaryGroupID "20"
+          sudo dscl . -passwd  /Users/alice alipass
 
-          GIT_LFS_SKIP_SMUDGE=1 git clone --depth=1 https://github.com/mikekazakov/lima-nohvf.git /tmp/lima-nohvf
-          cd /tmp/lima-nohvf && go build -ldflags "-X github.com/lima-vm/lima/pkg/version.Version=v${LIMA_VERSION}" -o /tmp/limactl-nohvf ./cmd/limactl && cd -
-          sudo cp /tmp/limactl-nohvf "$LIMACTL_PATH"
-          sudo chmod +x "$LIMACTL_PATH"
+          sudo dscl . -create /Users/bob
+          sudo dscl . -create /Users/bob UserShell /bin/bash
+          sudo dscl . -create /Users/bob RealName "Bob"
+          sudo dscl . -create /Users/bob UniqueID "1001"
+          sudo dscl . -create /Users/bob PrimaryGroupID "20"
+          sudo dscl . -passwd  /Users/bob bobpass
 
-          colima start --network-address --arch arm64 --vm-type=qemu
-          export DOCKER_BUILDKIT=1
-          export COMPOSE_DOCKER_CLI_BUILD=1
-          docker-compose up --detach
+          # Set share ownership and permissions
+          sudo chown -R alice:staff "$SAMBA_DIR/shares/alice"
+          sudo chown -R bob:staff   "$SAMBA_DIR/shares/bob"
+          sudo chmod -R 755 "$SAMBA_DIR/shares"
+          sudo chmod 777    "$SAMBA_DIR/shares/public"
 
-          swift test
+          # Write smb.conf
+          # Share order matters: access based share enum returns shares in smb.conf order.
+          # Tests expect: Public, <user-specific share>, IPC$ – so [Public] must come first.
+          cat > "$SMB_CONF" << 'EOF'
+[global]
+   workgroup = WORKGROUP
+   server string = Samba Server
+   security = user
+   map to guest = Never
+   passdb backend = tdbsam:/tmp/samba/private/passdb.tdb
+   smb ports = 4445
+   log level = 3
+   log file = /tmp/samba/log/smbd.log
+   client signing = mandatory
+   access based share enum = yes
+   private dir = /tmp/samba/private
+   lock directory = /tmp/samba/lock
+   pid directory = /tmp/samba/pid
+   state directory = /tmp/samba/state
+   cache directory = /tmp/samba/cache
+
+[Public]
+   path = /tmp/samba/shares/public
+   valid users = alice bob
+   guest ok = no
+   read only = no
+   browseable = yes
+   force group = staff
+
+[Alice Share]
+   path = /tmp/samba/shares/alice
+   valid users = alice
+   guest ok = no
+   read only = no
+   browseable = yes
+
+[Bob Share]
+   path = /tmp/samba/shares/bob
+   valid users = bob
+   guest ok = no
+   read only = no
+   browseable = yes
+EOF
+
+          # Add alice and bob to the Samba password database.
+          # SMB_CONF_PATH is honoured by all Samba tools and overrides the compiled-in default.
+          printf '%s\n%s\n' alipass alipass | sudo env SMB_CONF_PATH="$SMB_CONF" "$SAMBA_PREFIX/bin/smbpasswd" -s -a alice
+          printf '%s\n%s\n' bobpass bobpass | sudo env SMB_CONF_PATH="$SMB_CONF" "$SAMBA_PREFIX/bin/smbpasswd" -s -a bob
+
+          # Start smbd as a daemon
+          sudo "$SAMBA_PREFIX/sbin/smbd" -D -s "$SMB_CONF"
+
+          # Wait until port 4445 is accepting connections (timeout 30 s)
+          for i in $(seq 1 30); do
+            if nc -z 127.0.0.1 4445 2>/dev/null; then
+              echo "Samba is ready on port 4445"
+              break
+            fi
+            echo "Waiting for Samba... attempt $i"
+            sleep 1
+          done
+
+      - name: Run tests
+        run: swift test
