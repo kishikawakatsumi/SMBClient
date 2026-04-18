@@ -19,6 +19,49 @@ jobs:
         run: brew install samba
 
       - name: Configure and start Samba
+        # SMB_CONF_CONTENT is defined in the env block below so that the
+        # smb.conf text (which contains [section] headers at column-0) does
+        # not break YAML's block-scalar parser inside the run: | script.
+        env:
+          SMB_CONF_CONTENT: |
+            [global]
+               workgroup = WORKGROUP
+               server string = Samba Server
+               security = user
+               map to guest = Never
+               passdb backend = tdbsam:/tmp/samba/private/passdb.tdb
+               smb ports = 4445
+               log level = 3
+               log file = /tmp/samba/log/smbd.log
+               client signing = mandatory
+               access based share enum = yes
+               private dir = /tmp/samba/private
+               lock directory = /tmp/samba/lock
+               pid directory = /tmp/samba/pid
+               state directory = /tmp/samba/state
+               cache directory = /tmp/samba/cache
+
+            [Public]
+               path = /tmp/samba/shares/public
+               valid users = alice bob
+               guest ok = no
+               read only = no
+               browseable = yes
+               force group = staff
+
+            [Alice Share]
+               path = /tmp/samba/shares/alice
+               valid users = alice
+               guest ok = no
+               read only = no
+               browseable = yes
+
+            [Bob Share]
+               path = /tmp/samba/shares/bob
+               valid users = bob
+               guest ok = no
+               read only = no
+               browseable = yes
         run: |
           set -ex
 
@@ -63,49 +106,10 @@ jobs:
           sudo chmod -R 755 "$SAMBA_DIR/shares"
           sudo chmod 777    "$SAMBA_DIR/shares/public"
 
-          # Write smb.conf
+          # Write smb.conf from the environment variable defined in the env: block above.
           # Share order matters: access based share enum returns shares in smb.conf order.
           # Tests expect: Public, <user-specific share>, IPC$ – so [Public] must come first.
-          cat > "$SMB_CONF" << 'EOF'
-[global]
-   workgroup = WORKGROUP
-   server string = Samba Server
-   security = user
-   map to guest = Never
-   passdb backend = tdbsam:/tmp/samba/private/passdb.tdb
-   smb ports = 4445
-   log level = 3
-   log file = /tmp/samba/log/smbd.log
-   client signing = mandatory
-   access based share enum = yes
-   private dir = /tmp/samba/private
-   lock directory = /tmp/samba/lock
-   pid directory = /tmp/samba/pid
-   state directory = /tmp/samba/state
-   cache directory = /tmp/samba/cache
-
-[Public]
-   path = /tmp/samba/shares/public
-   valid users = alice bob
-   guest ok = no
-   read only = no
-   browseable = yes
-   force group = staff
-
-[Alice Share]
-   path = /tmp/samba/shares/alice
-   valid users = alice
-   guest ok = no
-   read only = no
-   browseable = yes
-
-[Bob Share]
-   path = /tmp/samba/shares/bob
-   valid users = bob
-   guest ok = no
-   read only = no
-   browseable = yes
-EOF
+          printf '%s' "$SMB_CONF_CONTENT" | sudo tee "$SMB_CONF" > /dev/null
 
           # Add alice and bob to the Samba password database.
           # SMB_CONF_PATH is honoured by all Samba tools and overrides the compiled-in default.
