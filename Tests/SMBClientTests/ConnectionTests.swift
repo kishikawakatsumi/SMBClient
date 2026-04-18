@@ -69,11 +69,16 @@ final class ConnectionTests: XCTestCase {
     }
 
     let assignedPort: UInt16 = try await withCheckedThrowingContinuation { continuation in
+      var resumed = false
       listener.stateUpdateHandler = { state in
         switch state {
         case .ready:
+          guard !resumed else { return }
+          resumed = true
           continuation.resume(returning: listener.port!.rawValue)
         case .failed(let error):
+          guard !resumed else { return }
+          resumed = true
           continuation.resume(throwing: error)
         default:
           break
