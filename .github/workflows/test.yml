@@ -14,39 +14,8 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.21'
-      - name: Test
-        run: |
-          set -ex
-
-          brew update
-          brew install docker docker-buildx docker-compose qemu
-
-          mkdir -p ~/.docker/cli-plugins
-          ln -sfn /opt/homebrew/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
-          ln -sfn /opt/homebrew/opt/docker-buildx/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx
-
-          curl -L "https://raw.githubusercontent.com/Homebrew/homebrew-core/5d01145b5a83d32e5ebee11677884ee429a6be4e/Formula/l/lima.rb" \
-            -o lima.rb
-          curl -L "https://raw.githubusercontent.com/Homebrew/homebrew-core/b8276941690ad4235558c4848b747eb21656f178/Formula/c/colima.rb" \
-            -o colima.rb
-          HOMEBREW_DEVELOPER=1 brew install --formula ./lima.rb ./colima.rb
-          brew info lima
-
-          LIMA_CELLAR="$(brew --cellar lima)"
-          LIMA_VERSION="$(brew list --versions lima | awk '{print $2}')"
-          LIMACTL_PATH="$LIMA_CELLAR/$LIMA_VERSION/bin/limactl"
-
-          GIT_LFS_SKIP_SMUDGE=1 git clone --depth=1 https://github.com/mikekazakov/lima-nohvf.git /tmp/lima-nohvf
-          cd /tmp/lima-nohvf && go build -ldflags "-X github.com/lima-vm/lima/pkg/version.Version=v${LIMA_VERSION}" -o /tmp/limactl-nohvf ./cmd/limactl && cd -
-          sudo cp /tmp/limactl-nohvf "$LIMACTL_PATH"
-          sudo chmod +x "$LIMACTL_PATH"
-
-          colima start --network-address --arch arm64 --vm-type=qemu
-          export DOCKER_BUILDKIT=1
-          export COMPOSE_DOCKER_CLI_BUILD=1
-          docker-compose up --detach
-
-          swift test
+      - uses: docker/setup-docker-action@v4
+      - name: Start SMB server
+        run: docker compose up --detach
+      - name: Run tests
+        run: swift test
