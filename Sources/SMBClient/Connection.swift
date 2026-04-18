@@ -33,7 +33,7 @@ public class Connection {
       port: NWEndpoint.Port(rawValue: UInt16(port))!
     )
     connection = NWConnection(to: endpoint, using: .tcp)
-    queue = DispatchQueue(label: "com.kishikawakatsumi.smbclient.connection.\(host)", qos: .userInitiated)
+    queue = DispatchQueue(label: "com.kishikawakatsumi.smbclient.connection.\(host):\(port)", qos: .userInitiated)
     onDisconnected = { _ in }
   }
 
