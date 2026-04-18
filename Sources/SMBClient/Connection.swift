@@ -143,75 +143,86 @@ public class Connection {
       }
 
       self.buffer.append(Data(content))
-      let transportPacket = DirectTCPPacket(response: self.buffer)
-      let length = Int(transportPacket.protocolLength)
-      self.buffer = Data(transportPacket.smb2Message)
 
-      self.receive(upTo: length) { (result) in
-        switch result {
+      self.receive(upTo: 4) { (headerResult) in
+        switch headerResult {
+        case .failure(let error):
+          completion(.failure(error))
+          return
         case .success:
-          let data = Data(self.buffer.prefix(length))
-          self.buffer = Data(self.buffer.suffix(from: length))
+          break
+        }
 
-          let reader = ByteReader(data)
-          var offset = 0
+        let transportPacket = DirectTCPPacket(response: self.buffer)
+        let length = Int(transportPacket.protocolLength)
+        self.buffer = Data(transportPacket.smb2Message)
 
-          var header: Header
-          var response = Data()
-          repeat {
-            header = reader.read()
+        self.receive(upTo: length) { (result) in
+          switch result {
+          case .success:
+            let data = Data(self.buffer.prefix(length))
+            self.buffer = Data(self.buffer.suffix(from: length))
 
-            switch NTStatus(header.status) {
-            case
-              .success,
-              .moreProcessingRequired,
-              .noMoreFiles,
-              .endOfFile:
-              response += data
-            case .pending:
-              if self.buffer.count >= 4 {
-                let transportPacket = DirectTCPPacket(response: self.buffer)
-                let length = Int(transportPacket.protocolLength)
+            let reader = ByteReader(data)
+            var offset = 0
 
-                if self.buffer.count < 4 + length {
+            var header: Header
+            var response = Data()
+            repeat {
+              header = reader.read()
+
+              switch NTStatus(header.status) {
+              case
+                .success,
+                .moreProcessingRequired,
+                .noMoreFiles,
+                .endOfFile:
+                response += data
+              case .pending:
+                if self.buffer.count >= 4 {
+                  let transportPacket = DirectTCPPacket(response: self.buffer)
+                  let length = Int(transportPacket.protocolLength)
+
+                  if self.buffer.count < 4 + length {
+                    self.receive(completion: completion)
+                    return
+                  }
+
+                  let data = transportPacket.smb2Message
+                  self.buffer = Data(self.buffer.suffix(from: 4 + length))
+
+                  let reader = ByteReader(data)
+                  let header: Header = reader.read()
+
+                  switch NTStatus(header.status) {
+                  case
+                    .success,
+                    .moreProcessingRequired,
+                    .noMoreFiles,
+                    .endOfFile:
+                    response += data
+                    break
+                  default:
+                    completion(.failure(ErrorResponse(data: data)))
+                    return
+                  }
+                } else {
                   self.receive(completion: completion)
                   return
                 }
-
-                let data = transportPacket.smb2Message
-                self.buffer = Data(self.buffer.suffix(from: 4 + length))
-
-                let reader = ByteReader(data)
-                let header: Header = reader.read()
-
-                switch NTStatus(header.status) {
-                case
-                  .success,
-                  .moreProcessingRequired,
-                  .noMoreFiles,
-                  .endOfFile:
-                  response += data
-                  break
-                default:
-                  completion(.failure(ErrorResponse(data: data)))
-                  return
-                }
-              } else {
-                self.receive(completion: completion)
+              default:
+                completion(.failure(ErrorResponse(data: Data(data[offset...]))))
                 return
               }
-            default:
-              completion(.failure(ErrorResponse(data: Data(data[offset...]))))
-              return
-            }
 
-            offset += Int(header.nextCommand)
-            reader.seek(to: offset)
-          } while header.nextCommand > 0
+              offset += Int(header.nextCommand)
+              reader.seek(to: offset)
+            } while header.nextCommand > 0
 
-          completion(.success(response))
-        case .failure(let error):
-          completion(.failure(error))
+            completion(.success(response))
+          case .failure(let error):
+            completion(.failure(error))
+          }
         }
       }
     }
