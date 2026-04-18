@@ -14,7 +14,13 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/setup-docker-action@v4
+      - name: Setup Docker (Colima with Virtualization.framework)
+        run: |
+          brew install colima docker docker-compose
+          mkdir -p ~/.docker/cli-plugins
+          ln -sfn /opt/homebrew/opt/docker-compose/bin/docker-compose \
+            ~/.docker/cli-plugins/docker-compose
+          colima start --vm-type vz --cpu 3 --memory 6
       - name: Start SMB server
         run: docker compose up --detach
       - name: Run tests
