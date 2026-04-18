@@ -121,7 +121,7 @@ public class Connection {
   }
 
   private func receive(completion: @escaping (Result<Data, Error>) -> Void) {
-    let minimumIncompleteLength = 0
+    let minimumIncompleteLength = 1
     let maximumLength = 65536
 
     connection.receive(
@@ -137,7 +137,7 @@ public class Connection {
         if isComplete {
           completion(.failure(ConnectionError.disconnected))
         } else {
-          completion(.failure(ConnectionError.noData))
+          self.receive(completion: completion)
         }
         return
       }
@@ -218,7 +218,7 @@ public class Connection {
   }
 
   private func receive(upTo byteCount: Int, completion: @escaping (Result<(), Error>) -> Void) {
-    let minimumIncompleteLength = 0
+    let minimumIncompleteLength = 1
     let maximumLength = 65536
 
     if self.buffer.count < byteCount {
@@ -232,7 +232,7 @@ public class Connection {
           if isComplete {
             completion(.failure(ConnectionError.disconnected))
           } else {
-            completion(.failure(ConnectionError.noData))
+            self.receive(upTo: byteCount, completion: completion)
           }
           return
         }
