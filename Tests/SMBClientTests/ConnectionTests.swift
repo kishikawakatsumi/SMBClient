@@ -51,9 +51,12 @@ final class ConnectionTests: XCTestCase {
       drainLoop()
 
       // Send each scripted fragment sequentially, with a delay between them.
+      // After the last fragment is delivered, cancel the server connection so the
+      // drain loop is stopped and no resources are held open unnecessarily.
       func sendNext(_ index: Int) {
         guard index < script.fragments.count else {
           serverDone?.fulfill()
+          serverConn.cancel()
           return
         }
         serverConn.send(content: script.fragments[index], completion: .contentProcessed { _ in
@@ -63,6 +66,7 @@ final class ConnectionTests: XCTestCase {
             }
           } else {
             serverDone?.fulfill()
+            serverConn.cancel()
           }
         })
       }
