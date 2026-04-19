@@ -202,7 +202,7 @@ public enum ErrorCode: UInt32 {
   case noMoreFiles = 0x80000006
   case stoppedOnSymlink = 0x8000002D
   case notImplemented = 0xC0000002
-  case invalidInfoClass = 0xC000000
+  case invalidInfoClass = 0xC0000003
   case invalidParameter = 0xC000000D
   case noSuchDevice = 0xC000000E
   case noSuchFile = 0xC000000F

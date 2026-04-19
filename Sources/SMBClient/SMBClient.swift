@@ -258,7 +258,7 @@ extension Share.ShareType: CustomStringConvertible {
       type.append("IPC")
     case SType.clusterFS:
       type.append("Cluster FS")
-    case SType.clusterDFS:
+    case SType.clusterSOFS:
       type.append("Cluster SOFS")
     case SType.clusterDFS:
       type.append("Cluster DFS")

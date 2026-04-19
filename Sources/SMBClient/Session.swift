@@ -406,8 +406,6 @@ public class Session {
         return false
       }
       throw error
-    } catch {
-      throw error
     }
   }
 
@@ -419,8 +417,6 @@ public class Session {
       if NTStatus(error.header.status) == .objectNameNotFound {
         return false
       }
-      throw error
-    } catch {
       throw error
     }
   }
