@@ -141,3 +141,9 @@ jobs:
 
       - name: Run tests
         run: swift test
+
+      - name: Show Samba log on failure
+        if: failure()
+        run: |
+          echo "=== smbd.log ==="
+          cat /tmp/samba/log/smbd.log 2>/dev/null | tail -100 || echo "(no log)"
