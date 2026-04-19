@@ -67,7 +67,9 @@ jobs:
 
           SAMBA_PREFIX="$(brew --prefix samba)"
           SAMBA_DIR=/tmp/samba
-          SMB_CONF=/tmp/smb.conf
+          # Use the Homebrew default config path; Homebrew Samba tools (smbpasswd etc.)
+          # are compiled with --sysconfdir=/opt/homebrew/etc and ignore SMB_CONF_PATH.
+          SMB_CONF=/opt/homebrew/etc/smb.conf
 
           # Create Samba working directories and share directories
           sudo mkdir -p \
@@ -112,9 +114,8 @@ jobs:
           printf '%s' "$SMB_CONF_CONTENT" | sudo tee "$SMB_CONF" > /dev/null
 
           # Add alice and bob to the Samba password database.
-          # SMB_CONF_PATH is honoured by all Samba tools and overrides the compiled-in default.
-          printf '%s\n%s\n' alipass alipass | sudo env SMB_CONF_PATH="$SMB_CONF" "$SAMBA_PREFIX/bin/smbpasswd" -s -a alice
-          printf '%s\n%s\n' bobpass bobpass | sudo env SMB_CONF_PATH="$SMB_CONF" "$SAMBA_PREFIX/bin/smbpasswd" -s -a bob
+          printf '%s\n%s\n' alipass alipass | sudo "$SAMBA_PREFIX/bin/smbpasswd" -s -a alice
+          printf '%s\n%s\n' bobpass bobpass | sudo "$SAMBA_PREFIX/bin/smbpasswd" -s -a bob
 
           # Start smbd as a daemon
           sudo "$SAMBA_PREFIX/sbin/smbd" -D -s "$SMB_CONF"
