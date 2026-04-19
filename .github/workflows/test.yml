@@ -139,6 +139,30 @@ jobs:
             sleep 1
           done
 
+      - name: Diagnose write permissions
+        run: |
+          SAMBA_PREFIX="$(brew --prefix samba)"
+          set -x
+
+          # Test Unix filesystem write permission for alice
+          sudo -u alice bash -c 'mkdir /tmp/samba/shares/alice/unix_test_dir' \
+            && echo "unix mkdir as alice: OK" || echo "unix mkdir as alice: FAILED"
+          sudo -u alice bash -c 'echo test > /tmp/samba/shares/alice/unix_test_file' \
+            && echo "unix create file as alice: OK" || echo "unix create file as alice: FAILED"
+
+          # Test write permission via smbclient
+          "$SAMBA_PREFIX/bin/smbclient" "//localhost/Alice Share" -p 4445 \
+            -U alice%alipass -c 'mkdir smbclient_test_dir' \
+            && echo "smbclient mkdir as alice: OK" || echo "smbclient mkdir as alice: FAILED"
+
+          # Show current smb.conf
+          echo "=== smb.conf ==="
+          cat /opt/homebrew/etc/smb.conf
+
+          # Show share directory permissions
+          echo "=== share directory permissions ==="
+          ls -la /tmp/samba/shares/
+
       - name: Run tests
         run: swift test
 
