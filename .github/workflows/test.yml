@@ -117,8 +117,12 @@ jobs:
           printf '%s\n%s\n' alipass alipass | sudo "$SAMBA_PREFIX/bin/smbpasswd" -s -a alice
           printf '%s\n%s\n' bobpass bobpass | sudo "$SAMBA_PREFIX/bin/smbpasswd" -s -a bob
 
-          # Locate smbd – Homebrew may install it under bin/ or sbin/
-          SMBD_PATH=$(find "$SAMBA_PREFIX" -name "smbd" -type f 2>/dev/null | head -1)
+          # Locate smbd using brew list (handles symlinks and any install layout)
+          SMBD_PATH=$(brew list samba 2>/dev/null | grep '/smbd$' | head -1)
+          # Fallback: search under the prefix without restricting to regular files
+          if [ -z "$SMBD_PATH" ]; then
+            SMBD_PATH=$(find "$SAMBA_PREFIX" -name "smbd" 2>/dev/null | head -1)
+          fi
           echo "smbd found at: $SMBD_PATH"
 
           # Start smbd as a daemon
