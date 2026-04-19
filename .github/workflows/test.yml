@@ -40,6 +40,8 @@ jobs:
                pid directory = /tmp/samba/pid
                state directory = /tmp/samba/state
                cache directory = /tmp/samba/cache
+               nt acl support = no
+               unix extensions = no
 
             [Public]
                path = /tmp/samba/shares/public
@@ -102,11 +104,10 @@ jobs:
           sudo dscl . -create /Users/bob PrimaryGroupID "20"
           sudo dscl . -passwd  /Users/bob bobpass
 
-          # Set share ownership and permissions
+          # Set share ownership and permissions (777 mirrors Docker's --chmod=777 approach)
           sudo chown -R alice:staff "$SAMBA_DIR/shares/alice"
           sudo chown -R bob:staff   "$SAMBA_DIR/shares/bob"
-          sudo chmod -R 755 "$SAMBA_DIR/shares"
-          sudo chmod 777    "$SAMBA_DIR/shares/public"
+          sudo chmod -R 777 "$SAMBA_DIR/shares"
 
           # Write smb.conf from the environment variable defined in the env: block above.
           # Share order matters: access based share enum returns shares in smb.conf order.
