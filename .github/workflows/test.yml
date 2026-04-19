@@ -117,8 +117,12 @@ jobs:
           printf '%s\n%s\n' alipass alipass | sudo "$SAMBA_PREFIX/bin/smbpasswd" -s -a alice
           printf '%s\n%s\n' bobpass bobpass | sudo "$SAMBA_PREFIX/bin/smbpasswd" -s -a bob
 
+          # Locate smbd – Homebrew may install it under bin/ or sbin/
+          SMBD_PATH=$(find "$SAMBA_PREFIX" -name "smbd" -type f 2>/dev/null | head -1)
+          echo "smbd found at: $SMBD_PATH"
+
           # Start smbd as a daemon
-          sudo "$SAMBA_PREFIX/sbin/smbd" -D -s "$SMB_CONF"
+          sudo "$SMBD_PATH" -D -s "$SMB_CONF"
 
           # Wait until port 4445 is accepting connections (timeout 30 s)
           for i in $(seq 1 30); do
