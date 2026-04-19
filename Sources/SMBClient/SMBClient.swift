@@ -47,7 +47,11 @@ public class SMBClient {
 
   @discardableResult
   public func logoff() async throws -> Logoff.Response {
-    try await session.logoff()
+    defer {
+      session.disconnect()
+    }
+    let response = try await session.logoff()
+    return response
   }
 
   public func listShares() async throws -> [Share] {

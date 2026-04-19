@@ -39,22 +39,34 @@ public class Connection {
 
   public func connect() async throws {
     return try await withCheckedThrowingContinuation { (continuation) in
-      connection.stateUpdateHandler = { (state) in
+      connection.stateUpdateHandler = { [weak self] (state) in
         switch state {
         case .setup, .preparing:
           break
         case .waiting(let error):
           continuation.resume(throwing: error)
-          self.connection.stateUpdateHandler = nil
+          self?.connection.stateUpdateHandler = nil
         case .ready:
           continuation.resume()
-          self.connection.stateUpdateHandler = stateUpdateHandler
+          // NWConnection delivers all state updates on `queue`, so assigning
+          // stateUpdateHandler here is safe: it runs on the same serial queue
+          // as any future state updates.
+          self?.connection.stateUpdateHandler = { [weak self] state in
+            switch state {
+            case .waiting(let error), .failed(let error):
+              self?.onDisconnected(error)
+            case .setup, .preparing, .ready, .cancelled:
+              break
+            @unknown default:
+              break
+            }
+          }
         case .failed(let error):
           continuation.resume(throwing: error)
-          self.connection.stateUpdateHandler = nil
+          self?.connection.stateUpdateHandler = nil
         case .cancelled:
           continuation.resume(throwing: ConnectionError.cancelled)
-          self.connection.stateUpdateHandler = nil
+          self?.connection.stateUpdateHandler = nil
         @unknown default:
           break
         }
@@ -62,21 +74,14 @@ public class Connection {
 
       connection.start(queue: queue)
     }
-
-    @Sendable
-    func stateUpdateHandler(_ state: NWConnection.State) {
-      switch state {
-      case .waiting(let error), .failed(let error):
-        onDisconnected(error)
-      case .setup, .preparing, .ready, .cancelled:
-        break
-      @unknown default:
-        break
-      }
-    }
   }
 
   public func disconnect() {
+    // Do not nil stateUpdateHandler before cancelling: NWConnection delivers
+    // the .cancelled state update asynchronously, and clearing the handler
+    // first would prevent any in-flight connect() continuation from being
+    // resumed, causing a hang. The retain cycle is instead broken by
+    // capturing self weakly in the handler closures.
     connection.cancel()
   }
 

@@ -130,6 +130,7 @@ enum Crypto {
 
   public static func hmacMD5(key: Data, data: Data) -> Data {
     let context = UnsafeMutablePointer<CCHmacContext>.allocate(capacity: 1)
+    defer { context.deallocate() }
     CCHmacInit(context, CCHmacAlgorithm(kCCHmacAlgMD5), (key as NSData).bytes, size_t(key.count))
     CCHmacUpdate(context, (data as NSData).bytes, size_t(data.count))
     var hmac = Array<UInt8>(repeating: 0, count: Int(CC_MD5_DIGEST_LENGTH))
@@ -139,6 +140,7 @@ enum Crypto {
 
   public static func hmacSHA256(key: Data, data: Data) -> Data {
     let context = UnsafeMutablePointer<CCHmacContext>.allocate(capacity: 1)
+    defer { context.deallocate() }
     CCHmacInit(context, CCHmacAlgorithm(kCCHmacAlgSHA256), (key as NSData).bytes, size_t(key.count))
     CCHmacUpdate(context, (data as NSData).bytes, size_t(data.count))
     var hmac = Array<UInt8>(repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
