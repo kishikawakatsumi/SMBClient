@@ -17,12 +17,13 @@ public class Connection {
 
   public init(host: String) {
     self.host = host
+    
     let endpoint = NWEndpoint.hostPort(
       host: NWEndpoint.Host(host),
       port: NWEndpoint.Port(integerLiteral: 445)
     )
     connection = NWConnection(to: endpoint, using: .tcp)
-    queue = DispatchQueue(label: "com.kishikawakatsumi.smbclient.connection.\(host)", qos: .userInitiated)
+    queue = DispatchQueue(label: "com.kishikawakatsumi.smbclient.connection.\(host):445", qos: .userInitiated)
     onDisconnected = { _ in }
   }
 
