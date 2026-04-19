@@ -380,12 +380,12 @@ final class ConnectionTests: XCTestCase {
     }
   }
 
-  // MARK: - #10: disconnect() during an in-flight connect() must not hang (PR #218)
+  // MARK: - #10: disconnect() during an in-flight connect() must resume with .cancelled (PR #218)
 
   /// With the old `disconnect()` that cleared `stateUpdateHandler` synchronously,
   /// an in-flight `connect()` continuation could be dropped, hanging forever.
   /// The fix keeps the handler attached and relies on `[weak self]` so the
-  /// `.cancelled` state update resumes the continuation with `.cancelled`.
+  /// `.cancelled` state update resumes the continuation with `ConnectionError.cancelled`.
   func testDisconnectDuringInflightConnectResumesWithCancelled() async throws {
     // 198.51.100.1 is TEST-NET-1 (RFC 5737); connections will never complete.
     let connection = Connection(host: "198.51.100.1", port: 445)
@@ -408,15 +408,11 @@ final class ConnectionTests: XCTestCase {
 
     connection.disconnect()
 
-    // The task must resume promptly (no hang).
-    let deadline = Date().addingTimeInterval(5)
+    // The task must resume promptly (no hang) with ConnectionError.cancelled.
     let result = await withTaskGroup(of: Error?.self) { group -> Error? in
       group.addTask { await task.value }
       group.addTask {
-        while Date() < deadline {
-          if task.isCancelled { return nil }
-          try? await Task.sleep(nanoseconds: 50_000_000)
-        }
+        try? await Task.sleep(nanoseconds: 5_000_000_000)
         return nil
       }
       let first = await group.next() ?? nil
@@ -424,9 +420,16 @@ final class ConnectionTests: XCTestCase {
       return first
     }
 
-    // Accept any ConnectionError (cancelled / disconnected) or NWError — the key
-    // guarantee is that we DO NOT hang.
-    XCTAssertNotNil(result, "connect() should have thrown after disconnect(), not hung")
+    // disconnect() cancels the NWConnection which delivers .cancelled to the
+    // stateUpdateHandler, which resumes the continuation with ConnectionError.cancelled.
+    guard let error = result else {
+      XCTFail("connect() should have thrown ConnectionError.cancelled after disconnect(), not hung")
+      return
+    }
+    guard let connError = error as? ConnectionError, case .cancelled = connError else {
+      XCTFail("Expected ConnectionError.cancelled, got \(error)")
+      return
+    }
   }
 
   // MARK: - #13: retain cycle check — Connection deallocates after disconnect
