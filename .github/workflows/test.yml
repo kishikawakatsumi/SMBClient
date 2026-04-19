@@ -123,7 +123,18 @@ jobs:
           if [ -z "$SMBD_PATH" ]; then
             SMBD_PATH=$(find "$SAMBA_PREFIX" -name "smbd" 2>/dev/null | head -1)
           fi
+          # Last resort: search entire /opt/homebrew for smbd
+          if [ -z "$SMBD_PATH" ]; then
+            SMBD_PATH=$(find /opt/homebrew -name "smbd" 2>/dev/null | head -1)
+          fi
           echo "smbd found at: $SMBD_PATH"
+          # Debug: list all samba binaries for diagnosis
+          echo "=== brew list samba (first 30) ==="
+          brew list samba 2>/dev/null | head -30 || true
+          echo "=== ls SAMBA_PREFIX ==="
+          ls "$SAMBA_PREFIX" 2>/dev/null || true
+          ls "$SAMBA_PREFIX/bin" 2>/dev/null || true
+          ls "$SAMBA_PREFIX/sbin" 2>/dev/null || true
 
           # Start smbd as a daemon
           sudo "$SMBD_PATH" -D -s "$SMB_CONF"
