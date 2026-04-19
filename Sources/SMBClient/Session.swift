@@ -406,8 +406,6 @@ public class Session {
         return false
       }
       throw error
-    } catch {
-      throw error
     }
   }
 
