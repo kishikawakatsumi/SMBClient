@@ -375,12 +375,32 @@ class FilesViewController: NSViewController {
     quickLookCurrentAsset = asset
     quickLookCurrentVideoPath = smbPath
 
-    let playerItem = AVPlayerItem(asset: asset)
-    let player = AVPlayer(playerItem: playerItem)
-    quickLookPlayerView?.player = player
-    player.play()
+    // Mirror MediaPlayerWindowController.windowDidLoad: read a single byte
+    // through a freshly opened FileReader before handing the SMBAVAsset to
+    // AVPlayer. Sleeping NAS disks block this read at the SMB layer until
+    // they spin up, which is the cleanest way to gate AVPlayer setup.
+    // Without this, AVPlayer's first metadata fetch fails fast on a
+    // sleeping disk and Quick Look stays on a black overlay with no
+    // recovery path (AVPlayer doesn't retry on its own).
+    Task { @MainActor [weak self, treeAccessor, smbPath, asset] in
+      do {
+        let reader = try await treeAccessor.fileReader(path: smbPath)
+        _ = try await reader.read(offset: 0, length: 1)
+        try await reader.close()
+      } catch {
+        return  // Couldn't reach the file at all; bail silently.
+      }
+      guard let self else { return }
+      // The user may have arrow-keyed past this video while we waited.
+      guard self.quickLookCurrentAsset === asset else { return }
 
-    resizeQuickLookPanelToVideoSize(of: asset)
+      let playerItem = AVPlayerItem(asset: asset)
+      let player = AVPlayer(playerItem: playerItem)
+      self.quickLookPlayerView?.player = player
+      player.play()
+
+      self.resizeQuickLookPanelToVideoSize(of: asset)
+    }
   }
 
   /// Resize the QLPreviewPanel to fit the video's natural dimensions, capped
@@ -490,23 +510,44 @@ class FilesViewController: NSViewController {
   /// `item.localURL` and asks Quick Look to re-render once the file is on
   /// disk. We only refresh the panel if the item is still the current one,
   /// since arrow-keying past it shouldn't yank the visible preview.
+  ///
+  /// NAS disks frequently sleep, and the first SMB read after a sleep can
+  /// fail with a timeout / IO error while the platters spin up. We retry
+  /// with exponential backoff so the preview eventually appears once the
+  /// disk is awake instead of permanently sticking on the blank placeholder.
   private func startQuickLookDownload(for item: QuickLookItem) {
     Task { [weak self, treeAccessor, smbPath = item.smbPath, localURL = item.localURL, weak item] in
-      do {
-        let data = try await treeAccessor.download(path: smbPath)
-        try data.write(to: localURL, options: .atomic)
-        await MainActor.run {
-          guard self != nil else { return }
-          guard let panel = QLPreviewPanel.shared(), panel.isVisible else { return }
-          if let current = panel.currentPreviewItem as? QuickLookItem,
-             current === item {
-            panel.refreshCurrentPreviewItem()
+      // 1, 2, 4, 8, 16, 32 — ~63 seconds of cumulative wait before giving up,
+      // which comfortably covers a typical NAS spin-up.
+      let backoffSeconds: [UInt64] = [0, 1, 2, 4, 8, 16, 32]
+
+      for backoff in backoffSeconds {
+        if backoff > 0 {
+          do {
+            try await Task.sleep(nanoseconds: backoff * 1_000_000_000)
+          } catch {
+            return  // Task cancelled while waiting — bail.
           }
         }
-      } catch {
-        // Download failed: leave the empty placeholder. Quick Look will
-        // fall back to its generic icon + metadata preview, which is what
-        // we want for un-previewable files anyway.
+        do {
+          let data = try await treeAccessor.download(path: smbPath)
+          try data.write(to: localURL, options: .atomic)
+          await MainActor.run {
+            guard self != nil else { return }
+            guard let panel = QLPreviewPanel.shared(), panel.isVisible else { return }
+            if let current = panel.currentPreviewItem as? QuickLookItem,
+               current === item {
+              panel.refreshCurrentPreviewItem()
+            }
+          }
+          return
+        } catch {
+          // Likely a spin-up timeout or transient SMB error. Loop and try
+          // again after the next backoff — unless this was the final
+          // attempt, in which case we silently give up and Quick Look's
+          // generic icon + metadata preview takes over.
+          continue
+        }
       }
     }
   }
