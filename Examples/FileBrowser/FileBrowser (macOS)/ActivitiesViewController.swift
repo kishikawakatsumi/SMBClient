@@ -53,11 +53,16 @@ class ActivitiesViewController: NSViewController {
 
   @IBAction
   private func clearActivities(_ sender: NSSegmentedControl) {
+    // Snapshot the row count *before* mutating the model — `numberOfRows(in:)`
+    // is data-source backed, so it would otherwise change underneath us mid-loop
+    // and produce the wrong reverse-mapped row indices (and, when more than one
+    // entry needed removing, an `Invalid update:` assertion crash).
+    let oldRowCount = tableView.numberOfRows
     let deleted = TransferQueue.shared.clearFinishedTransfers()
+    guard !deleted.isEmpty else { return }
 
-    for index in deleted {
-      tableView.removeRows(at: [tableView.numberOfRows - 1 - index])
-    }
+    let rowsToRemove = IndexSet(deleted.map { oldRowCount - 1 - $0 })
+    tableView.removeRows(at: rowsToRemove, withAnimation: .effectFade)
   }
 }
 
