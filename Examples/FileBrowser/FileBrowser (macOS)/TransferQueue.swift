@@ -28,7 +28,13 @@ class TransferQueue {
 
     Task {
       var fileTransfer = fileTransfer
+      // Preserve any progressHandler the caller set on the transfer before
+      // adding it to the queue (used by the file-promise drag-out path to
+      // detect terminal state). The internal handler we install below
+      // forwards each state update to the caller's handler first.
+      let externalHandler = fileTransfer.progressHandler
       fileTransfer.progressHandler = { (state) in
+        externalHandler(state)
         Task {
           await throttler.throttle {
             await MainActor.run { [weak self] in
