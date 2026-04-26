@@ -78,6 +78,13 @@ class FilesViewController: NSViewController {
 
     outlineView.doubleAction = #selector(doubleAction(_:))
     outlineView.registerForDraggedTypes([.fileURL])
+    // Without these, NSOutlineView's drag source defaults to .none for
+    // non-local sessions, which silently kills any drag-out to Finder no
+    // matter what file-promise pasteboard data we write. .move enables the
+    // existing within-outline rename/move; .copy enables the drag-out
+    // download path.
+    outlineView.setDraggingSourceOperationMask(.move, forLocal: true)
+    outlineView.setDraggingSourceOperationMask(.copy, forLocal: false)
 
     for column in outlineView.tableColumns {
       column.sortDescriptorPrototype = NSSortDescriptor(key: column.identifier.rawValue, ascending: true)
@@ -688,10 +695,21 @@ extension FilesViewController: NSOutlineViewDataSource {
   func outlineView(_ outlineView: NSOutlineView, pasteboardWriterForItem item: Any) -> (any NSPasteboardWriting)? {
     guard let fileNode = item as? FileNode else { return nil }
 
-    let pasteboardItem = NSPasteboardItem()
-    pasteboardItem.setString(fileNode.id.rawValue, forType: .fileURL)
-
-    return pasteboardItem
+    // Use NSFilePromiseProvider so dragging a row onto Finder triggers a
+    // download. The custom `.smbeamSMBPath` type is written alongside the
+    // file promise so internal drops within outlineView (= rename/move)
+    // can still recover the SMB path. UTType picks the file's filename
+    // extension so Finder's drop progress UI gets a sensible icon.
+    let utiIdentifier: String
+    if fileNode.isDirectory {
+      utiIdentifier = UTType.folder.identifier
+    } else {
+      let ext = (fileNode.name as NSString).pathExtension
+      utiIdentifier = UTType(filenameExtension: ext)?.identifier ?? UTType.data.identifier
+    }
+    let provider = SMBFilePromiseProvider(fileType: utiIdentifier, delegate: self)
+    provider.userInfo = SMBPromiseInfo(smbPath: fileNode.path, isDirectory: fileNode.isDirectory)
+    return provider
   }
 
   func outlineView(_ outlineView: NSOutlineView, validateDrop info: any NSDraggingInfo, proposedItem item: Any?, proposedChildIndex index: Int) -> NSDragOperation {
@@ -727,30 +745,24 @@ extension FilesViewController: NSOutlineViewDataSource {
   }
 
   func outlineView(_ outlineView: NSOutlineView, acceptDrop info: any NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
-    guard let fileURLs = info.draggingPasteboard.readObjects(forClasses: [NSURL.self]) else { return false }
-
     if let _ = info.draggingSource as? NSOutlineView {
+      // Internal drag — moves within the share. Source identity is now
+      // carried on the custom `.smbeamSMBPath` pasteboard type written
+      // alongside the file promise (see SMBFilePromiseProvider).
+      let smbPaths: [String] = (info.draggingPasteboard.pasteboardItems ?? []).compactMap {
+        $0.string(forType: .smbeamSMBPath)
+      }
+      let nodes: [FileNode] = smbPaths.compactMap { dirTree.node(ID($0)) }
+      guard !nodes.isEmpty else { return false }
+
       func validate() -> Bool {
-        for fileURL in fileURLs {
-          guard let fileURL = fileURL as? URL else { return false }
-
-          guard let node = dirTree.node(fileURL) else {
-            return false
-          }
-
+        for node in nodes {
           if let fileNode = item as? FileNode {
-            guard fileNode.isDirectory else {
-              return false
-            }
-            if dirTree.parent(of: node) == fileNode {
-              return false
-            }
-
+            guard fileNode.isDirectory else { return false }
+            if dirTree.parent(of: node) == fileNode { return false }
             return true
           } else {
-            if node.isRoot {
-              return false
-            }
+            if node.isRoot { return false }
             return true
           }
         }
@@ -758,20 +770,10 @@ extension FilesViewController: NSOutlineViewDataSource {
       }
 
       if validate() {
-        for fileURL in fileURLs {
-          guard let fileURL = fileURL as? URL else { return false }
-
-          guard let node = dirTree.node(fileURL) else {
-            return false
-          }
-
+        for node in nodes {
           if let fileNode = item as? FileNode {
-            guard fileNode.isDirectory else {
-              return false
-            }
-            if dirTree.parent(of: node) == fileNode {
-              return false
-            }
+            guard fileNode.isDirectory else { return false }
+            if dirTree.parent(of: node) == fileNode { return false }
 
             Task {
               let basename = URL(fileURLWithPath: node.path).lastPathComponent
@@ -782,9 +784,7 @@ extension FilesViewController: NSOutlineViewDataSource {
             }
             continue
           } else {
-            if node.isRoot {
-              return false
-            }
+            if node.isRoot { return false }
 
             Task {
               let basename = URL(fileURLWithPath: node.path).lastPathComponent
@@ -815,6 +815,9 @@ extension FilesViewController: NSOutlineViewDataSource {
         return false
       }
     } else {
+      // External drag — Finder uploads. NSURLs are still on the pasteboard
+      // because Finder writes them itself.
+      guard let fileURLs = info.draggingPasteboard.readObjects(forClasses: [NSURL.self]) else { return false }
       for fileURL in fileURLs {
         guard let fileURL = fileURL as? URL else { return false }
         let queue = TransferQueue.shared
@@ -1051,6 +1054,84 @@ final class QuickLookItem: NSObject, QLPreviewItem {
 
   var previewItemURL: URL! { localURL }
   var previewItemTitle: String! { title }
+}
+
+// MARK: - Drag-out (file promise)
+
+extension FilesViewController: NSFilePromiseProviderDelegate {
+  /// Returns the on-disk file name Finder should use for the dropped file.
+  /// Finder appends "copy" / number suffixes if a file with that name
+  /// already exists at the drop location, so we don't have to handle
+  /// collisions ourselves.
+  func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider, fileNameForType fileType: String) -> String {
+    if let info = filePromiseProvider.userInfo as? SMBPromiseInfo {
+      return (info.smbPath as NSString).lastPathComponent
+    }
+    return "Untitled"
+  }
+
+  /// AppKit invokes this on the queue returned from `operationQueue(for:)`
+  /// once the user drops on a destination. We delegate the actual byte
+  /// streaming to a `FileDownload` queued through `TransferQueue` so the
+  /// Activities panel reflects the work, while reporting completion back
+  /// to AppKit so it can dismiss its drag-progress indicator.
+  func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider, writePromiseTo url: URL, completionHandler: @escaping (Error?) -> Void) {
+    guard let info = filePromiseProvider.userInfo as? SMBPromiseInfo else {
+      completionHandler(URLError(.badURL))
+      return
+    }
+
+    let download = FileDownload(
+      sourcePath: info.smbPath,
+      isDirectory: info.isDirectory,
+      destination: url,
+      accessor: treeAccessor
+    )
+
+    // Pre-set a progressHandler that resolves Finder's file promise on
+    // terminal state. TransferQueue.addFileTransfer chains our handler in
+    // front of its own throttled UI handler, so both run.
+    let lock = NSLock()
+    var resolved = false
+    download.progressHandler = { state in
+      let outcome: Result<Void, Error>?
+      switch state {
+      case .completed: outcome = .success(())
+      case .failed(let error): outcome = .failure(error)
+      case .queued, .started: outcome = nil
+      }
+      guard let outcome else { return }
+      lock.lock()
+      if resolved { lock.unlock(); return }
+      resolved = true
+      lock.unlock()
+      switch outcome {
+      case .success: completionHandler(nil)
+      case .failure(let error): completionHandler(error)
+      }
+    }
+
+    Task { @MainActor in
+      TransferQueue.shared.addFileTransfer(download)
+      // Surface the Activities panel so the user sees progress, matching
+      // the upload-on-drop behaviour.
+      NotificationCenter.default.post(name: Self.didStartActivities, object: self)
+    }
+  }
+
+  /// Serial queue used for AppKit's writePromiseTo callbacks. We don't
+  /// actually do work here — the work happens in TransferQueue's actor —
+  /// but AppKit requires a non-main queue so the call doesn't block UI.
+  func operationQueue(for filePromiseProvider: NSFilePromiseProvider) -> OperationQueue {
+    Self.filePromiseQueue
+  }
+
+  private static let filePromiseQueue: OperationQueue = {
+    let queue = OperationQueue()
+    queue.qualityOfService = .userInitiated
+    queue.name = "com.kishikawakatsumi.smbeam.file-promise"
+    return queue
+  }()
 }
 
 extension FilesViewController: NSTextFieldDelegate {
