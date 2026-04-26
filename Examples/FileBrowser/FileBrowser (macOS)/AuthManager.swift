@@ -8,15 +8,19 @@ protocol AuthManager {
 class ServiceAuthManager: AuthManager {
   private let id: ID
   private let service: String
+  private let serviceType: String
+  private let serviceDomain: String
 
   private var authWindowController: ConnectServiceWindowController
   private var authViewController: ConnectServiceViewController
 
   private var session: Session?
 
-  init(id: ID, service: String) {
+  init(id: ID, service: String, type: String, domain: String) {
     self.id = id
     self.service = service
+    self.serviceType = type
+    self.serviceDomain = domain
 
     authWindowController = ConnectServiceWindowController.instantiate()
 
@@ -60,11 +64,16 @@ class ServiceAuthManager: AuthManager {
 
     Task { @MainActor in
       do {
+        let resolved = try await ServiceResolver.resolve(
+          name: service, type: serviceType, domain: serviceDomain
+        )
+
         let sessionManager = SessionManager.shared
         let session = try await sessionManager.login(
           id: id,
-          displayName: nil,
-          server: service,
+          displayName: service,
+          server: resolved.host,
+          port: resolved.port == 445 ? nil : resolved.port,
           username: username,
           password: password,
           savePassword: rememberPassword

@@ -85,7 +85,13 @@ extension SidebarManager {
     if let serverNode = node.content as? ServerNode {
       let authManager: AuthManager
       if serverNode.path.hasSuffix("._smb._tcp.local.") {
-        authManager = ServiceAuthManager(id: serverNode.id, service: serverNode.name)
+        let service = ServiceDiscovery.shared.services.first { $0.id == serverNode.id }
+        authManager = ServiceAuthManager(
+          id: serverNode.id,
+          service: serverNode.name,
+          type: service?.type ?? "_smb._tcp",
+          domain: service?.domain ?? "local."
+        )
       } else {
         authManager = ServerAuthManager(id: serverNode.id)
       }
