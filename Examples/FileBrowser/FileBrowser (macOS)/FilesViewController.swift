@@ -324,11 +324,11 @@ class FilesViewController: NSViewController {
 
   private func beginEditing(_ row: Int) {
     guard let _ = outlineView.item(atRow: row) as? FileNode else { return }
-
-    guard let rowView = outlineView.rowView(atRow: row, makeIfNecessary: false) else { return }
-    guard let cellView = rowView.view(atColumn: 0) as? NSTableCellView else { return }
-
-    cellView.window?.makeFirstResponder(cellView.textField)
+    // Drive editing through the table-view entry point. The basename-only
+    // initial selection is applied from `controlTextDidBeginEditing(_:)` —
+    // running it from here gets overwritten by AppKit's own select-all
+    // that fires when the field editor attaches.
+    outlineView.editColumn(0, row: row, with: nil, select: true)
   }
 
   @IBAction func deleteMenuAction(_ sender: Any?) {
@@ -758,5 +758,43 @@ func join(_ paths: String...) -> String {
     return paths.dropFirst().joined(separator: "/")
   } else {
     return paths.joined(separator: "/")
+  }
+}
+
+/// NSTextField subclass that mimics Finder's "select basename, leave extension"
+/// behaviour when entering edit mode. AppKit's auto-select-all happens *after*
+/// `NSTextFieldDelegate.controlTextDidBeginEditing(_:)` and after a synchronous
+/// `selectedRange = …` from `becomeFirstResponder()`, so the override has to
+/// dispatch to the next runloop tick on the responder path. The mouse path
+/// already has the field editor installed by the time `super.mouseDown` returns,
+/// so we can update the selection synchronously there.
+///
+/// Reference: CotEditor's FilenameTextField
+/// (https://github.com/coteditor/CotEditor — Apache 2.0).
+class FilenameTextField: NSTextField {
+  override func mouseDown(with event: NSEvent) {
+    super.mouseDown(with: event)
+    currentEditor()?.smbeam_selectFilenameStem()
+  }
+
+  override func becomeFirstResponder() -> Bool {
+    guard super.becomeFirstResponder() else { return false }
+    DispatchQueue.main.async { [weak self] in
+      self?.currentEditor()?.smbeam_selectFilenameStem()
+    }
+    return true
+  }
+}
+
+private extension NSText {
+  /// Selects the filename stem (the portion preceding the trailing
+  /// `.<ext>`). For names without a "real" extension — directories without
+  /// dot-suffixes, dotfiles like `.gitignore`, names like `README` —
+  /// the entire string is selected, matching Finder.
+  func smbeam_selectFilenameStem() {
+    let name = self.string as NSString
+    let stem = (name.deletingPathExtension as NSString)
+    let length = stem.length > 0 ? stem.length : name.length
+    self.selectedRange = NSRange(location: 0, length: length)
   }
 }
