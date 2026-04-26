@@ -282,18 +282,33 @@ class FilesViewController: NSViewController {
 
   private func openFileNode(_ fileNode: FileNode) {
     if fileNode.isDirectory {
-      guard let navigationController = navigationController() else { return }
-
       let treeAccessor = self.treeAccessor
       let path = dirTree.resolvePath(fileNode)
       let rootPath = self.rootPath
+      let serverNode = self.serverNode
+      let share = self.share
+      let title = fileNode.name
 
-      let filesViewController = FilesViewController.instantiate(
-        accessor: treeAccessor, serverNode: serverNode, share: share, path: path, rootPath: rootPath
-      )
-      filesViewController.title = fileNode.name
+      let makeFilesViewController: () -> FilesViewController = {
+        let vc = FilesViewController.instantiate(
+          accessor: treeAccessor, serverNode: serverNode, share: share, path: path, rootPath: rootPath
+        )
+        vc.title = title
+        return vc
+      }
 
-      navigationController.push(filesViewController)
+      // Cmd-click / Cmd-double-click on a directory opens it in a new tab,
+      // matching Finder's gesture.
+      let cmdHeld = NSApp.currentEvent?.modifierFlags.contains(.command) ?? false
+      if cmdHeld {
+        (NSApp.delegate as? AppDelegate)?.openInNewTab(adjacentTo: view.window) { nav in
+          nav.push(makeFilesViewController())
+        }
+        return
+      }
+
+      guard let navigationController = navigationController() else { return }
+      navigationController.push(makeFilesViewController())
     } else {
       let treeAccessor = self.treeAccessor
       let path = dirTree.resolvePath(fileNode)
