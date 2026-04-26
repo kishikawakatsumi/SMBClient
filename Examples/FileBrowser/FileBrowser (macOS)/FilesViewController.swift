@@ -325,9 +325,9 @@ class FilesViewController: NSViewController {
   private func beginEditing(_ row: Int) {
     guard let _ = outlineView.item(atRow: row) as? FileNode else { return }
     // Drive editing through the table-view entry point. The basename-only
-    // initial selection is applied from `controlTextDidBeginEditing(_:)` —
-    // running it from here gets overwritten by AppKit's own select-all
-    // that fires when the field editor attaches.
+    // initial selection is handled by `FilenameTextField` when it becomes
+    // first responder; attempting to force the selection here gets
+    // overwritten by AppKit's own select-all as the field editor attaches.
     outlineView.editColumn(0, row: row, with: nil, select: true)
   }
 
