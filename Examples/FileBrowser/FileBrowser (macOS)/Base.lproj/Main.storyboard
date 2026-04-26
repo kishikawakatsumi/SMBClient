@@ -95,6 +95,11 @@
                                                 <action selector="renameMenuAction:" target="Ady-hI-5gd" id="OHY-l9-GBq"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Quick Look" keyEquivalent="y" id="QLk-ql-mnu">
+                                            <connections>
+                                                <action selector="quickLookPreviewItems:" target="Ady-hI-5gd" id="QLk-ql-act"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="Gis-At-27X"/>
                                         <menuItem title="Delete" id="7f1-bQ-JCc">
                                             <string key="keyEquivalent" base64-UTF8="YES">
