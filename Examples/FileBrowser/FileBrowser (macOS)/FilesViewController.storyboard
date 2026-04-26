@@ -20,7 +20,7 @@
                                     <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
-                                        <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="reverseSequential" alternatingRowBackgroundColors="YES" autosaveColumns="NO" rowSizeStyle="automatic" headerView="cw9-C2-pyF" viewBased="YES" indentationPerLevel="13" outlineTableColumn="SFB-na-l8h" id="IkX-kb-led">
+                                        <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="reverseSequential" alternatingRowBackgroundColors="YES" autosaveColumns="NO" rowSizeStyle="automatic" headerView="cw9-C2-pyF" viewBased="YES" indentationPerLevel="13" outlineTableColumn="SFB-na-l8h" id="IkX-kb-led" customClass="FilesOutlineView" customModule="FileBrowser" customModuleProvider="target">
                                             <rect key="frame" x="0.0" y="0.0" width="522" height="272"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="4"/>
