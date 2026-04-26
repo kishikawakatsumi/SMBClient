@@ -609,10 +609,13 @@ class FilesViewController: NSViewController {
   }
 
   private func deleteFileNodes(rows: IndexSet) async {
+    let nodes = rows.compactMap { outlineView.item(atRow: $0) as? FileNode }
+    guard !nodes.isEmpty else { return }
+    guard await confirmDeletion(of: nodes) else { return }
+
     var reloadPaths = Set<String>()
     do {
-      for row in rows {
-        guard let fileNode = outlineView.item(atRow: row) as? FileNode else { continue }
+      for fileNode in nodes {
         let path = fileNode.path
 
         if fileNode.isDirectory {
@@ -631,6 +634,45 @@ class FilesViewController: NSViewController {
     } catch {
       NSAlert(error: error).runModal()
     }
+  }
+
+  /// Modal confirmation before destructive deletion. Files on SMB shares are
+  /// removed permanently (no Trash), so make the warning explicit and
+  /// default the safe button (Cancel).
+  @MainActor
+  private func confirmDeletion(of nodes: [FileNode]) async -> Bool {
+    let alert = NSAlert()
+    if nodes.count == 1 {
+      let node = nodes[0]
+      let format = NSLocalizedString(
+        "Are you sure you want to delete “%@”?",
+        comment: "Confirm deletion of a single SMB item"
+      )
+      alert.messageText = String(format: format, node.name)
+    } else {
+      let format = NSLocalizedString(
+        "Are you sure you want to delete these %d items?",
+        comment: "Confirm deletion of multiple SMB items"
+      )
+      alert.messageText = String(format: format, nodes.count)
+    }
+    alert.informativeText = NSLocalizedString(
+      "This operation cannot be undone.",
+      comment: "Permanent deletion warning"
+    )
+    alert.alertStyle = .warning
+
+    let deleteButton = alert.addButton(withTitle: NSLocalizedString("Delete", comment: ""))
+    deleteButton.hasDestructiveAction = true
+    alert.addButton(withTitle: NSLocalizedString("Cancel", comment: ""))
+
+    let response: NSApplication.ModalResponse
+    if let window = view.window {
+      response = await alert.beginSheetModal(for: window)
+    } else {
+      response = alert.runModal()
+    }
+    return response == .alertFirstButtonReturn
   }
 
   @objc
