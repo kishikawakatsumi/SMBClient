@@ -115,7 +115,7 @@
 		14288FAD2CF87E800059EA58 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		14288FAE2CF87E800059EA58 /* SharesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharesView.swift; sourceTree = "<group>"; };
 		14288FAF2CF87E800059EA58 /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
-		144680172C347E1F0029A1AB /* File Browser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "File Browser.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		144680172C347E1F0029A1AB /* SMBeam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SMBeam.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1446801A2C347E1F0029A1AB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1446801E2C347E200029A1AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		144680212C347E200029A1AB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -262,7 +262,7 @@
 		144680182C347E1F0029A1AB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				144680172C347E1F0029A1AB /* File Browser.app */,
+				144680172C347E1F0029A1AB /* SMBeam.app */,
 				14C23C802C53962F00CEA8CF /* File Browser.app */,
 				14F80F742CEA933D00C1869A /* File Browser.app */,
 			);
@@ -372,7 +372,7 @@
 				14F80FD92CEA974200C1869A /* FlyingSocks */,
 			);
 			productName = FileBrowser;
-			productReference = 144680172C347E1F0029A1AB /* File Browser.app */;
+			productReference = 144680172C347E1F0029A1AB /* SMBeam.app */;
 			productType = "com.apple.product-type.application";
 		};
 		14C23C7F2C53962F00CEA8CF /* FileBrowser (iOS) */ = {
@@ -762,7 +762,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kishikawakatsumi.FileBrowser;
 				PRODUCT_MODULE_NAME = FileBrowser;
-				PRODUCT_NAME = "File Browser";
+				PRODUCT_NAME = SMBeam;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -792,7 +792,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.kishikawakatsumi.FileBrowser;
 				PRODUCT_MODULE_NAME = FileBrowser;
-				PRODUCT_NAME = "File Browser";
+				PRODUCT_NAME = SMBeam;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};

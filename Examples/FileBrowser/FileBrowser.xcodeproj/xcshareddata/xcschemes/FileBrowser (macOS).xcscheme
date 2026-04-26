@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "144680162C347E1F0029A1AB"
-               BuildableName = "File Browser.app"
+               BuildableName = "SMBeam.app"
                BlueprintName = "FileBrowser (macOS)"
                ReferencedContainer = "container:FileBrowser.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "144680162C347E1F0029A1AB"
-            BuildableName = "File Browser.app"
+            BuildableName = "SMBeam.app"
             BlueprintName = "FileBrowser (macOS)"
             ReferencedContainer = "container:FileBrowser.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "144680162C347E1F0029A1AB"
-            BuildableName = "File Browser.app"
+            BuildableName = "SMBeam.app"
             BlueprintName = "FileBrowser (macOS)"
             ReferencedContainer = "container:FileBrowser.xcodeproj">
          </BuildableReference>
