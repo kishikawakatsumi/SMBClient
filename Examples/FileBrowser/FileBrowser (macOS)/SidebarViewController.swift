@@ -120,6 +120,12 @@ extension SidebarViewController: NSOutlineViewDelegate {
       return
     }
 
+    // Cmd-click on a sidebar entry opens it in a new tab, matching Finder.
+    // We capture this off NSApp.currentEvent because the selection-change
+    // delegate fires during the click that caused it.
+    let cmdHeld = NSApp.currentEvent?.modifierFlags.contains(.command) ?? false
+    let host = view.window
+
     switch node.content {
     case let serverNode as ServerNode:
       guard let _ = sessionManager.session(for: serverNode.id) else { return }
@@ -135,11 +141,17 @@ extension SidebarViewController: NSOutlineViewDelegate {
           rowView.isSelected = true
         }
 
-        guard let navigationController = navigationController() else { return }
-
         guard let shares: [ShareNode] = DataRepository.shared.nodes(serverNode.path) else { return }
         let sharesViewController = SharesViewController.instantiate(serverNode: serverNode, shares: Tree(nodes: shares))
-        navigationController.push(sharesViewController)
+
+        if cmdHeld {
+          (NSApp.delegate as? AppDelegate)?.openInNewTab(adjacentTo: host) { nav in
+            nav.push(sharesViewController)
+          }
+        } else {
+          guard let navigationController = navigationController() else { return }
+          navigationController.push(sharesViewController)
+        }
       }
     case let shareNode as ShareNode:
       guard let serverNode = sidebarManager.parent(of: node)?.content as? ServerNode else { return }
@@ -157,7 +169,13 @@ extension SidebarViewController: NSOutlineViewDelegate {
         )
         filesViewController.title = shareNode.name
 
-        navigationController()?.push(filesViewController)
+        if cmdHeld {
+          (NSApp.delegate as? AppDelegate)?.openInNewTab(adjacentTo: host) { nav in
+            nav.push(filesViewController)
+          }
+        } else {
+          navigationController()?.push(filesViewController)
+        }
       }
     default:
       break

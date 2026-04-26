@@ -115,4 +115,39 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     guard let index = windowControllers.firstIndex(where: { $0.window == window }) else { return }
     windowControllers.remove(at: index)
   }
+
+  /// Create a fresh WindowController, push the given view controller on top of
+  /// its empty navigation stack, then attach it as a tab to `existingWindow`.
+  /// Returns the new window controller (already retained by the AppDelegate).
+  /// Used by Cmd-click in the file list and the sidebar to open the destination
+  /// in a new tab, mirroring Finder's "open in new tab" gesture.
+  @discardableResult
+  func openInNewTab(
+    adjacentTo existingWindow: NSWindow?,
+    configure: (NavigationController) -> Void
+  ) -> WindowController? {
+    guard
+      let windowController = NSStoryboard(name: "Main", bundle: nil)
+        .instantiateInitialController() as? WindowController,
+      let newWindow = windowController.window,
+      let split = windowController.contentViewController as? SplitViewController,
+      let nav = split.splitViewItems[safe: 1]?.viewController as? NavigationController
+    else { return nil }
+
+    configure(nav)
+
+    if let existingWindow {
+      existingWindow.addTabbedWindow(newWindow, ordered: .above)
+    }
+    newWindow.makeKeyAndOrderFront(nil)
+
+    windowControllers.append(windowController)
+    return windowController
+  }
+}
+
+private extension Array {
+  subscript(safe index: Int) -> Element? {
+    indices.contains(index) ? self[index] : nil
+  }
 }
