@@ -369,6 +369,18 @@ class FilesViewController: NSViewController {
       quickLookPlayerView = playerView
     }
 
+    // Quick Look's preview engine may insert its own "couldn't preview"
+    // view on top of contentView a moment after we add our overlay (the
+    // placeholder file we hand to QLPreviewItem is empty, so it errors).
+    // Reassert the overlay's z-order over the next couple of seconds so
+    // it stays on top regardless of when QL's error view appears.
+    ensureQuickLookOverlayOnTop()
+    for delay in [0.05, 0.15, 0.5, 1.5, 3.0] {
+      DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+        self?.ensureQuickLookOverlayOnTop()
+      }
+    }
+
     // Tear down previous asset before installing the new one. SMBAVAsset.close()
     // closes the underlying FileReader, so we don't leak SMB handles when
     // arrow-keying through a list of videos.
@@ -382,17 +394,16 @@ class FilesViewController: NSViewController {
     quickLookCurrentAsset = asset
     quickLookCurrentVideoPath = smbPath
 
-    // Mirror MediaPlayerWindowController.windowDidLoad: read a single byte
-    // through a freshly opened FileReader before handing the SMBAVAsset to
-    // AVPlayer. Sleeping NAS disks block this read at the SMB layer until
-    // they spin up, which is the cleanest way to gate AVPlayer setup.
-    // Without this, AVPlayer's first metadata fetch fails fast on a
-    // sleeping disk and Quick Look stays on a black overlay with no
-    // recovery path (AVPlayer doesn't retry on its own).
+    // Warmup: read a real chunk before letting AVPlayer touch the asset.
+    // 1-byte reads can return immediately from a NAS metadata cache on
+    // some implementations without ever hitting the platters; using the
+    // default read length (≈ maxReadSize, ~1 MB) forces a real fetch and
+    // therefore reliably blocks server-side until the disk has spun up.
+    // Same pattern as MediaPlayerWindowController.windowDidLoad.
     Task { @MainActor [weak self, treeAccessor, smbPath, asset] in
       do {
         let reader = try await treeAccessor.fileReader(path: smbPath)
-        _ = try await reader.read(offset: 0, length: 1)
+        _ = try await reader.read(offset: 0)
         try await reader.close()
       } catch {
         return  // Couldn't reach the file at all; bail silently.
@@ -405,9 +416,23 @@ class FilesViewController: NSViewController {
       let player = AVPlayer(playerItem: playerItem)
       self.quickLookPlayerView?.player = player
       player.play()
+      // Re-promote one more time post-warmup to cover late QL views.
+      self.ensureQuickLookOverlayOnTop()
 
       self.resizeQuickLookPanelToVideoSize(of: asset)
     }
+  }
+
+  /// Re-pin the AVPlayerView overlay to the top of `panel.contentView`'s
+  /// subview stack. Cheap enough to call repeatedly from delayed dispatches.
+  private func ensureQuickLookOverlayOnTop() {
+    guard let panel = QLPreviewPanel.shared(),
+          panel.isVisible,
+          let containerView = panel.contentView,
+          let overlay = quickLookPlayerView,
+          overlay.superview === containerView
+    else { return }
+    containerView.addSubview(overlay, positioned: .above, relativeTo: nil)
   }
 
   /// Resize the QLPreviewPanel to fit the video's natural dimensions, capped
