@@ -9,6 +9,24 @@ public class Connection {
   private let queue: DispatchQueue
   private var buffer = Data()
 
+  // Set by Session once SMB3 encryption keys are derived. When a received
+  // message begins with the TRANSFORM_HEADER protocolId, it is decrypted to the
+  // underlying SMB2 message before any header parsing.
+  //
+  // Written via `setDecryptor` (which hops onto `queue`) and only ever read in
+  // `decryptIfNeeded`, which runs inside the NWConnection receive callback on
+  // `queue`. Keeping both on the serial `queue` gives a clean happens-before so
+  // there is no data race on this field across the async executor / connection
+  // queue boundary.
+  private var decryptor: ((Data) throws -> Data)?
+
+  /// Install (or clear) the decrypt hook. Routed through the connection's serial
+  /// `queue` so it is ordered with the receive-path reads of `decryptor`. Called
+  /// from Session's async context (never from `queue`), so `sync` can't deadlock.
+  func setDecryptor(_ decryptor: ((Data) throws -> Data)?) {
+    queue.sync { self.decryptor = decryptor }
+  }
+
   private let semaphore = Semaphore(value: 1)
 
   public var state: NWConnection.State {
@@ -39,40 +57,12 @@ public class Connection {
   }
 
   public func connect() async throws {
-    return try await withCheckedThrowingContinuation { (continuation) in
-      connection.stateUpdateHandler = { [weak self] (state) in
-        switch state {
-        case .setup, .preparing:
-          break
-        case .waiting(let error):
-          continuation.resume(throwing: error)
-          self?.connection.stateUpdateHandler = nil
-        case .ready:
-          continuation.resume()
-          // NWConnection delivers all state updates on `queue`, so assigning
-          // stateUpdateHandler here is safe: it runs on the same serial queue
-          // as any future state updates.
-          self?.connection.stateUpdateHandler = { [weak self] state in
-            switch state {
-            case .waiting(let error), .failed(let error):
-              self?.onDisconnected(error)
-            case .setup, .preparing, .ready, .cancelled:
-              break
-            @unknown default:
-              break
-            }
-          }
-        case .failed(let error):
-          continuation.resume(throwing: error)
-          self?.connection.stateUpdateHandler = nil
-        case .cancelled:
-          continuation.resume(throwing: ConnectionError.cancelled)
-          self?.connection.stateUpdateHandler = nil
-        @unknown default:
-          break
-        }
-      }
-
+    return try await withCheckedThrowingContinuation { continuation in
+      let handler = ConnectionStateHandler(
+        completion: { continuation.resume(with: $0) },
+        onDisconnected: { [weak self] in self?.onDisconnected($0) }
+      )
+      connection.stateUpdateHandler = handler.handle
       connection.start(queue: queue)
     }
   }
@@ -127,111 +117,84 @@ public class Connection {
   }
 
   private func receive(completion: @escaping (Result<Data, Error>) -> Void) {
-    let minimumIncompleteLength = 1
-    let maximumLength = 65536
-
-    connection.receive(
-      minimumIncompleteLength: minimumIncompleteLength,
-      maximumLength: maximumLength)
-    { (content, contentContext, isComplete, error) in
-      if let error = error {
+    receive(upTo: 4) { result in
+      if case .failure(let error) = result {
         completion(.failure(error))
         return
       }
-
-      guard let content else {
-        if isComplete {
-          completion(.failure(ConnectionError.disconnected))
-        } else {
-          self.receive(completion: completion)
-        }
+      let transportPacket = DirectTCPPacket(response: self.buffer)
+      let length = Int(transportPacket.protocolLength)
+      guard self.buffer.first == 0, length >= 64 else {
+        self.disconnect()
+        completion(.failure(ConnectionError.invalidResponse))
         return
       }
-
-      self.buffer.append(Data(content))
-
-      self.receive(upTo: 4) { (headerResult) in
-        switch headerResult {
+      self.buffer = Data(transportPacket.smb2Message)
+      self.receive(upTo: length) { result in
+        switch result {
         case .failure(let error):
           completion(.failure(error))
-          return
         case .success:
-          break
-        }
-
-        let transportPacket = DirectTCPPacket(response: self.buffer)
-        let length = Int(transportPacket.protocolLength)
-        self.buffer = Data(transportPacket.smb2Message)
-
-        self.receive(upTo: length) { (result) in
-          switch result {
-          case .success:
-            let data = Data(self.buffer.prefix(length))
-            self.buffer = Data(self.buffer.suffix(from: length))
-
-            let reader = ByteReader(data)
-            var offset = 0
-
-            var header: Header
-            var response = Data()
-            repeat {
-              header = reader.read()
-
-              switch NTStatus(header.status) {
-              case
-                .success,
-                .moreProcessingRequired,
-                .noMoreFiles,
-                .endOfFile:
-                response += data
-              case .pending:
-                if self.buffer.count >= 4 {
-                  let transportPacket = DirectTCPPacket(response: self.buffer)
-                  let length = Int(transportPacket.protocolLength)
-
-                  if self.buffer.count < 4 + length {
-                    self.receive(completion: completion)
-                    return
-                  }
-
-                  let data = transportPacket.smb2Message
-                  self.buffer = Data(self.buffer.suffix(from: 4 + length))
-
-                  let reader = ByteReader(data)
-                  let header: Header = reader.read()
-
-                  switch NTStatus(header.status) {
-                  case
-                    .success,
-                    .moreProcessingRequired,
-                    .noMoreFiles,
-                    .endOfFile:
-                    response += data
-                    break
-                  default:
-                    completion(.failure(ErrorResponse(data: data)))
-                    return
-                  }
-                } else {
-                  self.receive(completion: completion)
-                  return
-                }
-              default:
-                completion(.failure(ErrorResponse(data: Data(data[offset...]))))
-                return
-              }
-
-              offset += Int(header.nextCommand)
-              reader.seek(to: offset)
-            } while header.nextCommand > 0
-
-            completion(.success(response))
-          case .failure(let error):
+          let packet = Data(self.buffer.prefix(length))
+          self.buffer = Data(self.buffer.dropFirst(length))
+          do {
+            let data = try self.decryptIfNeeded(packet)
+            if try Self.isCompleteResponse(data) {
+              completion(.success(data))
+            } else {
+              // Drain already-buffered frames too, without recursively growing the stack.
+              self.queue.async { self.receive(completion: completion) }
+            }
+          } catch {
+            if error is ConnectionError { self.disconnect() }
             completion(.failure(error))
           }
         }
       }
     }
+  }
+
+  /// Validate the envelope before any unchecked Header or ErrorResponse decoding.
+  static func isCompleteResponse(_ data: Data) throws -> Bool {
+    let bytes = Data(data)
+    var offset = 0
+    while true {
+      let remaining = bytes.count - offset
+      guard remaining >= 64 else { throw ConnectionError.invalidResponse }
+      let header = Header(data: Data(bytes[offset..<(offset + 64)]))
+      guard header.protocolId == 0x424D53FE, header.structureSize == 64 else {
+        throw ConnectionError.invalidResponse
+      }
+      let next = Int(header.nextCommand)
+      guard next == 0 || (next >= 64 && next.isMultiple(of: 8) && next <= remaining - 64) else {
+        throw ConnectionError.invalidResponse
+      }
+      switch NTStatus(header.status) {
+      case .success, .moreProcessingRequired, .noMoreFiles, .endOfFile:
+        break
+      case .pending:
+        guard offset == 0, next == 0 else { throw ConnectionError.invalidResponse }
+        return false
+      default:
+        let commandLength = next == 0 ? remaining : next
+        guard commandLength >= 68 else { throw ConnectionError.invalidResponse }
+        throw ErrorResponse(data: Data(bytes[offset..<(offset + commandLength)]))
+      }
+      if next == 0 { return true }
+      offset += next
+    }
+  }
+
+  private func decryptIfNeeded(_ data: Data) throws -> Data {
+    guard data.count >= 4, let decryptor else { return data }
+    // TRANSFORM_HEADER protocolId 0x424D53FD on the wire is bytes FD 53 4D 42.
+    if data[data.startIndex] == 0xFD,
+       data[data.startIndex + 1] == 0x53,
+       data[data.startIndex + 2] == 0x4D,
+       data[data.startIndex + 3] == 0x42 {
+      return try decryptor(data)
+    }
+    return data
   }
 
   private func receive(upTo byteCount: Int, completion: @escaping (Result<(), Error>) -> Void) {
@@ -255,6 +218,10 @@ public class Connection {
         }
 
         self.buffer.append(data)
+        if isComplete && self.buffer.count < byteCount {
+          completion(.failure(ConnectionError.disconnected))
+          return
+        }
         self.receive(upTo: byteCount, completion: completion)
       }
       return
@@ -264,8 +231,59 @@ public class Connection {
   }
 }
 
+/// Replacing NWConnection's callback cannot revoke callbacks already enqueued.
+/// Consume connection completion before resuming its continuation instead.
+final class ConnectionStateHandler {
+  private let lock = NSLock()
+  private var completion: ((Result<Void, Error>) -> Void)?
+  private var established = false
+  private let onDisconnected: (Error) -> Void
+
+  init(
+    completion: @escaping (Result<Void, Error>) -> Void,
+    onDisconnected: @escaping (Error) -> Void
+  ) {
+    self.completion = completion
+    self.onDisconnected = onDisconnected
+  }
+
+  func handle(_ state: NWConnection.State) {
+    let result: Result<Void, Error>
+    let disconnection: Error?
+    switch state {
+    case .ready:
+      result = .success(())
+      disconnection = nil
+    case .waiting(let error), .failed(let error):
+      result = .failure(error)
+      disconnection = error
+    case .cancelled:
+      result = .failure(ConnectionError.cancelled)
+      disconnection = nil
+    case .setup, .preparing:
+      return
+    @unknown default:
+      return
+    }
+
+    lock.lock()
+    let completion = self.completion
+    self.completion = nil
+    if completion != nil, case .success = result { established = true }
+    let notifyDisconnection = completion == nil && established
+    lock.unlock()
+
+    if let completion {
+      completion(result)
+    } else if notifyDisconnection, let disconnection {
+      onDisconnected(disconnection)
+    }
+  }
+}
+
 public enum ConnectionError: Error {
   case disconnected
   case cancelled
   case unknown
+  case invalidResponse
 }

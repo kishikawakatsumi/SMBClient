@@ -11,7 +11,11 @@ public enum Negotiate {
     public let reserved: UInt16
     public let capabilities: Capabilities
     public let clientGuid: UUID
+    // For dialects < 3.1.1 this 8-byte slot carries ClientStartTime (0).
+    // For 3.1.1 it carries NegotiateContextOffset(4)+NegotiateContextCount(2)+Reserved2(2).
     public let clientStartTime: UInt64
+    public let negotiateContextOffset: UInt32
+    public let negotiateContextCount: UInt16
     public let dialects: [Dialects]
     public let padding: Data
     public let negotiateContextList: Data
@@ -20,7 +24,10 @@ public enum Negotiate {
       headerFlags: Header.Flags = [],
       messageId: UInt64,
       securityMode: SecurityMode,
-      dialects: [Dialects]
+      capabilities: Capabilities = [],
+      clientGuid: UUID = UUID(),
+      dialects: [Dialects],
+      negotiateContexts: [Data] = []
     ) {
       header = Header(
         creditCharge: 1,
@@ -36,12 +43,37 @@ public enum Negotiate {
       dialectCount = UInt16(dialects.count)
       self.securityMode = securityMode
       reserved = 0
-      capabilities = []
-      clientGuid = UUID()
-      clientStartTime = 0
+      self.capabilities = capabilities
+      self.clientGuid = clientGuid
       self.dialects = dialects
-      padding = Data(count: (dialects.count * 2) % 8)
-      negotiateContextList = Data()
+
+      // Align the dialect array (2 bytes each) so the negotiate context list
+      // starts on an 8-byte boundary relative to the SMB2 header.
+      let dialectsEnd = 64 + 36 + dialects.count * 2
+      let pad = (8 - (dialectsEnd % 8)) % 8
+      padding = Data(count: pad)
+
+      if negotiateContexts.isEmpty {
+        clientStartTime = 0
+        negotiateContextOffset = 0
+        negotiateContextCount = 0
+        negotiateContextList = Data()
+      } else {
+        clientStartTime = 0
+        negotiateContextOffset = UInt32(dialectsEnd + pad)
+        negotiateContextCount = UInt16(negotiateContexts.count)
+
+        var list = Data()
+        for (index, context) in negotiateContexts.enumerated() {
+          list += context
+          // Contexts (except the last) are padded to an 8-byte boundary.
+          if index < negotiateContexts.count - 1 {
+            let ctxPad = (8 - (context.count % 8)) % 8
+            list += Data(count: ctxPad)
+          }
+        }
+        negotiateContextList = list
+      }
     }
 
     public func encoded() -> Data {
@@ -55,7 +87,14 @@ public enum Negotiate {
       data += reserved
       data += capabilities.rawValue
       data += Data(from: clientGuid)
-      data += clientStartTime
+
+      if negotiateContextCount > 0 {
+        data += negotiateContextOffset
+        data += negotiateContextCount
+        data += UInt16(0) // Reserved2
+      } else {
+        data += clientStartTime
+      }
 
       for dialect in dialects {
         data += dialect.rawValue
@@ -84,6 +123,8 @@ public enum Negotiate {
     public let securityBufferLength: UInt16
     public let negotiateContextOffset: UInt32
     public let securityBuffer: Data
+    // Parsed negotiate contexts keyed by ContextType (3.1.1 only).
+    public let negotiateContexts: [UInt16: Data]
 
     public init(data: Data) {
       let reader = ByteReader(data)
@@ -105,6 +146,37 @@ public enum Negotiate {
       securityBufferLength = reader.read()
       negotiateContextOffset = reader.read()
       securityBuffer = reader.read(from: Int(securityBufferOffset), count: Int(securityBufferLength))
+
+      var contexts = [UInt16: Data]()
+      if dialectRevision == Dialects.smb311.rawValue, negotiateContextCount > 0, negotiateContextOffset > 0 {
+        var offset = Int(negotiateContextOffset)
+        for _ in 0..<negotiateContextCount {
+          guard offset + 8 <= data.count else { break }
+          reader.seek(to: offset)
+          let contextType: UInt16 = reader.read()
+          let dataLength: UInt16 = reader.read()
+          let _: UInt32 = reader.read() // Reserved
+          guard offset + 8 + Int(dataLength) <= data.count else { break }
+          let contextData = reader.read(count: Int(dataLength))
+          contexts[contextType] = contextData
+          // Advance past this context, honoring 8-byte alignment.
+          offset += 8 + Int(dataLength)
+          offset += (8 - (offset % 8)) % 8
+        }
+      }
+      negotiateContexts = contexts
+    }
+
+    /// The cipher selected by the server's ENCRYPTION_CAPABILITIES context
+    /// (3.1.1), or nil if none was returned.
+    public var selectedCipher: UInt16? {
+      guard let data = negotiateContexts[NegotiateContextType.encryptionCapabilities] else { return nil }
+      // CipherCount(2) then Ciphers[]; server returns exactly one.
+      guard data.count >= 4 else { return nil }
+      let reader = ByteReader(data)
+      let _: UInt16 = reader.read() // CipherCount
+      let cipher: UInt16 = reader.read()
+      return cipher
     }
   }
 
@@ -142,5 +214,59 @@ public enum Negotiate {
     case smb300 = 0x0300
     case smb302 = 0x0302
     case smb311 = 0x0311
+  }
+}
+
+// MARK: - Negotiate contexts (SMB 3.1.1)
+
+public enum NegotiateContextType {
+  public static let preauthIntegrityCapabilities: UInt16 = 0x0001
+  public static let encryptionCapabilities: UInt16 = 0x0002
+  public static let compressionCapabilities: UInt16 = 0x0003
+  public static let netnameNegotiateContextId: UInt16 = 0x0005
+  public static let transportCapabilities: UInt16 = 0x0006
+  public static let rdmaTransformCapabilities: UInt16 = 0x0007
+  public static let signingCapabilities: UInt16 = 0x0008
+}
+
+public enum HashAlgorithm {
+  public static let sha512: UInt16 = 0x0001
+}
+
+public enum Cipher {
+  public static let aes128ccm: UInt16 = 0x0001
+  public static let aes128gcm: UInt16 = 0x0002
+  public static let aes256ccm: UInt16 = 0x0003
+  public static let aes256gcm: UInt16 = 0x0004
+}
+
+public enum NegotiateContext {
+  /// PREAUTH_INTEGRITY_CAPABILITIES context (SHA-512, caller-supplied salt).
+  public static func preauthIntegrity(salt: Data) -> Data {
+    var body = Data()
+    body += UInt16(1)                 // HashAlgorithmCount
+    body += UInt16(salt.count)        // SaltLength
+    body += HashAlgorithm.sha512      // HashAlgorithms[0]
+    body += salt                      // Salt
+    return wrap(type: NegotiateContextType.preauthIntegrityCapabilities, body: body)
+  }
+
+  /// ENCRYPTION_CAPABILITIES context listing supported ciphers in preference order.
+  public static func encryption(ciphers: [UInt16]) -> Data {
+    var body = Data()
+    body += UInt16(ciphers.count)     // CipherCount
+    for cipher in ciphers {
+      body += cipher
+    }
+    return wrap(type: NegotiateContextType.encryptionCapabilities, body: body)
+  }
+
+  private static func wrap(type: UInt16, body: Data) -> Data {
+    var data = Data()
+    data += type                      // ContextType
+    data += UInt16(body.count)        // DataLength
+    data += UInt32(0)                 // Reserved
+    data += body
+    return data
   }
 }

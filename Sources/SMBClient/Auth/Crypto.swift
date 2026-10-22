@@ -1,5 +1,6 @@
 import Foundation
 import CommonCrypto
+import CryptoKit
 
 enum Crypto {
   public static func randomBytes(count: Int) -> Data {
@@ -165,5 +166,140 @@ enum Crypto {
       &numBytesEncrypted
     )
     return cryptData as Data
+  }
+
+  // MARK: - SMB3 primitives
+
+  public static func sha512(_ data: Data) -> Data {
+    var digest = [UInt8](repeating: 0, count: Int(CC_SHA512_DIGEST_LENGTH))
+    data.withUnsafeBytes { _ = CC_SHA512($0.baseAddress, CC_LONG(data.count), &digest) }
+    return Data(digest)
+  }
+
+  /// AES-ECB encryption of `data` (a whole number of 16-byte blocks) with no
+  /// padding. Used as the block cipher underneath AES-CMAC.
+  public static func aesEncryptECB(key: Data, data: Data) -> Data {
+    let out = NSMutableData(length: data.count + kCCBlockSizeAES128)!
+    var moved: size_t = 0
+    let status = CCCrypt(
+      CCOperation(kCCEncrypt),
+      CCAlgorithm(kCCAlgorithmAES),
+      CCOptions(kCCOptionECBMode),   // no kCCOptionPKCS7Padding => no padding
+      (key as NSData).bytes, key.count,
+      nil,
+      (data as NSData).bytes, data.count,
+      out.mutableBytes, out.length,
+      &moved
+    )
+    precondition(status == kCCSuccess, "AES-ECB failed: \(status)")
+    return out.subdata(with: NSRange(location: 0, length: moved))
+  }
+
+  /// AES-CMAC (NIST SP800-38B). Returns the full 16-byte MAC.
+  public static func aesCMAC(key: Data, data: Data) -> Data {
+    let blockSize = 16
+    let zero = Data(count: blockSize)
+
+    // Subkey generation.
+    let L = aesEncryptECB(key: key, data: zero)
+    let rb: UInt8 = 0x87
+    func shiftLeftOne(_ input: Data) -> (Data, UInt8) {
+      var out = Data(count: input.count)
+      var overflow: UInt8 = 0
+      for i in stride(from: input.count - 1, through: 0, by: -1) {
+        let b = input[input.startIndex + i]
+        out[out.startIndex + i] = (b << 1) | overflow
+        overflow = (b & 0x80) != 0 ? 1 : 0
+      }
+      return (out, overflow)
+    }
+    func deriveSubkey(_ input: Data) -> Data {
+      let (shifted, carry) = shiftLeftOne(input)
+      guard carry == 1 else { return shifted }
+      var k = shifted
+      k[k.index(k.startIndex, offsetBy: blockSize - 1)] ^= rb
+      return k
+    }
+    let k1 = deriveSubkey(L)
+    let k2 = deriveSubkey(k1)
+
+    // Message chunking.
+    let n = (data.count + blockSize - 1) / blockSize
+    let lastComplete = data.count > 0 && data.count % blockSize == 0
+    let blockCount = max(n, 1)
+
+    var lastBlock: Data
+    if lastComplete {
+      lastBlock = xor(Data(data.suffix(blockSize)), k1)
+    } else {
+      let remainder = data.count % blockSize
+      var padded = Data(data.suffix(remainder))
+      padded.append(0x80)
+      padded.append(contentsOf: [UInt8](repeating: 0, count: blockSize - remainder - 1))
+      lastBlock = xor(padded, k2)
+    }
+
+    var x = Data(count: blockSize)
+    for i in 0..<(blockCount - 1) {
+      let start = data.index(data.startIndex, offsetBy: i * blockSize)
+      let end = data.index(start, offsetBy: blockSize)
+      let block = Data(data[start..<end])
+      x = aesEncryptECB(key: key, data: xor(x, block))
+    }
+    let y = xor(x, lastBlock)
+    return aesEncryptECB(key: key, data: y)
+  }
+
+  /// SP800-108 KDF in counter mode with HMAC-SHA256 as the PRF. Produces
+  /// `lengthInBits`-bit output (SMB3 uses 128). The fixed input is assembled as
+  /// `[i]2 || Label || 0x00 || Context || [L]2`; callers pass the bare `label`
+  /// (e.g. "SMBSigningKey") and `context` — the single 0x00 label/context
+  /// separator is inserted here.
+  public static func sp800108CounterKDF(key: Data, label: Data, context: Data, lengthInBits: UInt32) -> Data {
+    var output = Data()
+    let iterations = (Int(lengthInBits) + 255) / 256
+    var i: UInt32 = 1
+    var lenBE = lengthInBits.bigEndian
+    let lenData = withUnsafeBytes(of: &lenBE) { Data($0) }
+    while output.count < (Int(lengthInBits) + 7) / 8 {
+      if Int(i) > iterations + 1 { break }
+      var counterBE = i.bigEndian
+      let counterData = withUnsafeBytes(of: &counterBE) { Data($0) }
+      // [i]2 || Label || 0x00 || Context || [L]2
+      let input = counterData + label + Data([0x00]) + context + lenData
+      output += hmacSHA256(key: key, data: input)
+      i &+= 1
+    }
+    return Data(output.prefix((Int(lengthInBits) + 7) / 8))
+  }
+
+  static func xor(_ a: Data, _ b: Data) -> Data {
+    let n = Swift.min(a.count, b.count)
+    var out = Data(count: n)
+    for i in 0..<n {
+      out[out.startIndex + i] = a[a.startIndex + i] ^ b[b.startIndex + i]
+    }
+    return out
+  }
+
+  /// AES-GCM seal. `nonce` must be 12 bytes. Returns (ciphertext, 16-byte tag).
+  public static func aesGCMSeal(key: Data, nonce: Data, plaintext: Data, aad: Data) throws -> (ciphertext: Data, tag: Data) {
+    let sealed = try AES.GCM.seal(
+      plaintext,
+      using: SymmetricKey(data: key),
+      nonce: AES.GCM.Nonce(data: nonce),
+      authenticating: aad
+    )
+    return (sealed.ciphertext, sealed.tag)
+  }
+
+  /// AES-GCM open. `nonce` must be 12 bytes, `tag` 16 bytes.
+  public static func aesGCMOpen(key: Data, nonce: Data, ciphertext: Data, tag: Data, aad: Data) throws -> Data {
+    let box = try AES.GCM.SealedBox(
+      nonce: AES.GCM.Nonce(data: nonce),
+      ciphertext: ciphertext,
+      tag: tag
+    )
+    return try AES.GCM.open(box, using: SymmetricKey(data: key), authenticating: aad)
   }
 }

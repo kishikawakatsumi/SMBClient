@@ -9,12 +9,40 @@ public class Session {
   private var signingRequired = false
   private var signingKey: Data?
 
+  // SMB3 state.
+  private var dialect: Negotiate.Dialects = .smb210
+  private let clientGuid = UUID()
+  private var preauthHash = Data(count: 64)   // 3.1.1 running SHA-512 pre-auth integrity hash
+  private var preauthSalt = Data()
+  private var cipherId: UInt16 = 0            // negotiated cipher (0 = none)
+  private var signingKeyDerived: Data?        // AES-CMAC signing key (3.x)
+  private var encryptionKey: Data?            // client -> server (encrypt) key
+  private var decryptionKey: Data?            // server -> client (decrypt) key
+  private var encryptionEnabled = false       // GCM negotiated and keys ready
+  private var shouldEncrypt = false           // actively wrap outbound traffic
+
+  private var isSMB3: Bool {
+    switch dialect {
+    case .smb300, .smb302, .smb311: return true
+    case .smb202, .smb210: return false
+    }
+  }
+
   public private(set) var maxTransactSize: UInt32 = 0
   public private(set) var maxReadSize: UInt32 = 0
   public private(set) var maxWriteSize: UInt32 = 0
 
   public var server: String { connection.host }
   public private(set) var connectedTree: String?
+
+  /// True when the most recent login resulted in a guest or anonymous (null)
+  /// session — i.e. the server set SMB2_SESSION_FLAG_IS_GUEST or IS_NULL. This
+  /// is set even when the caller supplied a username/password, because some
+  /// servers (e.g. Samba `map to guest = Bad User`) silently map an unknown
+  /// user or wrong password onto the guest account and report success. Callers
+  /// that require a *real* authenticated session can inspect this to detect that
+  /// their credentials were effectively rejected.
+  public private(set) var isGuestSession = false
 
   public var onDisconnected: (Error) -> Void {
     didSet {
@@ -47,6 +75,18 @@ public class Session {
     session.signingRequired = signingRequired
     session.signingKey = signingKey
 
+    session.dialect = dialect
+    session.preauthHash = preauthHash
+    session.preauthSalt = preauthSalt
+    session.cipherId = cipherId
+    session.signingKeyDerived = signingKeyDerived
+    session.encryptionKey = encryptionKey
+    session.decryptionKey = decryptionKey
+    session.encryptionEnabled = encryptionEnabled
+    session.shouldEncrypt = shouldEncrypt
+    session.isAnonymous = isAnonymous
+    session.isGuestSession = isGuestSession
+
     session.maxTransactSize = maxTransactSize
     session.maxReadSize = maxReadSize
     session.maxWriteSize = maxWriteSize
@@ -69,17 +109,56 @@ public class Session {
   @discardableResult
   public func negotiate(
     securityMode: Negotiate.SecurityMode = [.signingEnabled],
-    dialects: [Negotiate.Dialects] = [.smb202, .smb210]
+    dialects: [Negotiate.Dialects] = [.smb202, .smb210, .smb300, .smb302, .smb311]
   ) async throws -> Negotiate.Response {
+    let offers311 = dialects.contains(.smb311)
+    let offers3x = dialects.contains { [.smb300, .smb302, .smb311].contains($0) }
+
+    var contexts = [Data]()
+    if offers311 {
+      preauthSalt = Crypto.randomBytes(count: 32)
+      contexts.append(NegotiateContext.preauthIntegrity(salt: preauthSalt))
+      contexts.append(NegotiateContext.encryption(ciphers: [Cipher.aes128gcm, Cipher.aes256gcm]))
+    }
+    // Reset the running pre-auth integrity hash so NEGOTIATE is always chained
+    // onto a fresh 64-byte zero seed. `negotiate()` is public and a Session (and
+    // its Connection) can be reused, so without this a second negotiate would
+    // fold new bytes onto the previous attempt's hash and corrupt 3.1.1 key
+    // derivation. No-op on the first (only verified) negotiate, which already
+    // starts from a zeroed hash.
+    preauthHash = Data(count: 64)
+
     let request = Negotiate.Request(
       messageId: messageId.next(),
       securityMode: securityMode,
-      dialects: dialects
+      capabilities: offers3x ? [.encryption] : [],
+      clientGuid: clientGuid,
+      dialects: dialects,
+      negotiateContexts: contexts
     )
 
-    let response = try await send(request)
+    // NEGOTIATE is never signed or encrypted; send the raw packet so the exact
+    // bytes feed the 3.1.1 pre-auth integrity hash.
+    let requestData = request.encoded()
+    let responseData = try await connection.send(requestData)
+
+    // Pre-auth integrity hash (used only when 3.1.1 is negotiated): seed(0) then
+    // negotiate request, then negotiate response.
+    updatePreauth(requestData)
+    updatePreauth(responseData)
+
+    let response = Negotiate.Response(data: responseData)
 
     signingRequired = response.securityMode.contains(.signingRequired) || (securityMode.contains(.signingRequired) && response.securityMode.contains(.signingEnabled))
+
+    dialect = Negotiate.Dialects(rawValue: response.dialectRevision) ?? .smb210
+    if dialect == .smb311 {
+      cipherId = response.selectedCipher ?? 0
+    } else {
+      // 3.0/3.0.2 use AES-128-CCM, which this client does not implement; leave
+      // cipherId 0 so encryption stays off (signing still works via CMAC).
+      cipherId = 0
+    }
 
     maxTransactSize = response.maxTransactSize
     maxReadSize = response.maxReadSize
@@ -102,7 +181,7 @@ public class Session {
     )
     let securityBuffer = negotiateMessage.encoded()
 
-    let request = SessionSetup.Request(
+    let request1 = SessionSetup.Request(
       messageId: messageId.next(),
       sessionId: 0,
       securityMode: [requireSigning ? .signingRequired : .signingEnabled],
@@ -110,42 +189,93 @@ public class Session {
       previousSessionId: 0,
       securityBuffer: securityBuffer
     )
-    let response = try await send(request)
+    // SESSION_SETUP req/resp are never encrypted; use raw sends so exact bytes
+    // feed the 3.1.1 pre-auth integrity hash.
+    let request1Data = request1.encoded()
+    let response1Data = try await connection.send(request1Data)
+    let response1 = SessionSetup.Response(data: response1Data)
 
-    if NTStatus(response.header.status) == .moreProcessingRequired {
-      let challengeMessage = NTLM.ChallengeMessage(data: response.buffer)
-
-      let signingKey = Crypto.randomBytes(count: 16)
-      let authenticateMessage = challengeMessage.authenticateMessage(
-        username: username,
-        password: password,
-        domain: domain,
-        workstation: workstation,
-        negotiateMessage: securityBuffer,
-        signingKey: signingKey
-      )
-
-      let request = SessionSetup.Request(
-        messageId: messageId.next(),
-        sessionId: response.header.sessionId,
-        securityMode: [.signingEnabled],
-        capabilities: [],
-        previousSessionId: 0,
-        securityBuffer: authenticateMessage.encoded()
-      )
-
-      let response = try await send(request)
-
-      sessionId = response.header.sessionId
-
-      isAnonymous = (username ?? "").isEmpty && (password ?? "").isEmpty
-      self.signingKey = signingKey
-
-      return response
-    } else {
-      sessionId = response.header.sessionId
-      return response
+    guard NTStatus(response1.header.status) == .moreProcessingRequired else {
+      sessionId = response1.header.sessionId
+      return response1
     }
+
+    updatePreauth(request1Data)
+    updatePreauth(response1Data)
+
+    let challengeMessage = NTLM.ChallengeMessage(data: response1.buffer)
+
+    let sessionKey = Crypto.randomBytes(count: 16) // NTLM ExportedSessionKey (KDF Ki)
+    let authenticateMessage = challengeMessage.authenticateMessage(
+      username: username,
+      password: password,
+      domain: domain,
+      workstation: workstation,
+      negotiateMessage: securityBuffer,
+      signingKey: sessionKey
+    )
+
+    isAnonymous = (username ?? "").isEmpty && (password ?? "").isEmpty
+    self.signingKey = sessionKey
+
+    // The final SESSION_SETUP request must NOT carry the SMB2 SIGNED flag or a
+    // CMAC signature. The session is still mid-authentication at this point, so
+    // the server has no session key to verify a signature against: Samba routes
+    // a signed request into its dispatch-time verification path and rejects the
+    // still-pending session with STATUS_INVALID_HANDLE. Windows' own clients
+    // likewise send the final session setup unsigned. Integrity of everything
+    // after this point is guaranteed by SMB3 signing (when not encrypting) or by
+    // AES-GCM encryption (when the server requires it).
+    let request2 = SessionSetup.Request(
+      headerFlags: [],
+      messageId: messageId.next(),
+      sessionId: response1.header.sessionId,
+      securityMode: [.signingEnabled],
+      capabilities: [],
+      previousSessionId: 0,
+      securityBuffer: authenticateMessage.encoded()
+    )
+    let request2Data = request2.encoded()
+
+    // The pre-auth hash includes the final request (with its zeroed signature
+    // field); the session keys are then derived from that hash. The final
+    // SUCCESS response is NOT folded into the pre-auth hash.
+    updatePreauth(request2Data)
+
+    if isSMB3 && !isAnonymous {
+      deriveKeys(sessionKey: sessionKey)
+    }
+
+    let response2Data = try await connection.send(request2Data)
+    let response2 = SessionSetup.Response(data: response2Data)
+
+    sessionId = response2.header.sessionId
+
+    // A guest or null (anonymous) session has no cryptographically valid session
+    // key: the server never verified a password, so the signing/encryption keys
+    // we derived from the random NTLM ExportedSessionKey do not match the
+    // server's. Per MS-SMB2 3.2.5.3.1 the client MUST NOT sign or encrypt such a
+    // session. Detect this from the server's SessionFlags response rather than an
+    // empty username, because callers routinely log in with the literal user
+    // name "guest" (non-empty) yet are still mapped to a guest session. Signing
+    // or encrypting anyway makes the server drop the connection on the first
+    // request after SESSION_SETUP (e.g. TREE_CONNECT).
+    if response2.sessionFlags.contains(.guest) || response2.sessionFlags.contains(.nullSession) {
+      isAnonymous = true
+      isGuestSession = true
+    }
+
+    // Enable encryption when AES-GCM was negotiated (satisfies "encrypt = required"),
+    // but never for a guest/null session whose derived keys are not valid.
+    if isSMB3, !isAnonymous,
+       cipherId == Cipher.aes128gcm || cipherId == Cipher.aes256gcm,
+       encryptionKey != nil, decryptionKey != nil {
+      encryptionEnabled = true
+      shouldEncrypt = true
+      installDecryptor()
+    }
+
+    return response2
   }
 
   @discardableResult
@@ -692,7 +822,7 @@ public class Session {
 
   private func send<Request: Message.Request>(_ message: Request) async throws -> Request.Response {
     let packet = message.encoded()
-    let data = try await connection.send(sign(packet))
+    let data = try await connection.send(maybeEncrypt(sign(packet)))
     let response = Request.Response(data: data)
     return response
   }
@@ -724,7 +854,7 @@ public class Session {
       index += 1
     }
 
-    let responseData = try await connection.send(packet)
+    let responseData = try await connection.send(maybeEncrypt(packet))
     let reader = ByteReader(responseData)
 
     var responses = [Data]()
@@ -767,39 +897,121 @@ public class Session {
   }
 
   private func send(_ packets: Data...) async throws -> Data {
-    return try await connection.send(
-      packets.enumerated().reduce(into: Data()) {
-        let alignment = Data(count: 8 - $1.element.count % 8)
-        if $1.offset < packets.count - 1 {
-          let packet = $1.element + alignment
-          var header = Header(data: packet[..<64])
-          let payload = $1.element[64...]
+    let packet = packets.enumerated().reduce(into: Data()) {
+      let alignment = Data(count: 8 - $1.element.count % 8)
+      if $1.offset < packets.count - 1 {
+        let packet = $1.element + alignment
+        var header = Header(data: packet[..<64])
+        let payload = $1.element[64...]
 
-          header.nextCommand = UInt32(packet.count)
+        header.nextCommand = UInt32(packet.count)
 
-          $0 += sign(header.encoded() + payload + alignment)
-        } else {
-          $0 += sign($1.element + alignment)
-        }
+        $0 += sign(header.encoded() + payload + alignment)
+      } else {
+        $0 += sign($1.element + alignment)
       }
-    )
+    }
+    return try await connection.send(maybeEncrypt(packet))
   }
 #endif
 
   private func sign(_ packet: Data) -> Data {
-    if let signingKey, signingRequired, !isAnonymous {
-      var header = Header(data: packet[..<64])
-      let payload = packet[64...]
+    // Encrypted messages are authenticated by AES-GCM; do not also sign them.
+    guard !shouldEncrypt else { return packet }
+    guard signingRequired, !isAnonymous else { return packet }
 
-      header.flags = header.flags.union(.signed)
+    var header = Header(data: packet[..<64])
+    let payload = packet[64...]
 
-      let signature = Crypto.hmacSHA256(key: signingKey, data: header.encoded() + payload)[..<16]
+    header.flags = header.flags.union(.signed)
+    header.signature = Data(count: 16)
+
+    if isSMB3, let key = signingKeyDerived {
+      let signature = Data(Crypto.aesCMAC(key: key, data: header.encoded() + payload).prefix(16))
       header.signature = signature
-
+      return header.encoded() + payload
+    } else if let signingKey {
+      let signature = Crypto.hmacSHA256(key: signingKey, data: header.encoded() + payload)[..<16]
+      header.signature = Data(signature)
       return header.encoded() + payload
     } else {
       return packet
     }
+  }
+
+  // MARK: - SMB3 helpers
+
+  private func updatePreauth(_ message: Data) {
+    preauthHash = Crypto.sha512(preauthHash + message)
+  }
+
+  /// Derive the SMB3 signing key (and cipher keys when AES-GCM is negotiated)
+  /// via the SP800-108 SMB2 KDF. `ki` is the NTLM ExportedSessionKey.
+  private func deriveKeys(sessionKey ki: Data) {
+    // SMB3 KDF labels are null-terminated ASCII strings (MS-SMB2 3.1.4.2; matches
+    // Samba's data_blob_string_const_null and Windows). sp800108CounterKDF adds
+    // the SP800-108 0x00 separator itself, so the null-terminated label yields the
+    // two 0x00 bytes the wire protocol expects between label and context.
+    func label(_ s: String) -> Data { s.data(using: .ascii)! + Data([0x00]) }
+    let keyBits: UInt32 = (cipherId == Cipher.aes256gcm) ? 256 : 128
+
+    if dialect == .smb311 {
+      // 3.1.1: context is the pre-auth integrity hash.
+      signingKeyDerived = Crypto.sp800108CounterKDF(key: ki, label: label("SMBSigningKey"), context: preauthHash, lengthInBits: 128)
+      if cipherId == Cipher.aes128gcm || cipherId == Cipher.aes256gcm {
+        encryptionKey = Crypto.sp800108CounterKDF(key: ki, label: label("SMBC2SCipherKey"), context: preauthHash, lengthInBits: keyBits)
+        decryptionKey = Crypto.sp800108CounterKDF(key: ki, label: label("SMBS2CCipherKey"), context: preauthHash, lengthInBits: keyBits)
+      }
+    } else {
+      // 3.0 / 3.0.2: static labels/contexts. (Encryption on these dialects uses
+      // AES-CCM which is not implemented, so only the signing key is derived.)
+      signingKeyDerived = Crypto.sp800108CounterKDF(key: ki, label: label("SMB2AESCMAC"), context: "SmbSign".data(using: .ascii)! + Data([0x00]), lengthInBits: 128)
+    }
+  }
+
+  private func installDecryptor() {
+    let key = decryptionKey
+    connection.setDecryptor { data in
+      guard let key else { throw ConnectionError.unknown }
+      return try Session.decryptTransform(data, key: key)
+    }
+  }
+
+  private func maybeEncrypt(_ plaintext: Data) -> Data {
+    guard shouldEncrypt, let key = encryptionKey else { return plaintext }
+    return Session.encryptTransform(plaintext, key: key, sessionId: sessionId)
+  }
+
+  /// Wrap a plaintext SMB2 message (possibly compounded) in a TRANSFORM_HEADER
+  /// using AES-GCM. A random 96-bit nonce is used per message, which guarantees
+  /// nonce uniqueness across cloned sessions that share the same cipher key.
+  static func encryptTransform(_ plaintext: Data, key: Data, sessionId: UInt64) -> Data {
+    let nonce12 = Crypto.randomBytes(count: 12)
+    let nonce16 = nonce12 + Data(count: 4)
+    var header = TransformHeader(
+      signature: Data(count: 16),
+      nonce: nonce16,
+      originalMessageSize: UInt32(plaintext.count),
+      flags: 0x0001,
+      sessionId: sessionId
+    )
+    let aad = header.associatedData
+    // Seal cannot fail for valid 16/32-byte keys and 12-byte nonces.
+    let sealed = try! Crypto.aesGCMSeal(key: key, nonce: nonce12, plaintext: plaintext, aad: aad)
+    header.signature = sealed.tag
+    let out = header.encoded() + sealed.ciphertext
+    return out
+  }
+
+  static func decryptTransform(_ data: Data, key: Data) throws -> Data {
+    guard data.count >= TransformHeader.size else { throw ConnectionError.unknown }
+    let header = TransformHeader(data: Data(data.prefix(TransformHeader.size)))
+    let ciphertext = Data(data[data.index(data.startIndex, offsetBy: TransformHeader.size)...])
+    let nonce12 = Data(header.nonce.prefix(12))
+    let aadStart = data.index(data.startIndex, offsetBy: 20)
+    let aadEnd = data.index(data.startIndex, offsetBy: TransformHeader.size)
+    let aad = Data(data[aadStart..<aadEnd])
+    return try Crypto.aesGCMOpen(key: key, nonce: nonce12, ciphertext: ciphertext, tag: header.signature, aad: aad)
   }
 }
 
