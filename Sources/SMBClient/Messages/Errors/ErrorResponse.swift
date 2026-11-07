@@ -10,6 +10,14 @@ public struct ErrorResponse: Error {
     let reader = ByteReader(data)
 
     header = reader.read()
+    // Some servers (e.g. Impacket) send error responses with only the SMB2 header,
+    // so the body is read only if it is there.
+    guard reader.availableBytes >= 4 else {
+      structureSize = 0
+      errorContextCount = 0
+      reserved = 0
+      return
+    }
     structureSize = reader.read()
     errorContextCount = reader.read()
     reserved = reader.read()
