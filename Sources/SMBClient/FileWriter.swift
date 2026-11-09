@@ -3,12 +3,15 @@ import Foundation
 public class FileWriter {
   private let session: Session
   private let path: String
+  private let overwrite: Bool
 
   private var createResponse: Create.Response?
 
-  init(session: Session, path: String) {
+  /// With `overwrite`, an existing file at `path` is replaced. Without it, uploading to an existing file fails.
+  init(session: Session, path: String, overwrite: Bool = false) {
     self.session = session
     self.path = path.precomposedStringWithCanonicalMapping
+    self.overwrite = overwrite
   }
 
   public func upload(data: Data) async throws {
@@ -106,7 +109,7 @@ public class FileWriter {
         progressHandler(completedFiles, source, bytesSent)
 
         let fileHandle = try FileHandle(forReadingFrom: source)
-        let writer = FileWriter(session: session, path: destination)
+        let writer = FileWriter(session: session, path: destination, overwrite: overwrite)
         try await writer.upload(fileHandle: fileHandle)
         try await writer.close()
 
@@ -183,7 +186,8 @@ public class FileWriter {
         ],
         fileAttributes: [.archive, .normal],
         shareAccess: [.read, .write, .delete],
-        createDisposition: .create,
+        // FILE_OVERWRITE_IF replaces an existing file or creates a new one; FILE_CREATE fails if one exists.
+        createDisposition: overwrite ? .overwriteIf : .create,
         createOptions: [],
         name: path
       )
