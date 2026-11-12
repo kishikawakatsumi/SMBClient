@@ -530,6 +530,44 @@ final class SMBClientTests: XCTestCase {
     try await client.logoff()
   }
 
+  func testUploadOverwrite() async throws {
+    let user = alice
+    let client = SMBClient(host: "localhost", port: 4445)
+    try await client.login(username: user.username, password: user.password)
+    try await client.connectShare(user.share)
+
+    let filename = #function
+    let original = Data("original".utf8)
+    let replacement = Data("replacement".utf8)
+
+    // With overwrite, a file that doesn't exist yet is created.
+    try await client.upload(content: original, path: filename, overwrite: true)
+    let createdData = try await client.download(path: filename)
+    XCTAssertEqual(createdData, original)
+
+    // Without it, an existing file is left as it is.
+    do {
+      try await client.upload(content: replacement, path: filename)
+      XCTFail("Uploading over an existing file should fail without overwrite")
+    } catch let error as ErrorResponse {
+      XCTAssertTrue(NTStatus(error.header.status) == ErrorCode.objectNameCollision)
+    }
+    let unchangedData = try await client.download(path: filename)
+    XCTAssertEqual(unchangedData, original)
+
+    // With it, the existing file is replaced, including when the new content is shorter.
+    try await client.upload(content: replacement, path: filename, overwrite: true)
+    try await client.upload(content: Data("short".utf8), path: filename, overwrite: true)
+    let replacedData = try await client.download(path: filename)
+    XCTAssertEqual(replacedData, Data("short".utf8))
+
+    try await client.deleteFile(path: filename)
+    try await assertFileDoesNotExist(at: filename, client: client)
+
+    try await client.treeDisconnect()
+    try await client.logoff()
+  }
+
   func testUploadFile() async throws {
     let user = alice
 
